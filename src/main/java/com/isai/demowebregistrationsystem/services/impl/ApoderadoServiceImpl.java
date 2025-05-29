@@ -6,6 +6,7 @@ import com.isai.demowebregistrationsystem.repositorys.ApoderadoRepository;
 import com.isai.demowebregistrationsystem.services.ApoderadoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,6 +20,22 @@ public class ApoderadoServiceImpl implements ApoderadoService {
     @Override
     public List<ApoderadoDTO> listarApoderados() {
         List<Apoderado> apoderados = apoderadoRepository.findAll();
+        return apoderados.stream()
+                .map(this::mapApoderadoToDTO)
+                .collect(Collectors.toList());
+    }
+
+
+    //metodo para buscar por algun termino de busqueda
+    public List<ApoderadoDTO> buscarApoderados(String termianoBusqueda) {
+        List<Apoderado> apoderados;
+        // Verifica si el término no es nulo o vacío
+        if (StringUtils.hasText(termianoBusqueda)) {
+            apoderados = apoderadoRepository.searchApoderados(termianoBusqueda);
+        } else {
+            //si hay no termino de busqueda devuelve todos
+            apoderados = apoderadoRepository.findAll();
+        }
         return apoderados.stream()
                 .map(this::mapApoderadoToDTO)
                 .collect(Collectors.toList());

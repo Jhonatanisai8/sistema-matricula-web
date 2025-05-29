@@ -45,6 +45,20 @@
                 </a>
             </div>
             <div class="card-body">
+                <div class="mb-3">
+                    <form th:action="@{/admin/apoderados}" method="get" class="d-flex">
+                        <input type="text" name="terminoBusqueda" class="form-control me-2"
+                               placeholder="Buscar por DNI, nombres o apellidos..."
+                               th:value="${terminoBusqueda}">
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                        <a th:href="@{/admin/apoderados}" class="btn btn-outline-secondary ms-2">
+                            <i class="bi bi-x-circle"></i> Limpiar
+                        </a>
+                    </form>
+                </div>
+
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
                         <thead class="bg-light">
@@ -91,7 +105,9 @@
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(apoderados)}">
-                            <td colspan="10" class="text-center text-muted">No hay apoderados registrados.</td>
+                            <td colspan="10" class="text-center text-muted">No hay apoderados registrados que coincidan
+                                con la búsqueda.
+                            </td>
                         </tr>
                         </tbody>
                     </table>
