@@ -1,7 +1,8 @@
 package com.isai.demowebregistrationsystem.controllers;
 
+import com.isai.demowebregistrationsystem.model.dtos.EstudianteDTO;
 import com.isai.demowebregistrationsystem.model.entities.Estudiante;
-import com.isai.demowebregistrationsystem.services.EstudianteService;
+import com.isai.demowebregistrationsystem.services.impl.EstudianteServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,7 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequiredArgsConstructor
 public class AdminEstudianteController {
 
-    private final EstudianteService estudianteService;
+    private final EstudianteServiceImpl estudianteServiceImpl;
 
     @GetMapping
     public String listar(
@@ -28,7 +29,7 @@ public class AdminEstudianteController {
             Model model) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("idEstudiante").descending());
-        Page<Estudiante> estudiantes = estudianteService.listarEstudiantes(filtro, pageable);
+        Page<Estudiante> estudiantes = estudianteServiceImpl.listarEstudiantes(filtro, pageable);
 
         model.addAttribute("estudiantes", estudiantes);
         model.addAttribute("filtro", filtro);
@@ -42,20 +43,33 @@ public class AdminEstudianteController {
     }
 
 
-    @GetMapping("/nuevo")
-    public String nuevoFormulario(Model model) {
-        model.addAttribute("estudiante", new Estudiante());
-        return "admin/lista-estudiantes";
+    @GetMapping(path = "/registro") // La URL completa para acceder a este método es /admin/estudiantes/registro
+    public String mostrarFormularioRegistroEstudiante(Model model) {
+        model.addAttribute("estudianteDTO", new EstudianteDTO());
+        return "admin/registro-estudiante";
     }
 
-    @PostMapping("/guardar")
-    public String guardar(@ModelAttribute Estudiante estudiante, RedirectAttributes attrs) {
-        estudianteService.registrar(estudiante);
-        attrs.addFlashAttribute("mensaje", "Estudiante registrado correctamente.");
-        return "redirect:/admin/estudiantes";
+    @PostMapping(path = "/registro")
+    public String registrarEstudiante(@ModelAttribute("estudianteDTO") EstudianteDTO estudianteDTO,
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            // Llama a tu servicio para registrar
+            estudianteServiceImpl.registrar(estudianteDTO); // Asumiendo este método en tu servicio
+            redirectAttributes.addFlashAttribute("successMessage", "Estudiante registrado exitosamente!");
+            // Redirigir SIEMPRE a la URL completa para evitar problemas de rutas relativas
+            return "redirect:/admin/estudiantes/registro";
+        } catch (RuntimeException e) {
+            // Captura excepciones específicas (ej. Apoderado no encontrado, DNI duplicado)
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al registrar el estudiante: " + e.getMessage());
+            return "redirect:/admin/estudiantes/registro";
+        } catch (Exception e) {
+            // Captura cualquier otra excepción inesperada
+            redirectAttributes.addFlashAttribute("errorMessage", "Ocurrió un error inesperado al registrar el estudiante.");
+            return "redirect:/admin/estudiantes/registro";
+        }
     }
 
-    @GetMapping("/editar/{id}")
+/*    @GetMapping("/editar/{id}")
     public String editar(@PathVariable Integer id, Model model) {
         Estudiante estudiante = estudianteService.obtenerPorId(id);
         model.addAttribute("estudiante", estudiante);
@@ -74,5 +88,5 @@ public class AdminEstudianteController {
         estudianteService.eliminar(id);
         attrs.addFlashAttribute("mensaje", "Estudiante eliminado correctamente.");
         return "redirect:/admin/estudiantes";
-    }
+    }*/
 }
