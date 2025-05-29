@@ -12,11 +12,11 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GradeEvaluation {
+public class Rating {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer evaluationId;
+    private Integer ratingId;
 
     @Column(name = "evaluation_type", length = 100)
     private String evaluationType;
