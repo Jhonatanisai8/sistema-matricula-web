@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout-admin}">
+
+<head>
+    <title layout:fragment="title">Lista de Estudiantes</title>
+</head>
+
+<body>
+<!-- Encabezado personalizado -->
+<div layout:fragment="header">
+    <h1 class="h3"><i class="bi bi-mortarboard-fill me-2"></i>Estudiantes</h1>
+</div>
+
+<!-- Contenido principal -->
+<section layout:fragment="content">
+    <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <form th:action="@{/admin/estudiantes}" method="get" class="d-flex">
+            <input type="text" name="filtro" class="form-control me-2"
+                   placeholder="Buscar por nombre o DNI"
+                   th:value="${filtro}"
+                   style="min-width: 250px;">
+            <button type="submit" class="btn btn-outline-primary">
+                <i class="bi bi-search"></i> Buscar
+            </button>
+        </form>
+        <a th:href="@{/admin/estudiantes/nuevo}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Nuevo Estudiante
+        </a>
+    </div>
+
+    <!-- Mensaje cuando no hay estudiantes -->
+    <div th:if="${estudiantes.empty}" class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        <span th:if="${filtro != null and !filtro.isEmpty()}">
+            No se encontraron estudiantes que coincidan con "<strong th:text="${filtro}"></strong>".
+        </span>
+        <span th:unless="${filtro != null and !filtro.isEmpty()}">
+            No hay estudiantes registrados.
+        </span>
+    </div>
+
+    <!-- Tabla de estudiantes -->
+    <div th:unless="${estudiantes.empty}">
+        <!-- Información de resultados -->
+        <div class="mb-3 d-flex justify-content-between align-items-center">
+            <div class="text-muted">
+                <small>
+                    <span th:if="${filtro != null and !filtro.isEmpty()}">
+                        Se encontraron <strong
+                            th:text="${estudiantes.totalElements}"></strong> estudiante(s) para "<strong
+                            th:text="${filtro}"></strong>"
+                    </span>
+                    <span th:unless="${filtro != null and !filtro.isEmpty()}">
+                        Total: <strong th:text="${estudiantes.totalElements}"></strong> estudiante(s)
+                    </span>
+                    <span th:if="${estudiantes.totalPages > 1}">
+                        - Página <strong th:text="${estudiantes.number + 1}"></strong> de <strong
+                            th:text="${estudiantes.totalPages}"></strong>
+                    </span>
+                </small>
+            </div>
+
+            <!-- Selector de tamaño de página -->
+            <div th:if="${estudiantes.totalElements > 10}">
+                <form th:action="@{/admin/estudiantes}" method="get" class="d-flex align-items-center">
+                    <input type="hidden" name="filtro" th:value="${filtro}">
+                    <label class="form-label me-2 mb-0 small">Mostrar:</label>
+                    <select name="size" class="form-select form-select-sm" style="width: auto;"
+                            onchange="this.form.submit()">
+                        <option value="10" th:selected="${tamanioPagina == 10}">10</option>
+                        <option value="25" th:selected="${tamanioPagina == 25}">25</option>
+                        <option value="50" th:selected="${tamanioPagina == 50}">50</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover">
+                <thead class="table-primary">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Nombre Completo</th>
+                    <th scope="col">DNI</th>
+                    <th scope="col">Correo Electrónico</th>
+                    <th scope="col" class="text-center">Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="estudiante, iStat : ${estudiantes.content}">
+                    <th scope="row" th:text="${(paginaActual * tamanioPagina) + iStat.index + 1}">1</th>
+                    <td>
+                        <span th:text="${estudiante.persona.nombres + ' ' + estudiante.persona.nombres}">Nombre Completo</span>
+                    </td>
+                    <td>
+                        <span th:text="${estudiante.persona.dni}">DNI</span>
+                    </td>
+                    <td>
+                        <span th:text="${estudiante.persona.emailPersonal}">correo@ejemplo.com</span>
+                    </td>
+                    <td class="text-center">
+                        <div class="btn-group" role="group" aria-label="Acciones del estudiante">
+                            <!-- Botón Ver/Detalle (opcional) -->
+                            <a th:href="@{/admin/estudiantes/ver/{id}(id=${estudiante.idEstudiante})}"
+                               class="btn btn-sm btn-outline-info"
+                               title="Ver detalles">
+                                <i class="bi bi-eye-fill"></i>
+                            </a>
+
+                            <!-- Botón Editar -->
+                            <a th:href="@{/admin/estudiantes/editar/{id}(id=${estudiante.idEstudiante})}"
+                               class="btn btn-sm btn-warning"
+                               title="Editar estudiante">
+                                <i class="bi bi-pencil-fill"></i>
+                            </a>
+
+                            <!-- Botón Eliminar -->
+                            <form th:action="@{/admin/estudiantes/eliminar/{id}(id=${estudiante.idEstudiante})}"
+                                  method="post"
+                                  class="d-inline"
+                                  onsubmit="return confirm('¿Estás seguro de que deseas eliminar a este estudiante? Esta acción no se puede deshacer.');">
+                                <button type="submit"
+                                        class="btn btn-sm btn-danger"
+                                        title="Eliminar estudiante">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        <nav th:if="${totalPaginas > 1}" aria-label="Paginación de estudiantes">
+            <ul class="pagination justify-content-center">
+                <!-- Botón Primera página -->
+                <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/admin/estudiantes(page=0, size=${tamanioPagina}, filtro=${filtro})}">
+                        <i class="bi bi-chevron-double-left"></i>
+                    </a>
+                </li>
+
+                <!-- Botón Anterior -->
+                <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/admin/estudiantes(page=${paginaActual - 1}, size=${tamanioPagina}, filtro=${filtro})}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+
+                <!-- Números de página -->
+                <li class="page-item"
+                    th:each="i : ${#numbers.sequence(T(java.lang.Math).max(0, paginaActual - 2), T(java.lang.Math).min(totalPaginas - 1, paginaActual + 2))}"
+                    th:classappend="${i == paginaActual} ? 'active'">
+                    <a class="page-link"
+                       th:href="@{/admin/estudiantes(page=${i}, size=${tamanioPagina}, filtro=${filtro})}"
+                       th:text="${i + 1}">1</a>
+                </li>
+
+                <!-- Botón Siguiente -->
+                <li class="page-item" th:classappend="${paginaActual >= totalPaginas - 1} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/admin/estudiantes(page=${paginaActual + 1}, size=${tamanioPagina}, filtro=${filtro})}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+
+                <!-- Botón Última página -->
+                <li class="page-item" th:classappend="${paginaActual >= totalPaginas - 1} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/admin/estudiantes(page=${totalPaginas - 1}, size=${tamanioPagina}, filtro=${filtro})}">
+                        <i class="bi bi-chevron-double-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Botón para limpiar filtro (si existe) -->
+    <div th:if="${filtro != null and !filtro.isEmpty()}" class="mt-3">
+        <a th:href="@{/admin/estudiantes}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-x-circle me-1"></i> Limpiar filtro
+        </a>
+    </div>
+</section>
+
+</body>
+</html>
