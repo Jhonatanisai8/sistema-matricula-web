@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout-admin.html}"> <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:fragment="title">Registro de Nuevo Estudiante</title>
+
+    <th:block layout:fragment="styles">
+    </th:block>
+</head>
+<body>
+
+<section layout:fragment="content" class="flex-grow-1">
+    <header>
+        <h1 class="h3"><i class="bi bi-mortarboard-fill me-2"></i>Registro de Estudiante</h1>
+    </header>
+
+    <div class="container-fluid">
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Formulario de Registro de Nuevo Estudiante</h4>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/admin/estudiantes/registro}" th:object="${estudianteDTO}" method="post">
+
+                    <div class="form-section mb-4">
+                        <h4>Datos Personales del Estudiante</h4>
+                        <div class="row">
+                            <div class="form-group col-md-4 mb-3">
+                                <label for="dniEstudiante" class="form-label">DNI <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="dniEstudiante"
+                                       th:field="*{dniEstudiante}" required maxlength="20">
+                            </div>
+                            <div class="form-group col-md-4 mb-3">
+                                <label for="nombresEstudiante" class="form-label">Nombres <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="nombresEstudiante"
+                                       th:field="*{nombresEstudiante}" required maxlength="100">
+                            </div>
+                            <div class="form-group col-md-4 mb-3">
+                                <label for="apellidosEstudiante" class="form-label">Apellidos <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="apellidosEstudiante"
+                                       th:field="*{apellidosEstudiante}" required maxlength="100">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-4 mb-3">
+                                <label for="fechaNacimientoEstudiante" class="form-label">Fecha de
+                                    Nacimiento</label>
+                                <input type="date" class="form-control" id="fechaNacimientoEstudiante"
+                                       th:field="*{fechaNacimientoEstudiante}">
+                            </div>
+                            <div class="form-group col-md-4 mb-3">
+                                <label for="generoEstudiante" class="form-label">Género</label>
+                                <select class="form-select" id="generoEstudiante" th:field="*{generoEstudiante}">
+                                    <option value="">Seleccione</option>
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Femenino">Femenino</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-4 mb-3">
+                                <label for="telefonoEstudiante" class="form-label">Teléfono</label>
+                                <input type="tel" class="form-control" id="telefonoEstudiante"
+                                       th:field="*{telefonoEstudiante}" maxlength="20">
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="direccionEstudiante" class="form-label">Dirección</label>
+                            <input type="text" class="form-control" id="direccionEstudiante"
+                                   th:field="*{direccionEstudiante}" maxlength="255">
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="emailPersonalEstudiante" class="form-label">Email Personal</label>
+                                <input type="email" class="form-control" id="emailPersonalEstudiante"
+                                       th:field="*{emailPersonalEstudiante}" maxlength="100">
+                            </div>
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="estadoCivilEstudiante" class="form-label">Estado Civil</label>
+                                <input type="text" class="form-control" id="estadoCivilEstudiante"
+                                       th:field="*{estadoCivilEstudiante}" maxlength="50">
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="tipoDocumentoEstudiante" class="form-label">Tipo de Documento</label>
+                            <input type="text" class="form-control" id="tipoDocumentoEstudiante"
+                                   th:field="*{tipoDocumentoEstudiante}" maxlength="50">
+                        </div>
+                    </div>
+
+                    <div class="form-section mb-4">
+                        <h4>Datos Académicos y de Salud del Estudiante</h4>
+                        <div class="row">
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="codigoEstudiante" class="form-label">Código de Estudiante <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="codigoEstudiante"
+                                       th:field="*{codigoEstudiante}" required maxlength="50">
+                            </div>
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="emailEducativoEstudiante" class="form-label">Email Educativo</label>
+                                <input type="email" class="form-control" id="emailEducativoEstudiante"
+                                       th:field="*{emailEducativoEstudiante}" maxlength="100">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="gradoAnteriorEstudiante" class="form-label">Grado Anterior</label>
+                                <input type="text" class="form-control" id="gradoAnteriorEstudiante"
+                                       th:field="*{gradoAnteriorEstudiante}" maxlength="100">
+                            </div>
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="institucionProcedenciaEstudiante" class="form-label">Institución de
+                                    Procedencia</label>
+                                <input type="text" class="form-control" id="institucionProcedenciaEstudiante"
+                                       th:field="*{institucionProcedenciaEstudiante}" maxlength="255">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-4 mb-3">
+                                <label for="tipoSangreEstudiante" class="form-label">Tipo de Sangre</label>
+                                <input type="text" class="form-control" id="tipoSangreEstudiante"
+                                       th:field="*{tipoSangreEstudiante}" maxlength="10">
+                            </div>
+                            <div class="form-group col-md-4 mb-3">
+                                <label for="contactoEmergenciaEstudiante" class="form-label">Contacto de
+                                    Emergencia</label>
+                                <input type="text" class="form-control" id="contactoEmergenciaEstudiante"
+                                       th:field="*{contactoEmergenciaEstudiante}" maxlength="100">
+                            </div>
+                            <div class="form-group col-md-4 mb-3">
+                                <label for="telefonoEmergenciaEstudiante" class="form-label">Teléfono de
+                                    Emergencia</label>
+                                <input type="tel" class="form-control" id="telefonoEmergenciaEstudiante"
+                                       th:field="*{telefonoEmergenciaEstudiante}" maxlength="20">
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="observacionesMedicasEstudiante" class="form-label">Observaciones
+                                Médicas</label>
+                            <textarea class="form-control" id="observacionesMedicasEstudiante"
+                                      th:field="*{observacionesMedicasEstudiante}" rows="3"></textarea>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="alergiasEstudiante" class="form-label">Alergias</label>
+                            <input type="text" class="form-control" id="alergiasEstudiante"
+                                   th:field="*{alergiasEstudiante}" maxlength="255">
+                        </div>
+                        <div class="form-group form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="seguroEscolarEstudiante"
+                                   th:field="*{seguroEscolarEstudiante}">
+                            <label class="form-check-label" for="seguroEscolarEstudiante">¿Tiene Seguro
+                                Escolar?</label>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="fotoUrlEstudiante" class="form-label">URL de la Foto</label>
+                            <input type="url" class="form-control" id="fotoUrlEstudiante"
+                                   th:field="*{fotoUrlEstudiante}" maxlength="255">
+                        </div>
+                    </div>
+
+                    <div class="form-section mb-4">
+                        <h4>Apoderado Principal</h4>
+                        <p class="text-muted">Ingrese el DNI del apoderado si ya está registrado en el sistema.</p>
+                        <div class="form-group mb-3">
+                            <label for="dniApoderadoPrincipal" class="form-label">DNI del Apoderado Principal <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="dniApoderadoPrincipal"
+                                   th:field="*{dniApoderadoPrincipal}" required maxlength="20"
+                                   placeholder="Ej: 20000001">
+                            <small class="form-text text-muted">El apoderado debe estar previamente
+                                registrado.</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-save me-2"></i> Registrar Estudiante
+                        </button>
+                        <a th:href="@{/admin/estudiantes}" class="btn btn-secondary btn-lg">
+                            <i class="bi bi-x-circle me-2"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<th:block layout:fragment="scripts">
+</th:block>
+</body>
+</html>
