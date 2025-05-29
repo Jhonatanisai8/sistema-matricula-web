@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title layout:fragment="title">Panel de Administrador</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style th:inline="css">
+        /* Variables CSS para colores si deseas fácil personalización */
+        :root {
+            --primary-color: #007bff; /* Color primario de Bootstrap */
+            --dark-bg: #343a40; /* Fondo oscuro de la barra lateral */
+            --text-light: #f8f9fa; /* Color de texto claro */
+        }
+
+        body {
+            background-color: var(--text-light); /* Fondo claro para el cuerpo */
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; /* Fuente más legible */
+        }
+
+        /* Estilos para la barra lateral */
+        aside {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            min-width: 250px; /* Un poco más de ancho para mejor legibilidad */
+            min-height: 100vh;
+            padding: 1.5rem; /* Un poco más de padding */
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Sombra sutil para darle profundidad */
+            position: sticky; /* Fija la barra lateral al hacer scroll */
+            top: 0;
+            left: 0;
+            z-index: 1000; /* Asegurar que esté por encima de otros elementos */
+        }
+
+        aside .nav-link {
+            padding: 0.75rem 1rem; /* Más padding para los enlaces */
+            border-radius: 0.25rem; /* Bordes ligeramente redondeados */
+            transition: background-color 0.2s ease, color 0.2s ease; /* Transición suave al hover */
+        }
+
+        aside .nav-link:hover,
+        aside .nav-link.active { /* Clase 'active' para el enlace actual */
+            background-color: rgba(255, 255, 255, 0.1); /* Fondo sutil al pasar el ratón o si está activo */
+            color: #ffffff; /* Texto blanco más brillante */
+        }
+
+        aside .nav-link i {
+            margin-right: 0.8rem; /* Espacio entre icono y texto */
+        }
+
+        /* Contenido principal */
+        main {
+            flex-grow: 1; /* Permite que ocupe todo el espacio restante */
+            padding: 2.5rem; /* Más padding para el contenido */
+        }
+
+        header h1 {
+            color: #343a40; /* Color oscuro para los títulos */
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #dee2e6; /* Línea separadora */
+            padding-bottom: 1rem;
+        }
+
+        /* Estilo para el pie de página (opcional, si decides añadir uno) */
+        footer {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            padding: 1rem;
+            text-align: center;
+            margin-top: auto; /* Empuja el footer al final de la página */
+        }
+
+        /* Responsividad básica para pantallas pequeñas */
+        @media (max-width: 768px) {
+            .d-flex {
+                flex-direction: column; /* Coloca la barra lateral encima del contenido */
+            }
+
+            aside {
+                min-width: 100%;
+                min-height: auto;
+                position: relative; /* Quita el sticky para móviles */
+                box-shadow: none;
+            }
+        }
+
+    </style>
+
+    <th:block layout:fragment="styles"></th:block>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" th:href="@{/admin/dashboard}">
+            <i class="bi bi-house-door-fill me-2"></i> Sistema de Matrícula
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarCollapse"
+                aria-controls="sidebarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
+            <ul class="navbar-nav">
+                <li class="nav-item d-flex align-items-center me-3">
+                    <span class="text-white me-2">
+                        <i class="bi bi-person-circle me-1"></i>
+                        Bienvenido, <span sec:authentication="name"></span>! </span>
+                </li>
+                <li class="nav-item">
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit" class="btn btn-outline-light">
+                            <i class="bi bi-box-arrow-right me-1"></i> Salir
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="d-flex">
+    <aside class="bg-dark text-white p-3 d-flex flex-column" style="min-width: 250px; min-height: 100vh;">
+        <div class="text-center mb-4">
+            <h4 class="text-white mt-2 mb-0">Administrador</h4>
+            <small class="text-muted" sec:authentication="authorities"></small></div>
+
+        <ul class="nav flex-column gap-2 flex-grow-1">
+            <li>
+                <a class="nav-link text-white" th:href="@{/admin/dashboard}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+            <li>
+                <a class="nav-link text-white" th:href="@{/admin/usuarios}">
+                    <i class="bi bi-people-fill"></i> Usuarios
+                </a>
+            </li>
+            <li>
+                <a class="nav-link text-white" th:href="@{/admin/personas}"> <i class="bi bi-person-badge"></i> Personas
+                </a>
+            </li>
+            <li>
+                <a class="nav-link text-white" th:href="@{/admin/estudiantes}">
+                    <i class="bi bi-mortarboard-fill"></i> Estudiantes
+                </a>
+            </li>
+            <li>
+                <a class="nav-link text-white" th:href="@{/admin/apoderados}">
+                    <i class="bi bi-person-check-fill"></i> Apoderados
+                </a>
+            </li>
+            <li>
+                <a class="nav-link text-white" th:href="@{/admin/docentes}">
+                    <i class="bi bi-person-video2"></i> Docentes
+                </a>
+            </li>
+            <li class="nav-item mt-3"><h6
+                    class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                <span>Académico</span>
+            </h6>
+            </li>
+            <li>
+                <a class="nav-link text-white" th:href="@{/admin/grados}">
+                    <i class="bi bi-journal-album"></i> Grados
+                </a>
+            </li>
+            <li>
+                <a class="nav-link text-white" th:href="@{/admin/secciones}">
+                    <i class="bi bi-grid-3x3-gap-fill"></i> Secciones
+                </a>
+            </li>
+            <li>
+                <a class="nav-link text-white" th:href="@{/admin/cursos}">
+                    <i class="bi bi-book-fill"></i> Cursos
+                </a>
+            </li>
+            <li>
+                <a class="nav-link text-white" th:href="@{/admin/horarios}">
+                    <i class="bi bi-calendar-week-fill"></i> Horarios
+                </a>
+            </li>
+            <li>
+                <a class="nav-link text-white" th:href="@{/admin/periodos-academicos}">
+                    <i class="bi bi-calendar-event"></i> Periodos Académicos
+                </a>
+            </li>
+            <li>
+                <a class="nav-link text-white" th:href="@{/admin/salones}">
+                    <i class="bi bi-building"></i> Salones
+                </a>
+            </li>
+            <li class="nav-item mt-3">
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                    <span>Procesos</span>
+                </h6>
+            </li>
+            <li>
+                <a class="nav-link text-white" th:href="@{/admin/matriculas}">
+                    <i class="bi bi-clipboard-check-fill"></i> Matrículas
+                </a>
+            </li>
+            <li>
+                <a class="nav-link text-white" th:href="@{/admin/asistencia}">
+                    <i class="bi bi-check2-circle"></i> Asistencia
+                </a>
+            </li>
+            <li>
+                <a class="nav-link text-white" th:href="@{/admin/calificaciones}">
+                    <i class="bi bi-graph-up-arrow"></i> Calificaciones
+                </a>
+            </li>
+        </ul>
+        <div class="mt-auto pt-3 border-top border-secondary text-center">
+            <small class="text-muted">&copy; [[${#dates.format(#dates.createNow(), 'yyyy')}]] Tu Institución</small>
+        </div>
+    </aside>
+
+    <main class="p-4 w-100 d-flex flex-column">
+        <header layout:fragment="header">
+            <h1 class="h3"><i class="bi bi-house-fill me-2"></i>Panel de Administración</h1></header>
+
+        <section layout:fragment="content" class="flex-grow-1">
+        </section>
+
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+<th:block layout:fragment="scripts"></th:block>
+
+</body>
+</html>
