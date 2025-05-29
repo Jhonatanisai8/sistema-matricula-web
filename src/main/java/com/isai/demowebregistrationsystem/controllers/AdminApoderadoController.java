@@ -1,0 +1,25 @@
+package com.isai.demowebregistrationsystem.controllers;
+
+import com.isai.demowebregistrationsystem.model.dtos.ApoderadoDTO;
+import com.isai.demowebregistrationsystem.services.impl.ApoderadoServiceImpl;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.List;
+
+@Controller
+@RequiredArgsConstructor
+@RequestMapping("/admin/apoderados")
+public class AdminApoderadoController {
+    private final ApoderadoServiceImpl apoderadoServiceImpl;
+
+    @GetMapping
+    public String listarApoderados(Model model) {
+        List<ApoderadoDTO> apoderados = apoderadoServiceImpl.listarApoderados();
+        model.addAttribute("apoderados", apoderados);
+        return "admin/lista-apoderados"; // This view will be src/main/resources/templates/admin/lista-apoderados.html
+    }
+}
