@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout-admin.html}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:fragment="title">Lista de Personas</title>
+
+    <th:block layout:fragment="styles">
+        <style>
+            .table-striped tbody tr:nth-of-type(odd) {
+                background-color: rgba(0, 0, 0, 0.05);
+            }
+
+            .table th, .table td {
+                vertical-align: middle;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+
+<section layout:fragment="content" class="flex-grow-1">
+    <header>
+        <h1 class="h3"><i class="bi bi-person-check-fill me-2"></i>Gestion de Usuarios</h1>
+        <h2 class="h3"><i class="bi me-2"></i>Aun esta en desarrollo....</h2>
+    </header>
+</section>
+
+<th:block layout:fragment="scripts">
+</th:block>
+</body>
+</html>
