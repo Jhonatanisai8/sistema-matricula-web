@@ -50,10 +50,10 @@ public class Persona {
     @Column(name = "tipo_documento", length = 50)
     private String tipoDocumento;
 
-    @Column(name = "fecha_registro", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "fecha_registro")
     private LocalDateTime fechaRegistro;
 
-    @Column(name = "fecha_actualizacion", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+    @Column(name = "fecha_actualizacion")
     private LocalDateTime fechaActualizacion;
 
     @Column(name = "activo", nullable = false)
@@ -64,7 +64,7 @@ public class Persona {
         if (this.fechaRegistro == null) {
             this.fechaRegistro = LocalDateTime.now();
         }
-        if (this.fechaActualizacion == null) { // Para la primera creación
+        if (this.fechaActualizacion == null) {
             this.fechaActualizacion = LocalDateTime.now();
         }
         if (this.activo == null) {
