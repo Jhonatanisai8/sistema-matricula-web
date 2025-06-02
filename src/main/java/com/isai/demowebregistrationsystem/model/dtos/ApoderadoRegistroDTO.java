@@ -16,6 +16,11 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class ApoderadoRegistroDTO {
 
+    //campos para la edicion
+    private Integer idPersona;
+    private Integer idUsuario;
+    private Integer idApoderado;
+
     // --- Campos de Persona ---
     @NotBlank(message = "El DNI no puede estar vacío.")
     @Size(min = 8, max = 20, message = "El DNI debe tener entre 8 y 20 caracteres.")
@@ -92,8 +97,7 @@ public class ApoderadoRegistroDTO {
 
     @NotBlank(message = "La contraseña no puede estar vacía.")
     @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres.")
-    private String password; // Se usará para crear el passwordHash
+    private String password;
 
     private String rol; // Por defecto "APODERADO"
 }
-

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -130,5 +131,134 @@ public class ApoderadoServiceImpl implements ApoderadoService {
             dto.setEmailPersonal(apoderado.getPersona().getEmailPersonal());
         }
         return dto;
+    }
+
+    //metodos para la edicion
+
+    @Override
+    @Transactional
+    public ApoderadoRegistroDTO obtenerApoderadoParaEditar(Integer idApoderado) {
+        Apoderado apoderado = apoderadoRepository.findById(idApoderado)
+                .orElseThrow(() -> new NoSuchElementException("Apoderado no encontrado con ID: " + idApoderado));
+
+        Persona persona = apoderado.getPersona();
+        if (persona == null) {
+            throw new IllegalStateException("Apoderado con ID " + idApoderado + " no tiene persona asociada.");
+        }
+
+        Usuario usuario = usuarioRepository.findByPersona(persona)
+                .orElseThrow(() -> new IllegalStateException("No se encontró usuario para la persona con ID: " + persona.getIdPersona()));
+
+        ApoderadoRegistroDTO dto = new ApoderadoRegistroDTO();
+
+        // seteamos los IDS
+        dto.setIdApoderado(apoderado.getIdApoderado());
+        dto.setIdPersona(persona.getIdPersona());
+        dto.setIdUsuario(usuario.getIdUsuario());
+
+        // Setear campos de Persona
+        dto.setDni(persona.getDni());
+        dto.setNombres(persona.getNombres());
+        dto.setApellidos(persona.getApellidos());
+        dto.setFechaNacimiento(persona.getFechaNacimiento());
+        dto.setGenero(persona.getGenero());
+        dto.setDireccion(persona.getDireccion());
+        dto.setTelefono(persona.getTelefono());
+        dto.setEmailPersonal(persona.getEmailPersonal());
+        dto.setEstadoCivil(persona.getEstadoCivil());
+        dto.setTipoDocumento(persona.getTipoDocumento());
+
+        // Setear campos de Apoderado
+        dto.setOcupacion(apoderado.getOcupacion());
+        dto.setLugarTrabajo(apoderado.getLugarTrabajo());
+        dto.setTelefonoTrabajo(apoderado.getTelefonoTrabajo());
+        dto.setParentesco(apoderado.getParentesco());
+        dto.setNivelEducativo(apoderado.getNivelEducativo());
+        dto.setIngresoMensual(apoderado.getIngresoMensual());
+        dto.setEsPrincipal(apoderado.getEsPrincipal());
+        dto.setAutorizadoRecoger(apoderado.getAutorizadoRecoger());
+        dto.setFotoUrl(apoderado.getFotoUrl());
+        dto.setReferenciaPersonal(apoderado.getReferenciaPersonal());
+        dto.setTelefonoReferencia(apoderado.getTelefonoReferencia());
+
+        // Setear campos de Usuario
+        dto.setUsername(usuario.getUserName());
+        dto.setPassword(""); // O null
+        dto.setRol(usuario.getRol());
+        return dto;
+    }
+
+    @Override
+    @Transactional
+    public Apoderado actualizarApoderado(ApoderadoRegistroDTO apoderadoDTO) {   // 1. Obtener entidades existentes por ID
+        // Es crucial que los IDs no sean nulos para la actualización
+        if (apoderadoDTO.getIdPersona() == null || apoderadoDTO.getIdApoderado() == null || apoderadoDTO.getIdUsuario() == null) {
+            throw new IllegalArgumentException("IDs de Persona, Usuario o Apoderado son requeridos para la actualización.");
+        }
+
+        Persona personaExistente = personaRepository.findById(apoderadoDTO.getIdPersona())
+                .orElseThrow(() -> new NoSuchElementException("Persona no encontrada con ID: " + apoderadoDTO.getIdPersona()));
+        Apoderado apoderadoExistente = apoderadoRepository.findById(apoderadoDTO.getIdApoderado())
+                .orElseThrow(() -> new NoSuchElementException("Apoderado no encontrado con ID: " + apoderadoDTO.getIdApoderado()));
+        Usuario usuarioExistente = usuarioRepository.findById(apoderadoDTO.getIdUsuario())
+                .orElseThrow(() -> new NoSuchElementException("Usuario no encontrado con ID: " + apoderadoDTO.getIdUsuario()));
+
+        // 2. Validaciones de unicidad (DNI, Email, Username)
+        personaRepository.findByDni(apoderadoDTO.getDni()).ifPresent(p -> {
+            if (!p.getIdPersona().equals(personaExistente.getIdPersona())) {
+                throw new IllegalArgumentException("Ya existe una persona con el DNI: " + apoderadoDTO.getDni());
+            }
+        });
+
+        if (StringUtils.hasText(apoderadoDTO.getEmailPersonal())) {
+            personaRepository.findByEmailPersonal(apoderadoDTO.getEmailPersonal()).ifPresent(p -> {
+                if (!p.getIdPersona().equals(personaExistente.getIdPersona())) {
+                    throw new IllegalArgumentException("Ya existe una persona con el email personal: " + apoderadoDTO.getEmailPersonal());
+                }
+            });
+        }
+
+        usuarioRepository.findByUserName(apoderadoDTO.getUsername()).ifPresent(u -> {
+            if (!u.getIdUsuario().equals(usuarioExistente.getIdUsuario())) {
+                throw new IllegalArgumentException("El nombre de usuario '" + apoderadoDTO.getUsername() + "' ya está en uso.");
+            }
+        });
+
+
+        // actuaalizamos los campos de Persona
+        personaExistente.setDni(apoderadoDTO.getDni());
+        personaExistente.setNombres(apoderadoDTO.getNombres());
+        personaExistente.setApellidos(apoderadoDTO.getApellidos());
+        personaExistente.setFechaNacimiento(apoderadoDTO.getFechaNacimiento());
+        personaExistente.setGenero(apoderadoDTO.getGenero());
+        personaExistente.setDireccion(apoderadoDTO.getDireccion());
+        personaExistente.setTelefono(apoderadoDTO.getTelefono());
+        personaExistente.setEmailPersonal(apoderadoDTO.getEmailPersonal());
+        personaExistente.setEstadoCivil(apoderadoDTO.getEstadoCivil());
+        personaExistente.setTipoDocumento(apoderadoDTO.getTipoDocumento());
+        personaRepository.save(personaExistente);
+
+        //actualizamos los campos de Usuario
+        usuarioExistente.setUserName(apoderadoDTO.getUsername());
+        if (StringUtils.hasText(apoderadoDTO.getPassword())) {
+            usuarioExistente.setPasswordHash(passwordEncoder.encode(apoderadoDTO.getPassword()));
+        }
+        usuarioExistente.setRol("APODERADO");
+        usuarioRepository.save(usuarioExistente);
+
+        // actualizamos los campos de Apoderado
+        apoderadoExistente.setOcupacion(apoderadoDTO.getOcupacion());
+        apoderadoExistente.setLugarTrabajo(apoderadoDTO.getLugarTrabajo());
+        apoderadoExistente.setTelefonoTrabajo(apoderadoDTO.getTelefonoTrabajo());
+        apoderadoExistente.setParentesco(apoderadoDTO.getParentesco());
+        apoderadoExistente.setNivelEducativo(apoderadoDTO.getNivelEducativo());
+        apoderadoExistente.setIngresoMensual(apoderadoDTO.getIngresoMensual());
+        apoderadoExistente.setEsPrincipal(apoderadoDTO.getEsPrincipal());
+        apoderadoExistente.setAutorizadoRecoger(apoderadoDTO.getAutorizadoRecoger());
+        apoderadoExistente.setFotoUrl(apoderadoDTO.getFotoUrl());
+        apoderadoExistente.setReferenciaPersonal(apoderadoDTO.getReferenciaPersonal());
+        apoderadoExistente.setTelefonoReferencia(apoderadoDTO.getTelefonoReferencia());
+
+        return apoderadoRepository.save(apoderadoExistente); // Guardar cambios en Apoderado
     }
 }

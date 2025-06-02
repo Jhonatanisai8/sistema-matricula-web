@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Controller
 @RequiredArgsConstructor
@@ -52,8 +53,8 @@ public class AdminApoderadoController {
             model.addAttribute("apoderadoRegistroDTO", new ApoderadoRegistroDTO());
         }
 
-        // ¡IMPORTANTE! Añadir estos atributos SIEMPRE, ya sea la primera carga o una redirección con errores.
-        model.addAttribute("generos", List.of("Masculino", "Femenino", "Otro"));
+        // para el campo genero
+        model.addAttribute("generos", List.of("Masculino", "Femenino"));
         model.addAttribute("parentescos", List.of("Padre", "Madre", "Abuelo(a)", "Tío(a)", "Hermano(a)", "Otro"));
         model.addAttribute("roles", List.of("APODERADO"));
 
@@ -111,4 +112,69 @@ public class AdminApoderadoController {
             return "redirect:/admin/apoderados/registro";
         }
     }
+
+    // Método para mostrar el formulario de edición (GET)
+    @GetMapping("/editar/{idApoderado}")
+    public String mostrarFormularioEdicionApoderado(@PathVariable Integer idApoderado, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            ApoderadoRegistroDTO apoderadoDTO = apoderadoServiceImpl.obtenerApoderadoParaEditar(idApoderado);
+            model.addAttribute("apoderadoRegistroDTO", apoderadoDTO);
+
+            model.addAttribute("generos", List.of("Masculino", "Femenino"));
+            model.addAttribute("parentescos", List.of("Padre", "Madre", "Abuelo(a)", "Tío(a)", "Hermano(a)", "Otro"));
+            model.addAttribute("roles", List.of("APODERADO")); // Opcional, ya que no se muestra
+
+            return "admin/editar-apoderado";
+        } catch (NoSuchElementException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/apoderados";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al cargar los datos del apoderado para edición: " + e.getMessage());
+            return "redirect:/admin/apoderados";
+        }
+    }
+
+    // Método para procesar el envío del formulario de edición (POST)
+    @PostMapping("/editar")
+    public String actualizarApoderado(@Valid @ModelAttribute("apoderadoRegistroDTO") ApoderadoRegistroDTO apoderadoDTO,
+                                      BindingResult result,
+                                      RedirectAttributes redirectAttributes) {
+
+        if (result.hasErrors()) {
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.apoderadoRegistroDTO", result);
+            redirectAttributes.addFlashAttribute("apoderadoRegistroDTO", apoderadoDTO); // Para precargar los datos
+            redirectAttributes.addFlashAttribute("errorMessage", "Por favor, corrige los errores en el formulario.");
+            return "redirect:/admin/apoderados/editar/" + apoderadoDTO.getIdApoderado();
+        }
+
+        try {
+            apoderadoServiceImpl.actualizarApoderado(apoderadoDTO);
+            redirectAttributes.addFlashAttribute("successMessage", "Apoderado actualizado exitosamente.");
+            return "redirect:/admin/apoderados"; // Redirige a la lista después de actualizar
+        } catch (IllegalArgumentException e) {
+            // errores de dupliucado de dni, email y username
+            if (e.getMessage().contains("DNI")) {
+                result.rejectValue("dni", "duplicate.dni", e.getMessage());
+            } else if (e.getMessage().contains("email")) {
+                result.rejectValue("emailPersonal", "duplicate.email", e.getMessage());
+            } else if (e.getMessage().contains("nombre de usuario")) {
+                result.rejectValue("username", "duplicate.username", e.getMessage());
+            } else {
+                result.rejectValue(null, null, e.getMessage()); // error global si no coincide
+            }
+
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.apoderadoRegistroDTO", result);
+            redirectAttributes.addFlashAttribute("apoderadoRegistroDTO", apoderadoDTO);
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/apoderados/editar/" + apoderadoDTO.getIdApoderado();
+        } catch (NoSuchElementException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al actualizar: " + e.getMessage());
+            return "redirect:/admin/apoderados";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error inesperado al actualizar el apoderado: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("apoderadoRegistroDTO", apoderadoDTO);
+            return "redirect:/admin/apoderados/editar/" + apoderadoDTO.getIdApoderado();
+        }
+    }
+
 }

@@ -14,4 +14,10 @@ public interface ApoderadoService {
     ApoderadoDTO mapApoderadoToDTO(Apoderado apoderado);
 
     Apoderado registrarApoderado(ApoderadoRegistroDTO apoderadoRegistroDTO);
+
+    //metodo para las ediciones
+    ApoderadoRegistroDTO obtenerApoderadoParaEditar(Integer idApoderado);
+
+    Apoderado actualizarApoderado(ApoderadoRegistroDTO apoderado);
+
 }
