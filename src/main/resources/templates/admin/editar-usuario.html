@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout-admin.html}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:fragment="title">Edición de Usuario</title>
+    <th:block layout:fragment="styles">
+        <style>
+            .form-section {
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                padding: 20px;
+                margin-bottom: 30px;
+                background-color: #fcfcfc;
+            }
+
+            .form-section h4 {
+                color: #007bff;
+                margin-bottom: 20px;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 10px;
+            }
+
+            .error-message {
+                color: red;
+                font-size: 0.875em;
+                margin-top: 0.25em;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+
+<section layout:fragment="content" class="flex-grow-1">
+    <header>
+        <h1 class="h3"><i class="bi bi-person-fill-gear me-2"></i>Edición de Usuario</h1>
+    </header>
+
+    <div class="container-fluid mt-4">
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Formulario de Edición de Usuario</h4>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/admin/usuarios/editar}" th:object="${usuarioDTO}" method="post">
+
+                    <input type="hidden" th:field="*{idUsuario}"/>
+                    <input type="hidden" th:field="*{idPersona}"/>
+                    <input type="hidden" th:field="*{fechaCreacion}"/>
+                    <input type="hidden" th:field="*{ultimoAcceso}"/>
+                    <input type="hidden" th:field="*{intentosFallidos}"/>
+
+
+                    <div class="form-section mb-4">
+                        <h4>Datos del Usuario</h4>
+                        <div class="row">
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="userName" class="form-label">Nombre de Usuario <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="userName" th:field="*{userName}" required
+                                       maxlength="50">
+                                <p th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}"
+                                   class="error-message"></p>
+                            </div>
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="password" class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="password" th:field="*{password}">
+                                <small class="form-text text-muted">Deja en blanco si no deseas cambiar la contraseña.
+                                    Mínimo 8 caracteres si se ingresa.</small>
+                                <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}"
+                                   class="error-message"></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="rol" class="form-label">Rol <span class="text-danger">*</span></label>
+                                <select class="form-select" id="rol" th:field="*{rol}" required>
+                                    <option value="">Seleccione un Rol</option>
+                                    <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"></option>
+                                </select>
+                                <p th:if="${#fields.hasErrors('rol')}" th:errors="*{rol}" class="error-message"></p>
+                            </div>
+                            <div class="form-group col-md-6 mb-3 form-check d-flex align-items-center justify-content-center">
+                                <input type="checkbox" class="form-check-input" id="activo" th:field="*{activo}">
+                                <label class="form-check-label ms-2" for="activo">Usuario Activo</label>
+                                <p th:if="${#fields.hasErrors('activo')}" th:errors="*{activo}"
+                                   class="error-message"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section mb-4">
+                        <h4>Datos de la Persona Asociada (Solo Vista)</h4>
+                        <div class="row">
+                            <div class="form-group col-md-4 mb-3">
+                                <label for="dniPersona" class="form-label">DNI</label>
+                                <input type="text" class="form-control" id="dniPersona" th:field="*{dniPersona}"
+                                       readonly>
+                            </div>
+                            <div class="form-group col-md-4 mb-3">
+                                <label for="nombresPersona" class="form-label">Nombres</label>
+                                <input type="text" class="form-control" id="nombresPersona" th:field="*{nombresPersona}"
+                                       readonly>
+                            </div>
+                            <div class="form-group col-md-4 mb-3">
+                                <label for="apellidosPersona" class="form-label">Apellidos</label>
+                                <input type="text" class="form-control" id="apellidosPersona"
+                                       th:field="*{apellidosPersona}" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-save me-2"></i> Guardar Cambios
+                        </button>
+                        <a th:href="@{/admin/usuarios}" class="btn btn-secondary btn-lg">
+                            <i class="bi bi-x-circle me-2"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<th:block layout:fragment="scripts">
+</th:block>
+</body>
+</html>
