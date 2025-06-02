@@ -1,13 +1,15 @@
 package com.isai.demowebregistrationsystem.controllers;
 
 import com.isai.demowebregistrationsystem.model.dtos.ApoderadoDTO;
+import com.isai.demowebregistrationsystem.model.dtos.ApoderadoRegistroDTO;
 import com.isai.demowebregistrationsystem.services.impl.ApoderadoServiceImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -39,5 +41,74 @@ public class AdminApoderadoController {
         }
         model.addAttribute("apoderados", apoderadoDTOS);
         return "admin/lista-apoderados";
+    }
+
+    // Método para mostrar el formulario de registro (GET)
+    @GetMapping("/registro")
+    public String mostrarFormularioRegistroApoderado(Model model) {
+        // Si hay un apoderadoRegistroDTO como flash attribute (debido a un error previo), se usará.
+        // Si no, se crea uno nuevo.
+        if (!model.containsAttribute("apoderadoRegistroDTO")) {
+            model.addAttribute("apoderadoRegistroDTO", new ApoderadoRegistroDTO());
+        }
+
+        // ¡IMPORTANTE! Añadir estos atributos SIEMPRE, ya sea la primera carga o una redirección con errores.
+        model.addAttribute("generos", List.of("Masculino", "Femenino", "Otro"));
+        model.addAttribute("parentescos", List.of("Padre", "Madre", "Abuelo(a)", "Tío(a)", "Hermano(a)", "Otro"));
+        model.addAttribute("roles", List.of("APODERADO"));
+
+        return "admin/registro-apoderado";
+    }
+
+    @PostMapping("/registro")
+    public String registrarApoderado(@Valid @ModelAttribute("apoderadoRegistroDTO") ApoderadoRegistroDTO apoderadoDTO,
+                                     BindingResult result,
+                                     RedirectAttributes redirectAttributes) {
+
+        System.out.println("--- DENTRO DEL MÉTODO POST /admin/apoderados/registro ---");
+        System.out.println("DTO recibido: " + apoderadoDTO.getDni() + ", " + apoderadoDTO.getNombres() + ", " + apoderadoDTO.getUsername()); // Imprime algunos campos para verificar que llegan
+        System.out.println("BindingResult tiene errores: " + result.hasErrors());
+
+        if (result.hasErrors()) {
+            System.out.println("--- ERRORES DE VALIDACIÓN DETECTADOS ---");
+            result.getAllErrors().forEach(error -> System.out.println("Error: " + error.getDefaultMessage() + " en campo: " + (error instanceof org.springframework.validation.FieldError ? ((org.springframework.validation.FieldError) error).getField() : "global")));
+            // ... (resto de tu código de redirección para errores)
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.apoderadoRegistroDTO", result);
+            redirectAttributes.addFlashAttribute("apoderadoRegistroDTO", apoderadoDTO);
+            redirectAttributes.addFlashAttribute("errorMessage", "Por favor, corrige los errores en el formulario.");
+            return "redirect:/admin/apoderados/registro";
+        }
+
+        try {
+            System.out.println("--- INTENTANDO REGISTRAR APODERADO EN EL SERVICIO ---");
+            apoderadoServiceImpl.registrarApoderado(apoderadoDTO);
+            System.out.println("--- APODERADO REGISTRADO EXITOSAMENTE (supuestamente) ---");
+            redirectAttributes.addFlashAttribute("successMessage", "Apoderado registrado exitosamente.");
+            return "redirect:/admin/apoderados";
+        } catch (IllegalArgumentException e) {
+            System.err.println("--- ERROR DE LÓGICA DE NEGOCIO: " + e.getMessage() + " ---");
+            // ... (resto de tu código de redirección para errores de negocio)
+            if (e.getMessage().contains("DNI")) {
+                result.rejectValue("dni", "duplicate.dni", e.getMessage());
+            } else if (e.getMessage().contains("Email Personal")) {
+                result.rejectValue("emailPersonal", "duplicate.email", e.getMessage());
+            } else if (e.getMessage().contains("nombre de usuario")) {
+                result.rejectValue("username", "duplicate.username", e.getMessage());
+            } else {
+                result.rejectValue(null, null, e.getMessage());
+            }
+
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.apoderadoRegistroDTO", result);
+            redirectAttributes.addFlashAttribute("apoderadoRegistroDTO", apoderadoDTO);
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/apoderados/registro";
+        } catch (Exception e) {
+            System.err.println("--- ERROR INESPERADO AL REGISTRAR: " + e.getMessage() + " ---");
+            e.printStackTrace(); // Imprime el stack trace completo para errores inesperados
+            // ... (resto de tu código de redirección para errores inesperados)
+            redirectAttributes.addFlashAttribute("errorMessage", "Error inesperado al registrar el apoderado: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("apoderadoRegistroDTO", apoderadoDTO);
+            return "redirect:/admin/apoderados/registro";
+        }
     }
 }
