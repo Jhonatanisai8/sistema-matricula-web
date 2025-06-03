@@ -1,6 +1,6 @@
 # Sistema de Gestión de Matrícula para Institución Educativa (Nivel Primario)
 
-![Banner del Proyecto (Opcional)](https://via.placeholder.com/1200x300/007bff/ffffff?text=Sistema+de+Matr%C3%ADcula+Educativa)
+![image](https://github.com/user-attachments/assets/270cfa0b-3a2d-4616-8942-d07be60ae24e)
 Este proyecto es un sistema web integral diseñado para optimizar el proceso de matrícula y la gestión de usuarios dentro de una institución educativa de nivel primario. Facilita la administración de estudiantes, docentes, apoderados y usuarios del sistema, proporcionando interfaces específicas para cada rol.
 
 ---
