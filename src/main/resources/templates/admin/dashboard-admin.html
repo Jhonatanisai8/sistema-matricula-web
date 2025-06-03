@@ -10,12 +10,59 @@
 
     <th:block layout:fragment="styles">
         <style>
-            .table-striped tbody tr:nth-of-type(odd) {
-                background-color: rgba(0, 0, 0, 0.05);
+            .dashboard-card {
+                background-color: #ffffff;
+                border-radius: 8px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
             }
 
-            .table th, .table td {
-                vertical-align: middle;
+            .dashboard-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            }
+
+            .dashboard-card .card-body {
+                padding: 2rem;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+            }
+
+            .dashboard-card .card-title {
+                font-size: 1.2rem;
+                color: #555;
+                margin-bottom: 0.5rem;
+            }
+
+            .dashboard-card .card-text {
+                font-size: 2.5rem;
+                font-weight: bold;
+                color: #007bff; /* Color principal de Bootstrap */
+            }
+
+            .dashboard-card .card-icon {
+                font-size: 3.5rem;
+                color: #007bff;
+                margin-bottom: 1rem;
+            }
+
+            .card-total .card-text {
+                color: #28a745; /* Color verde para el total */
+            }
+
+            .card-docente .card-text {
+                color: #ffc107; /* Amarillo */
+            }
+
+            .card-apoderado .card-text {
+                color: #17a2b8; /* Azul claro */
+            }
+
+            .card-estudiante .card-text {
+                color: #dc3545; /* Rojo */
             }
         </style>
     </th:block>
@@ -23,10 +70,63 @@
 <body>
 
 <section layout:fragment="content" class="flex-grow-1">
-    <header>
-        <h1 class="h3"><i class="bi  bi-speedometer2 me-2"></i>Dashboard de Admnistrador</h1>
-        <h2 class="h2"><i class="bi me-2"></i>En desarollo</h2>
+    <header class="mb-4">
+        <h1 class="h3"><i class="bi bi-speedometer2 me-2"></i>Dashboard de Administrador</h1>
+        <p class="lead text-muted">Resumen rápido de la plataforma</p>
     </header>
+
+    <div class="container-fluid mt-4">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            <div class="col">
+                <div class="card dashboard-card h-100 card-total">
+                    <div class="card-body">
+                        <i class="bi bi-people-fill card-icon"></i>
+                        <h5 class="card-title">Total Usuarios</h5>
+                        <p class="card-text" th:text="${summary.totalUsuarios}">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="card dashboard-card h-100 card-docente">
+                    <div class="card-body">
+                        <i class="bi bi-person-badge-fill card-icon"></i>
+                        <h5 class="card-title">Total Docentes</h5>
+                        <p class="card-text" th:text="${summary.totalDocentes}">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="card dashboard-card h-100 card-apoderado">
+                    <div class="card-body">
+                        <i class="bi bi-person-fill card-icon"></i>
+                        <h5 class="card-title">Total Apoderados</h5>
+                        <p class="card-text" th:text="${summary.totalApoderados}">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="card dashboard-card h-100 card-estudiante">
+                    <div class="card-body">
+                        <i class="bi bi-mortarboard-fill card-icon"></i>
+                        <h5 class="card-title">Total Estudiantes</h5>
+                        <p class="card-text" th:text="${summary.totalEstudiantes}">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-5 p-4 bg-light rounded shadow-sm">
+            <h4 class="text-center text-muted">Otras estadísticas y funcionalidades en desarrollo...</h4>
+            <div class="text-center text-muted mt-3">
+                <i class="bi bi-gear-fill" style="font-size: 2rem;"></i>
+                <p>¡Pronto más información aquí!</p>
+            </div>
+        </div>
+
+    </div>
 </section>
 
 <th:block layout:fragment="scripts">
