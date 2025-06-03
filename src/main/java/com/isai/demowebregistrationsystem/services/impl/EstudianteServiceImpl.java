@@ -4,9 +4,11 @@ import com.isai.demowebregistrationsystem.model.dtos.EstudianteDTO;
 import com.isai.demowebregistrationsystem.model.entities.Apoderado;
 import com.isai.demowebregistrationsystem.model.entities.Estudiante;
 import com.isai.demowebregistrationsystem.model.entities.Persona;
+import com.isai.demowebregistrationsystem.model.entities.Usuario;
 import com.isai.demowebregistrationsystem.repositorys.ApoderadoRepository;
 import com.isai.demowebregistrationsystem.repositorys.EstudianteRepository;
 import com.isai.demowebregistrationsystem.repositorys.PersonaRepository;
+import com.isai.demowebregistrationsystem.repositorys.UsuarioRepository;
 import com.isai.demowebregistrationsystem.services.EstudianteService;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -14,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
@@ -25,6 +28,9 @@ public class EstudianteServiceImpl implements EstudianteService {
     private final EstudianteRepository estudianteRepository;
     private final ApoderadoRepository apoderadoRepository;
     private final PersonaRepository personaRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UsuarioRepository usuarioRepository;
+
 
     @Override
     public Page<Estudiante> listarEstudiantes(String filtro, Pageable pageable) {
@@ -32,7 +38,7 @@ public class EstudianteServiceImpl implements EstudianteService {
             if (filtro == null || filtro.trim().isEmpty()) {
                 return null;
             }
-            // Usa join explícito INNER para asegurar que funciona bien
+            //  join explícito INNER para asegurar que funciona bien
             Join<Estudiante, Persona> personaJoin = root.join("persona", JoinType.INNER);
 
             String filtroLike = "%" + filtro.toLowerCase() + "%";
@@ -67,19 +73,25 @@ public class EstudianteServiceImpl implements EstudianteService {
         personaEstudiante.setEmailPersonal(estudianteDTO.getEmailPersonalEstudiante());
         personaEstudiante.setEstadoCivil(estudianteDTO.getEstadoCivilEstudiante());
         personaEstudiante.setTipoDocumento(estudianteDTO.getTipoDocumentoEstudiante());
-        // fechaRegistro, fechaActualizacion, activo se manejan con @PrePersist en la entidad Persona
-        personaEstudiante = personaRepository.save(personaEstudiante); // Guardar para obtener el ID
+        personaEstudiante = personaRepository.save(personaEstudiante);
 
         // --- 2. Buscar el Apoderado Principal existente por su DNI ---
-        // Necesitarás este método en tu ApoderadoRepository:
-        // Optional<Apoderado> findByPersonaDni(String dni);
         Apoderado apoderadoPrincipal = apoderadoRepository.findByPersonaDni(estudianteDTO.getDniApoderadoPrincipal())
                 .orElseThrow(() -> new RuntimeException("Apoderado con DNI " + estudianteDTO.getDniApoderadoPrincipal() + " no encontrado. Por favor, registre al apoderado primero."));
 
+        // --- 4. Cremos y guardamos el usuario ---
+        Usuario usuario = new Usuario();
+        usuario.setUserName(estudianteDTO.getNombresEstudiante().substring(0, 3).concat(estudianteDTO.getApellidosEstudiante().substring(0, 4)));
+        usuario.setPasswordHash(passwordEncoder.encode(estudianteDTO.getNombresEstudiante().substring(0, 3).concat(estudianteDTO.getApellidosEstudiante().substring(0, 4)).concat("2025").toLowerCase()));
+        usuario.setRol("ESTUDIANTE");
+        usuario.setPersona(personaEstudiante);
+        usuarioRepository.save(usuario);
+
+
         // --- 3. Crear y guardar la entidad Estudiante ---
         Estudiante estudiante = new Estudiante();
-        estudiante.setPersona(personaEstudiante); // Asignar la Persona recién creada
-        estudiante.setApoderadoPrincipal(apoderadoPrincipal); // Asignar el Apoderado encontrado
+        estudiante.setPersona(personaEstudiante);
+        estudiante.setApoderadoPrincipal(apoderadoPrincipal);
 
         estudiante.setCodigoEstudiante(estudianteDTO.getCodigoEstudiante());
         estudiante.setEmailEducativo(estudianteDTO.getEmailEducativoEstudiante());
@@ -92,6 +104,7 @@ public class EstudianteServiceImpl implements EstudianteService {
         estudiante.setTelefonoEmergencia(estudianteDTO.getTelefonoEmergenciaEstudiante());
         estudiante.setSeguroEscolar(estudianteDTO.getSeguroEscolarEstudiante() != null ? estudianteDTO.getSeguroEscolarEstudiante() : false);
         estudiante.setFotoUrl(estudianteDTO.getFotoUrlEstudiante());
+
         return estudianteRepository.save(estudiante);
     }
 

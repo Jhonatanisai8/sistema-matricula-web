@@ -53,8 +53,8 @@ public class AdminEstudianteController {
     public String registrarEstudiante(@ModelAttribute("estudianteDTO") EstudianteDTO estudianteDTO,
                                       RedirectAttributes redirectAttributes) {
         try {
-            // Llama a tu servicio para registrar
-            estudianteServiceImpl.registrar(estudianteDTO); // Asumiendo este método en tu servicio
+            // Llamar a servicio para registrar
+            estudianteServiceImpl.registrar(estudianteDTO);
             redirectAttributes.addFlashAttribute("successMessage", "Estudiante registrado exitosamente!");
             // Redirigir SIEMPRE a la URL completa para evitar problemas de rutas relativas
             return "redirect:/admin/estudiantes/registro";
