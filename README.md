@@ -53,12 +53,11 @@ El sistema se centra en las siguientes áreas clave:
     * Thymeleaf (motor de plantillas)
     * HTML5
     * CSS3
-    * JavaScript (opcional, para interacciones dinámicas)
     * Bootstrap 5 (o similar, para diseño responsive)
     * Bootstrap Icons (o Font Awesome, para iconografía)
 
 * **Base de Datos:**
-    * (Indica aquí tu base de datos, ej: MySQL, PostgreSQL, H2 Database para desarrollo)
+    * (SQL SERVER)
 
 ---
 
@@ -126,17 +125,18 @@ Aquí se muestran algunas de las interfaces clave del sistema.
 
 Una vista general que proporciona un resumen de las principales estadísticas del sistema.
 
-![Dashboard de Administrador](image_64ae3d.png)
+![image](https://github.com/user-attachments/assets/d437f140-6a6e-44bd-ae33-967bb7d72b28)
 ### Listado de Docentes
 
 Muestra la lista de docentes registrados con su información relevante.
 
-![Listado de Docentes](image_650873.png)
+![Listado de Docentes](![image](https://github.com/user-attachments/assets/df75fc40-a151-4935-ac14-a357467af3a2)
+)
 ### Registro de Docente
 
 Formulario para añadir nuevos docentes al sistema.
+![image](https://github.com/user-attachments/assets/92964a94-a74b-4110-8a7c-fbef03673be1)
 
-![Formulario de Registro de Docente](image_afb1b7.png)
 ---
 
 ## 🛣️ Próximos Pasos (Roadmap)
@@ -150,27 +150,9 @@ Formulario para añadir nuevos docentes al sistema.
 * Generación de reportes.
 
 ---
-
-## 🤝 Contribuciones
-
-Las contribuciones son bienvenidas. Si deseas colaborar, por favor sigue estos pasos:
-
-1.  Haz un "fork" de este repositorio.
-2.  Crea una nueva rama (`git checkout -b feature/nueva-funcionalidad`).
-3.  Realiza tus cambios y commitea (`git commit -m 'feat: Añade nueva funcionalidad X'`).
-4.  Haz "push" a tu rama (`git push origin feature/nueva-funcionalidad`).
-5.  Abre un "Pull Request".
-
----
-
-## 📧 Contacto
-
 Para cualquier pregunta o sugerencia, puedes contactar a:
 
 * **Jhonatan Isai**
 * GitHub: [Jhonatanisai8](https://github.com/Jhonatanisai8)
-* Email: [tu_email@example.com](mailto:tu_email@example.com) ---
-
-## 📄 Licencia
-
-Este proyecto está bajo la licencia [MIT](https://opensource.org/licenses/MIT). Consulta el archivo [LICENSE](LICENSE) para más detalles.
+* Email: [Jhonatan Isai Ojeda Sanchez](ojedasnachezjhonatan@gmail.com
+) ---
