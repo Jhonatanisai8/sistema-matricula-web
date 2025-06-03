@@ -130,8 +130,8 @@ Una vista general que proporciona un resumen de las principales estadísticas de
 
 Muestra la lista de docentes registrados con su información relevante.
 
-![Listado de Docentes](![image](https://github.com/user-attachments/assets/df75fc40-a151-4935-ac14-a357467af3a2)
-)
+![image](https://github.com/user-attachments/assets/df75fc40-a151-4935-ac14-a357467af3a2)
+
 ### Registro de Docente
 
 Formulario para añadir nuevos docentes al sistema.
@@ -154,5 +154,5 @@ Para cualquier pregunta o sugerencia, puedes contactar a:
 
 * **Jhonatan Isai**
 * GitHub: [Jhonatanisai8](https://github.com/Jhonatanisai8)
-* Email: [Jhonatan Isai Ojeda Sanchez](ojedasnachezjhonatan@gmail.com
+* Email: [ojedasnachezjhonatan@gmail.com](ojedasnachezjhonatan@gmail.com
 ) ---
