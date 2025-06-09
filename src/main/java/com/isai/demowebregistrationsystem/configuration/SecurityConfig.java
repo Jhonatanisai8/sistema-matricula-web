@@ -20,28 +20,21 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // Usuario en memoria
+
     @Bean
     public InMemoryUserDetailsManager userDetailsService(PasswordEncoder encoder) {
-        UserDetails user = User.withUsername("admin")
-                .password(encoder.encode("admin123"))
-                .roles("ADMIN")
-                .build();
-        return new InMemoryUserDetailsManager(user);
+        UserDetails admin = User.withUsername("admin").password(encoder.encode("admin123"))
+                .roles("ADMIN").build();
+        return new InMemoryUserDetailsManager(admin);
     }
 
-    // Seguridad
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().authenticated()
-                )
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .permitAll()
-                )
-                .logout(logout -> logout.permitAll());
+        http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated()).formLogin(form -> form.loginPage("/login").defaultSuccessUrl("/admin/dashboard", true).failureUrl("/login?error").permitAll()).logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/login?logout").permitAll());
 
         return http.build();
     }
