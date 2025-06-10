@@ -6,89 +6,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title layout:fragment="title">Panel de Administrador</title>
-
+    <title layout:fragment="title">Panel de Administración</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Segoe+UI:wght@400;700&display=swap"
+          rel="stylesheet">
+
     <style th:inline="css">
-        /* Variables CSS para colores si deseas fácil personalización */
+        /* Variables CSS */
         :root {
-            --primary-color: #007bff; /* Color primario de Bootstrap */
-            --dark-bg: #343a40; /* Fondo oscuro de la barra lateral */
-            --text-light: #f8f9fa; /* Color de texto claro */
+            --primary-color: #007bff; /* Azul de Bootstrap */
+            --secondary-color: #6c757d; /* Gris de Bootstrap */
+            --success-color: #28a745;
+            --info-color: #17a2b8;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+
+            --dark-bg: #2c3e50; /* Azul oscuro pizarra */
+            --darker-bg: #233140; /* Más oscuro para hover */
+            --text-light: #ecf0f1; /* Gris claro para texto */
+            --highlight-color: #3498db; /* Azul brillante para resaltar */
+
+            --font-family-base: 'Roboto', 'Segoe UI', Arial, sans-serif;
+            --main-bg-color: #f4f7f6; /* Gris muy claro para el fondo principal */
+            --content-bg-color: #ffffff; /* Blanco para el contenido principal */
+
+            --border-color-light: #e0e0e0; /* Bordes claros */
+            --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.08); /* Sombra ligera */
+            --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15); /* Sombra media */
+        }
+
+        /* Estilos generales */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; /* Evitar scroll horizontal no deseado */
         }
 
         body {
-            background-color: var(--text-light); /* Fondo claro para el cuerpo */
-            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; /* Fuente más legible */
+            background-color: var(--main-bg-color);
+            font-family: var(--font-family-base);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Asegura que el body ocupe al menos la altura de la ventana */
         }
 
-        /* Estilos para la barra lateral */
+        /* Contenedor principal de la aplicación (navbar + sidebar + main content) */
+        #app-container {
+            display: flex;
+            flex: 1; /* Permite que este contenedor crezca y ocupe el espacio restante */
+            min-height: calc(100vh - 56px); /* Altura de la ventana menos la altura del navbar */
+        }
+
+        /* Estilos del Sidebar */
         aside {
             background-color: var(--dark-bg);
             color: var(--text-light);
-            min-width: 250px; /* Un poco más de ancho para mejor legibilidad */
-            min-height: 100vh;
-            padding: 1.5rem; /* Un poco más de padding */
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Sombra sutil para darle profundidad */
-            position: sticky; /* Fija la barra lateral al hacer scroll */
-            top: 0;
-            left: 0;
-            z-index: 1000; /* Asegurar que esté por encima de otros elementos */
+            min-width: 260px;
+            max-width: 260px; /* Asegura un ancho fijo */
+            padding: 1.5rem 1rem;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            position: sticky; /* Sidebar pegajoso */
+            top: 0; /* Pegado a la parte superior */
+            height: calc(100vh - 56px); /* Ocupa el resto de la altura vertical */
+            z-index: 1000;
+            overflow-y: auto; /* Scroll si el contenido es muy largo */
+            transition: all 0.3s ease; /* Transición para posibles cambios de ancho */
         }
 
         aside .nav-link {
-            padding: 0.75rem 1rem; /* Más padding para los enlaces */
-            border-radius: 0.25rem; /* Bordes ligeramente redondeados */
-            transition: background-color 0.2s ease, color 0.2s ease; /* Transición suave al hover */
+            padding: 0.8rem 1rem;
+            border-radius: 0.35rem;
+            color: var(--text-light); /* Color de texto por defecto */
+            transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
         }
 
-        aside .nav-link:hover,
-        aside .nav-link.active { /* Clase 'active' para el enlace actual */
-            background-color: rgba(255, 255, 255, 0.1); /* Fondo sutil al pasar el ratón o si está activo */
-            color: #ffffff; /* Texto blanco más brillante */
+        aside .nav-link:hover {
+            background-color: var(--darker-bg); /* Un tono más oscuro en hover */
+            color: #ffffff; /* Blanco puro en hover */
+            transform: translateX(5px); /* Pequeño desplazamiento visual */
+        }
+
+        aside .nav-link.active {
+            background-color: var(--highlight-color); /* Color de resaltado para activo */
+            color: #ffffff;
+            font-weight: 700; /* Negrita para el activo */
+            box-shadow: var(--shadow-light); /* Sombra sutil para activo */
         }
 
         aside .nav-link i {
-            margin-right: 0.8rem; /* Espacio entre icono y texto */
+            margin-right: 1rem;
+            font-size: 1.1rem;
         }
 
-        /* Contenido principal */
+        aside .sidebar-heading {
+            color: rgba(255, 255, 255, 0.6); /* Color más claro para las cabeceras */
+            font-size: 0.85rem;
+            font-weight: bold;
+            padding-left: 1rem;
+            margin-bottom: 0.8rem;
+            margin-top: 1.5rem; /* Espacio superior para separar secciones */
+            text-transform: uppercase; /* Convertir a mayúsculas */
+        }
+
+        /* Estilos del contenido principal (Main) */
         main {
-            flex-grow: 1; /* Permite que ocupe todo el espacio restante */
-            padding: 2.5rem; /* Más padding para el contenido */
+            flex-grow: 1; /* Permite que el contenido principal ocupe todo el espacio restante */
+            padding: 2.5rem 3rem; /* Padding generoso */
+            background-color: var(--content-bg-color);
+            box-shadow: -2px 0 8px rgba(0, 0, 0, 0.05); /* Sombra lateral */
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 56px); /* Asegura que ocupe la altura adecuada */
+            overflow-y: auto; /* Scroll si el contenido es muy largo */
         }
 
-        header h1 {
-            color: #343a40; /* Color oscuro para los títulos */
-            margin-bottom: 2rem;
-            border-bottom: 1px solid #dee2e6; /* Línea separadora */
-            padding-bottom: 1rem;
+        main header {
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.2rem;
+            border-bottom: 1px solid var(--border-color-light); /* Separador visual */
         }
 
-        /* Estilo para el pie de página (opcional, si decides añadir uno) */
-        footer {
-            background-color: var(--dark-bg);
-            color: var(--text-light);
-            padding: 1rem;
+        main header h1 {
+            color: var(--dark-bg);
+            font-weight: 700;
+        }
+
+        main section[layout\:fragment="content"] {
+            flex-grow: 1; /* El contenido dentro de la sección crecerá para ocupar el espacio */
+        }
+
+        /* Estilos del Navbar */
+        .navbar {
+            background-color: var(--dark-bg) !important; /* Fondo oscuro */
+            box-shadow: var(--shadow-medium); /* Sombra para elevarlo */
+            padding: 0.75rem 1.5rem;
+        }
+
+        .navbar-brand {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffffff !important; /* Blanco puro para el brand */
+        }
+
+        .navbar-nav .nav-item .text-white {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+
+        .btn-outline-light {
+            border-color: rgba(255, 255, 255, 0.5);
+            color: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-light:hover {
+            background-color: #ffffff;
+            color: var(--dark-bg);
+            border-color: #ffffff;
+        }
+
+        /* Estilos del pie de página del sidebar */
+        aside .mt-auto {
+            border-top: 1px solid rgba(255, 255, 255, 0.15); /* Separador */
+            padding-top: 1.5rem;
+            margin-top: 2rem !important;
             text-align: center;
-            margin-top: auto; /* Empuja el footer al final de la página */
         }
 
-        /* Responsividad básica para pantallas pequeñas */
-        @media (max-width: 768px) {
-            .d-flex {
-                flex-direction: column; /* Coloca la barra lateral encima del contenido */
+        aside small {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Media Queries para responsividad (tablets y móviles) */
+        @media (max-width: 992px) {
+            #app-container {
+                flex-direction: column; /* Apilar sidebar y main */
+                min-height: auto; /* Resetear altura mínima */
             }
 
             aside {
                 min-width: 100%;
                 min-height: auto;
-                position: relative; /* Quita el sticky para móviles */
+                position: relative; /* Quitar sticky para móviles */
                 box-shadow: none;
+                flex-direction: row; /* Menú horizontal para móviles */
+                overflow-x: auto; /* Scroll horizontal si hay muchos items */
+                overflow-y: hidden;
+                white-space: nowrap; /* Evitar que los items se envuelvan */
+                padding-bottom: 0;
+                height: auto; /* Altura automática */
+            }
+
+            aside .nav {
+                flex-direction: row !important;
+                gap: 0.5rem;
+                padding-bottom: 1rem;
+                justify-content: center; /* Centrar items en móvil */
+            }
+
+            aside .sidebar-heading, aside .mt-auto, aside .text-center.d-none.d-lg-block {
+                display: none; /* Ocultar cabeceras y pie de página en móvil */
+            }
+
+            aside .nav-link {
+                padding: 0.7rem 1.2rem; /* Ajustar padding para botones de menú */
+            }
+
+            aside .nav-link i {
+                margin-right: 0.5rem; /* Menos espacio para el ícono */
+            }
+
+            main {
+                padding: 1.5rem; /* Menos padding en móvil */
+                min-height: auto;
+            }
+
+            .navbar-collapse {
+                flex-grow: 0; /* No permitir que crezca el collapse del navbar */
             }
         }
-
     </style>
 
     <th:block layout:fragment="styles"></th:block>
@@ -106,16 +250,17 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
-            <ul class="navbar-nav">
+        <div class="collapse navbar-collapse" id="sidebarCollapse">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
                 <li class="nav-item d-flex align-items-center me-3">
                     <span class="text-white me-2">
                         <i class="bi bi-person-circle me-1"></i>
-                        Bienvenido, <span sec:authentication="name"></span>! </span>
+                        Bienvenido, <strong sec:authentication="name"></strong>!
+                    </span>
                 </li>
                 <li class="nav-item">
                     <form th:action="@{/logout}" method="post">
-                        <button type="submit" class="btn btn-outline-light">
+                        <button type="submit" class="btn btn-outline-light btn-sm">
                             <i class="bi bi-box-arrow-right me-1"></i> Salir
                         </button>
                     </form>
@@ -125,114 +270,143 @@
     </div>
 </nav>
 
-<div class="d-flex">
-    <aside class="bg-dark text-white p-3 d-flex flex-column" style="min-width: 250px; min-height: 100vh;">
-        <div class="text-center mb-4">
+<div id="app-container">
+    <aside class="bg-dark text-white p-3 d-flex flex-column">
+        <div class="text-center mb-4 d-none d-lg-block">
             <h4 class="text-white mt-2 mb-0">Administrador</h4>
-            <small class="text-muted" sec:authentication="authorities"></small></div>
+            <small class="text-muted" sec:authentication="authorities"></small>
+        </div>
 
-        <ul class="nav flex-column gap-2 flex-grow-1">
+        <ul class="nav flex-column gap-2 flex-grow-1" id="sidebarNav">
             <li>
-                <a class="nav-link text-white" th:href="@{/admin/dashboard}">
+                <a class="nav-link" th:href="@{/admin/dashboard}">
                     <i class="bi bi-speedometer2"></i> Dashboard
                 </a>
             </li>
+
+            <li class="nav-item mt-3">
+                <h6 class="sidebar-heading">Usuarios y Personas</h6>
+            </li>
             <li>
-                <a class="nav-link text-white" th:href="@{/admin/usuarios}">
+                <a class="nav-link" th:href="@{/admin/usuarios}">
                     <i class="bi bi-people-fill"></i> Usuarios
                 </a>
             </li>
             <li>
-                <a class="nav-link text-white" th:href="@{/admin/personas}"> <i class="bi bi-person-badge"></i> Personas
+                <a class="nav-link" th:href="@{/admin/personas}">
+                    <i class="bi bi-person-badge"></i> Personas
                 </a>
             </li>
             <li>
-                <a class="nav-link text-white" th:href="@{/admin/estudiantes}">
+                <a class="nav-link" th:href="@{/admin/estudiantes}">
                     <i class="bi bi-mortarboard-fill"></i> Estudiantes
                 </a>
             </li>
             <li>
-                <a class="nav-link text-white" th:href="@{/admin/apoderados}">
+                <a class="nav-link" th:href="@{/admin/apoderados}">
                     <i class="bi bi-person-check-fill"></i> Apoderados
                 </a>
             </li>
             <li>
-                <a class="nav-link text-white" th:href="@{/admin/docentes}">
+                <a class="nav-link" th:href="@{/admin/docentes}">
                     <i class="bi bi-person-video2"></i> Docentes
                 </a>
             </li>
-            <li class="nav-item mt-3"><h6
-                    class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
-                <span>Académico</span>
-            </h6>
+
+            <li class="nav-item mt-3">
+                <h6 class="sidebar-heading">Académico</h6>
             </li>
             <li>
-                <a class="nav-link text-white" th:href="@{/admin/grados}">
+                <a class="nav-link" th:href="@{/admin/grados}">
                     <i class="bi bi-journal-album"></i> Grados
                 </a>
             </li>
             <li>
-                <a class="nav-link text-white" th:href="@{/admin/secciones}">
+                <a class="nav-link" th:href="@{/admin/secciones}">
                     <i class="bi bi-grid-3x3-gap-fill"></i> Secciones
                 </a>
             </li>
             <li>
-                <a class="nav-link text-white" th:href="@{/admin/cursos}">
+                <a class="nav-link" th:href="@{/admin/cursos}">
                     <i class="bi bi-book-fill"></i> Cursos
                 </a>
             </li>
             <li>
-                <a class="nav-link text-white" th:href="@{/admin/horarios}">
+                <a class="nav-link" th:href="@{/admin/horarios}">
                     <i class="bi bi-calendar-week-fill"></i> Horarios
                 </a>
             </li>
             <li>
-                <a class="nav-link text-white" th:href="@{/admin/periodos-academicos}">
+                <a class="nav-link" th:href="@{/admin/periodos-academicos}">
                     <i class="bi bi-calendar-event"></i> Periodos Académicos
                 </a>
             </li>
             <li>
-                <a class="nav-link text-white" th:href="@{/admin/salones}">
+                <a class="nav-link" th:href="@{/admin/salones}">
                     <i class="bi bi-building"></i> Salones
                 </a>
             </li>
+
             <li class="nav-item mt-3">
-                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
-                    <span>Procesos</span>
-                </h6>
+                <h6 class="sidebar-heading">Procesos</h6>
             </li>
             <li>
-                <a class="nav-link text-white" th:href="@{/admin/matriculas}">
+                <a class="nav-link" th:href="@{/admin/matriculas}">
                     <i class="bi bi-clipboard-check-fill"></i> Matrículas
                 </a>
             </li>
             <li>
-                <a class="nav-link text-white" th:href="@{/admin/asistencia}">
+                <a class="nav-link" th:href="@{/admin/asistencia}">
                     <i class="bi bi-check2-circle"></i> Asistencia
                 </a>
             </li>
             <li>
-                <a class="nav-link text-white" th:href="@{/admin/calificaciones}">
+                <a class="nav-link" th:href="@{/admin/calificaciones}">
                     <i class="bi bi-graph-up-arrow"></i> Calificaciones
                 </a>
             </li>
         </ul>
+
         <div class="mt-auto pt-3 border-top border-secondary text-center">
             <small class="text-muted">&copy; [[${#dates.format(#dates.createNow(), 'yyyy')}]] Tu Institución</small>
         </div>
     </aside>
 
-    <main class="p-4 w-100 d-flex flex-column">
+    <main class="w-100 d-flex flex-column">
         <header layout:fragment="header">
-            <h1 class="h3"><i class="bi bi-house-fill me-2"></i>Panel de Administración</h1></header>
+            <h1 class="h3"><i class="bi bi-gear-fill me-2"></i>Gestión</h1>
+        </header>
 
         <section layout:fragment="content" class="flex-grow-1">
         </section>
-
     </main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        const sidebarNav = document.getElementById('sidebarNav');
+        if (sidebarNav) {
+            const currentPath = window.location.pathname;
+            const navLinks = sidebarNav.querySelectorAll('.nav-link');
+
+            navLinks.forEach(link => {
+                const linkHref = link.getAttribute('href');
+                // Compara la URL actual con el href del enlace
+                // Puedes necesitar ajustar esto si tus URLs son más complejas
+                if (currentPath.startsWith(linkHref) && linkHref !== '/admin/dashboard') {
+                    // Si la ruta actual empieza con el href del enlace (ej: /admin/usuarios/new coincide con /admin/usuarios)
+                    link.classList.add('active');
+                } else if (currentPath === '/admin/dashboard' && linkHref === '/admin/dashboard') {
+                    // Caso especial para el dashboard para evitar que se active con otras rutas
+                    link.classList.add('active');
+                }
+            });
+        }
+    });
+</script>
+
 <th:block layout:fragment="scripts"></th:block>
 
 </body>
