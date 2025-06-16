@@ -1,4 +1,4 @@
-package com.isai.demowebregistrationsystem.controllers;
+package com.isai.demowebregistrationsystem.controllers.admin;
 
 import com.isai.demowebregistrationsystem.model.dtos.DashboardSummaryDTO;
 import com.isai.demowebregistrationsystem.services.DashboardService;
