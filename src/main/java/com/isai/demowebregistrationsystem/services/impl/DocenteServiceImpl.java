@@ -68,7 +68,6 @@ public class DocenteServiceImpl implements DocenteService {
         nuevoDocente.setEstadoLaboral(docenteRegistroDTO.getEstadoLaboral());
         nuevoDocente.setAnosExperiencia(docenteRegistroDTO.getAnosExperiencia());
         nuevoDocente.setCvUrl(docenteRegistroDTO.getCvUrl());
-        nuevoDocente.setFotoUrl(docenteRegistroDTO.getFotoUrlDocente());
         nuevoDocente.setCoordinador(docenteRegistroDTO.getCoordinador());
         nuevoDocente.setPersona(personaGuardada);
         // Los campos pre-persist se setean con @PrePersist en la entidad Docente

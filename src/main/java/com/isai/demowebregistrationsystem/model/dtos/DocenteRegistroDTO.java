@@ -16,7 +16,7 @@ public class DocenteRegistroDTO {
 
     // --- Campos de Persona ---
     @NotBlank(message = "El DNI no puede estar vacío.")
-    @Size(min = 8, max = 20, message = "El DNI debe tener entre 8 y 20 caracteres.")
+    @Size(min = 8, message = "El DNI debe tener entre 8 y 20 caracteres.")
     private String dni;
 
     @NotBlank(message = "Los nombres no pueden estar vacíos.")

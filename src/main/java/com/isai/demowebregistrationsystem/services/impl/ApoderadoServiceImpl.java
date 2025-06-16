@@ -105,7 +105,6 @@ public class ApoderadoServiceImpl implements ApoderadoService {
         apoderado.setIngresoMensual(apoderadoDTO.getIngresoMensual());
         apoderado.setEsPrincipal(apoderadoDTO.getEsPrincipal());
         apoderado.setAutorizadoRecoger(apoderadoDTO.getAutorizadoRecoger());
-        apoderado.setFotoUrl(apoderadoDTO.getFotoUrl());
         apoderado.setReferenciaPersonal(apoderadoDTO.getReferenciaPersonal());
         apoderado.setTelefonoReferencia(apoderadoDTO.getTelefonoReferencia());
         apoderado.setPersona(persona); // Vincular el apoderado a la persona recién creada
@@ -177,7 +176,6 @@ public class ApoderadoServiceImpl implements ApoderadoService {
         dto.setIngresoMensual(apoderado.getIngresoMensual());
         dto.setEsPrincipal(apoderado.getEsPrincipal());
         dto.setAutorizadoRecoger(apoderado.getAutorizadoRecoger());
-        dto.setFotoUrl(apoderado.getFotoUrl());
         dto.setReferenciaPersonal(apoderado.getReferenciaPersonal());
         dto.setTelefonoReferencia(apoderado.getTelefonoReferencia());
 
@@ -255,7 +253,6 @@ public class ApoderadoServiceImpl implements ApoderadoService {
         apoderadoExistente.setIngresoMensual(apoderadoDTO.getIngresoMensual());
         apoderadoExistente.setEsPrincipal(apoderadoDTO.getEsPrincipal());
         apoderadoExistente.setAutorizadoRecoger(apoderadoDTO.getAutorizadoRecoger());
-        apoderadoExistente.setFotoUrl(apoderadoDTO.getFotoUrl());
         apoderadoExistente.setReferenciaPersonal(apoderadoDTO.getReferenciaPersonal());
         apoderadoExistente.setTelefonoReferencia(apoderadoDTO.getTelefonoReferencia());
 

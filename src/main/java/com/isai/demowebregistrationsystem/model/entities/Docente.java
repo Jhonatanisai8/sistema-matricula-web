@@ -56,9 +56,6 @@ public class Docente {
     @Column(name = "cv_url", length = 255)
     private String cvUrl;
 
-    @Column(name = "foto_url", length = 255)
-    private String fotoUrl;
-
     @Column(name = "coordinador", nullable = false)
     private Boolean coordinador;
 
