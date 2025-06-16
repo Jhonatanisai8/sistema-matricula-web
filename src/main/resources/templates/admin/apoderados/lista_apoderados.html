@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout-admin.html}">
+<head>
+    <meta charset="UTF-8">
+    <title layout:fragment="title">Listado de Apoderados</title>
+</head>
+<body>
+<header layout:fragment="header" class="custom-header-content">
+    <h1 class="h3 mb-0 text-dark-emphasis">
+        <i class="bi bi-person-check-fill me-2"></i>Gestión de Apoderados
+    </h1>
+    <p class="lead text-muted mb-0">Administra los apoderados registrados en el sistema, con búsqueda y paginación.</p>
+</header>
+
+<section layout:fragment="content" class="flex-grow-1">
+    <div class="container-fluid">
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-x-circle-fill me-2"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-column flex-md-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary mb-2 mb-md-0">Listado de Apoderados</h6>
+                <div class="d-flex w-100 w-md-auto justify-content-between align-items-center">
+                    <form th:action="@{/admin/apoderados}" method="get" class="d-flex me-3 flex-grow-1">
+                        <input type="text" name="dni" class="form-control form-control-sm me-2" placeholder="Buscar por DNI..." th:value="${dni}">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm me-1"><i class="bi bi-search"></i> Buscar</button>
+                        <a th:href="@{/admin/apoderados}" class="btn btn-outline-info btn-sm"><i class="bi bi-x-circle"></i> Limpiar</a>
+                    </form>
+                    <a th:href="@{/admin/apoderados/nuevo}" class="btn btn-primary btn-sm flex-shrink-0">
+                        <i class="bi bi-plus-circle me-1"></i> Añadir Apoderado
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="apoderadosTable" width="100%" cellspacing="0">
+                        <thead>
+                        <tr>
+                            <th>ID Apoderado</th>
+                            <th>Nombres y Apellidos</th>
+                            <th>DNI</th>
+                            <th>Email Personal</th>
+                            <th>Usuario</th>
+                            <th>Ocupación</th>
+                            <th>Parentesco</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="apoderado : ${apoderadosPage.content}">
+                            <td th:text="${apoderado.idApoderado}">1</td>
+                            <td th:text="${apoderado.nombres + ' ' + apoderado.apellidos}">Juan Pérez</td>
+                            <td th:text="${apoderado.dni}">12345678</td>
+                            <td th:text="${apoderado.emailPersonal}">juan.perez@example.com</td>
+                            <td th:text="${apoderado.userName}">jperez</td>
+                            <td th:text="${apoderado.ocupacion}">Ingeniero</td>
+                            <td th:text="${apoderado.parentesco}">Padre</td>
+                            <td>
+                                <a th:href="@{/admin/apoderados/detalle/{id}(id=${apoderado.idApoderado})}"
+                                   class="btn btn-info btn-sm me-1" title="Ver detalle">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a th:href="@{/admin/apoderados/editar/{id}(id=${apoderado.idApoderado})}"
+                                   class="btn btn-warning btn-sm me-1" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form th:action="@{/admin/apoderados/eliminar/{id}(id=${apoderado.idApoderado})}" method="post"
+                                      style="display:inline;"
+                                      onsubmit="return confirm('¿Estás seguro de que quieres eliminar este apoderado? Esta acción eliminará permanentemente al apoderado, los datos de la persona asociada y su cuenta de usuario. ¡No se puede deshacer!');">
+                                    <button type="submit" class="btn btn-danger btn-sm" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${apoderadosPage.empty}">
+                            <td colspan="8" class="text-center">No se encontraron apoderados.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav th:if="${apoderadosPage.totalPages > 0}" aria-label="Page navigation" class="d-flex justify-content-center">
+                    <ul class="pagination">
+                        <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{/admin/apoderados(page=${currentPage - 1}, size=${apoderadosPage.size}, dni=${dni})}"
+                               aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, apoderadosPage.totalPages - 1)}"
+                            th:classappend="${i == currentPage ? 'active' : ''}">
+                            <a class="page-link" th:href="@{/admin/apoderados(page=${i}, size=${apoderadosPage.size}, dni=${dni})}" th:text="${i + 1}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == apoderadosPage.totalPages - 1 ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{/admin/apoderados(page=${currentPage + 1}, size=${apoderadosPage.size}, dni=${dni})}"
+                               aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <div class="text-center mt-3">
+                    <p class="text-muted small">Mostrando <span th:text="${apoderadosPage.numberOfElements}"></span> de <span th:text="${apoderadosPage.totalElements}"></span> apoderados.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

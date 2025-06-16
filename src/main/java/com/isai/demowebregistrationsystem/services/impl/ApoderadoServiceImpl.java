@@ -1,7 +1,7 @@
 package com.isai.demowebregistrationsystem.services.impl;
 
+import com.isai.demowebregistrationsystem.model.Rol;
 import com.isai.demowebregistrationsystem.model.dtos.ApoderadoDTO;
-import com.isai.demowebregistrationsystem.model.dtos.ApoderadoRegistroDTO;
 import com.isai.demowebregistrationsystem.model.entities.Apoderado;
 import com.isai.demowebregistrationsystem.model.entities.Persona;
 import com.isai.demowebregistrationsystem.model.entities.Usuario;
@@ -9,15 +9,17 @@ import com.isai.demowebregistrationsystem.repositorys.ApoderadoRepository;
 import com.isai.demowebregistrationsystem.repositorys.PersonaRepository;
 import com.isai.demowebregistrationsystem.repositorys.UsuarioRepository;
 import com.isai.demowebregistrationsystem.services.ApoderadoService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -27,53 +29,55 @@ public class ApoderadoServiceImpl implements ApoderadoService {
 
     private final UsuarioRepository usuarioRepository;
 
-    private final PersonaRepository personaRepository;
+    private final AlmacenArchivoImpl almacenArchivo;
 
+    private final PersonaRepository personaRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional(readOnly = true)
     @Override
-    public List<ApoderadoDTO> listarApoderados() {
-        List<Apoderado> apoderados = apoderadoRepository.findAll();
-        return apoderados.stream()
-                .map(this::mapApoderadoToDTO)
-                .collect(Collectors.toList());
-    }
-
-
-    //metodo para buscar por algun termino de busqueda
-    public List<ApoderadoDTO> buscarApoderados(String termianoBusqueda) {
-        List<Apoderado> apoderados;
-        // Verifica si el término no es nulo o vacío
-        if (StringUtils.hasText(termianoBusqueda)) {
-            apoderados = apoderadoRepository.searchApoderados(termianoBusqueda);
+    public Page<ApoderadoDTO> buscarApoderados(String dni, Pageable pageable) {
+        Page<Apoderado> apoderadoPage;
+        if (StringUtils.hasText(dni)) {
+            apoderadoPage = apoderadoRepository.findByPersonaDniContainingIgnoreCase(dni, pageable);
         } else {
-            //si hay no termino de busqueda devuelve todos
-            apoderados = apoderadoRepository.findAll();
+            apoderadoPage = apoderadoRepository.findAll(pageable);
         }
-        return apoderados.stream()
-                .map(this::mapApoderadoToDTO)
-                .collect(Collectors.toList());
+        return apoderadoPage.map(this::convertirA_DTO);
     }
 
     @Override
-    @Transactional
-    public Apoderado registrarApoderado(ApoderadoRegistroDTO apoderadoDTO) {
-        System.out.println("DNI:" + apoderadoDTO.getDni());
-        if (personaRepository.findByDni(apoderadoDTO.getDni()).isPresent()) {
-            throw new IllegalArgumentException("La persona ya existe en el sistema");
+    public Optional<ApoderadoDTO> buscarApoderadoPorId(Integer idApoderado) {
+        return apoderadoRepository.findById(idApoderado)
+                .map(apoderado -> {
+                    ApoderadoDTO dto = convertirA_DTO(apoderado);
+                    // Cargar datos del usuario si existe
+                    usuarioRepository.findByPersonaIdPersona(apoderado.getPersona().getIdPersona())
+                            .ifPresent(usuario -> {
+                                dto.setIdUsuario(usuario.getIdUsuario());
+                                dto.setUserName(usuario.getUserName());
+                            });
+                    return dto;
+                });
+    }
+
+    @Override
+    public ApoderadoDTO guardarApoderado(ApoderadoDTO apoderadoDTO) {
+        Persona persona;
+        if (apoderadoDTO.getIdPersona() != null) { // Es una edición de Persona existente
+            persona = personaRepository.findById(apoderadoDTO.getIdPersona())
+                    .orElseThrow(() -> new EntityNotFoundException("Persona no encontrada con ID: " + apoderadoDTO.getIdPersona()));
+            Optional<Persona> existingPersonaByDni = personaRepository.findByDni(apoderadoDTO.getDni());
+            if (existingPersonaByDni.isPresent() && !existingPersonaByDni.get().getIdPersona().equals(apoderadoDTO.getIdPersona())) {
+                throw new IllegalArgumentException("El DNI " + apoderadoDTO.getDni() + " ya está registrado para otra persona.");
+            }
+        } else {
+            if (personaRepository.existsByDni(apoderadoDTO.getDni())) {
+                throw new IllegalArgumentException("Ya existe una persona con el DNI: " + apoderadoDTO.getDni());
+            }
+            persona = new Persona();
         }
 
-        if (StringUtils.hasText(apoderadoDTO.getEmailPersonal())
-                && personaRepository.findByEmailPersonal(apoderadoDTO.getEmailPersonal()).isPresent()) {
-            throw new IllegalArgumentException("Ya existe una persona en el sistema con ese email");
-        }
-
-        if (usuarioRepository.findByUserName(apoderadoDTO.getUsername()).isPresent()) {
-            throw new IllegalArgumentException("Ya existe una usuario en el sistema");
-        }
-
-        //creamos y guardamos la persona
-        Persona persona = new Persona();
         persona.setDni(apoderadoDTO.getDni());
         persona.setNombres(apoderadoDTO.getNombres());
         persona.setApellidos(apoderadoDTO.getApellidos());
@@ -84,19 +88,22 @@ public class ApoderadoServiceImpl implements ApoderadoService {
         persona.setEmailPersonal(apoderadoDTO.getEmailPersonal());
         persona.setEstadoCivil(apoderadoDTO.getEstadoCivil());
         persona.setTipoDocumento(apoderadoDTO.getTipoDocumento());
-        persona = personaRepository.save(persona); // Guardar persona para obtener el ID
-        // Los campos de fechaRegistro, fechaActualizacion y activo se manejan con @PrePersist en la entidad
-        //creamos y guardamos el usuario
-        Usuario usuario = new Usuario();
-        usuario.setUserName(apoderadoDTO.getUsername());
-        usuario.setPasswordHash(passwordEncoder.encode(apoderadoDTO.getPassword())); // Hashear la contraseña
-        usuario.setRol("APODERADO"); // Establecer rol por defecto
-        usuario.setPersona(persona); // Vincular el usuario a la persona recién creada
-        // Los campos de fechaCreacion, intentosFallidos y activo se manejan con @PrePersist
-        usuarioRepository.save(usuario);
+        String ruta = "";
+        if (apoderadoDTO.getFoto() != null
+                && !apoderadoDTO.getFoto().isEmpty()) {
+            ruta = almacenArchivo.almacenarArchivo(apoderadoDTO.getFoto());
+            persona.setFotoUrl(ruta);
+        }
+        Persona savedPersona = personaRepository.save(persona);
+        Apoderado apoderado;
+        if (apoderadoDTO.getIdApoderado() != null) {
+            apoderado = apoderadoRepository.findById(apoderadoDTO.getIdApoderado())
+                    .orElseThrow(() -> new EntityNotFoundException("Apoderado no encontrado con ID: " + apoderadoDTO.getIdApoderado()));
+        } else {
+            apoderado = new Apoderado();
+            apoderado.setPersona(savedPersona);
+        }
 
-        //creamos y guardamos el apoderado
-        Apoderado apoderado = new Apoderado();
         apoderado.setOcupacion(apoderadoDTO.getOcupacion());
         apoderado.setLugarTrabajo(apoderadoDTO.getLugarTrabajo());
         apoderado.setTelefonoTrabajo(apoderadoDTO.getTelefonoTrabajo());
@@ -107,67 +114,72 @@ public class ApoderadoServiceImpl implements ApoderadoService {
         apoderado.setAutorizadoRecoger(apoderadoDTO.getAutorizadoRecoger());
         apoderado.setReferenciaPersonal(apoderadoDTO.getReferenciaPersonal());
         apoderado.setTelefonoReferencia(apoderadoDTO.getTelefonoReferencia());
-        apoderado.setPersona(persona); // Vincular el apoderado a la persona recién creada
-        // Los campos esPrincipal y autorizadoRecoger se manejan con @PrePersist si son null
 
-        return apoderadoRepository.save(apoderado);
+        Apoderado savedApoderado = apoderadoRepository.save(apoderado);
 
+        Usuario usuario;
+        if (apoderadoDTO.getIdUsuario() != null) { // Es una edición de Usuario existente
+            usuario = usuarioRepository.findById(apoderadoDTO.getIdUsuario())
+                    .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + apoderadoDTO.getIdUsuario()));
+
+            Optional<Usuario> existingUserByUsername = usuarioRepository.findByUserName(apoderadoDTO.getUserName());
+            if (existingUserByUsername.isPresent() && !existingUserByUsername.get().getIdUsuario().equals(apoderadoDTO.getIdUsuario())) {
+                throw new IllegalArgumentException("El nombre de usuario '" + apoderadoDTO.getUserName() + "' ya está en uso.");
+            }
+        } else {
+            if (usuarioRepository.existsByUserName(apoderadoDTO.getUserName())) {
+                throw new IllegalArgumentException("El nombre de usuario '" + apoderadoDTO.getUserName() + "' ya está en uso.");
+            }
+            usuario = new Usuario();
+            usuario.setFechaCreacion(LocalDateTime.now());
+            usuario.setActivo(true);
+            usuario.setIntentosFallidos(0);
+            usuario.setRol(Rol.APODERADO);
+            usuario.setPersona(savedPersona);
+        }
+
+        usuario.setUserName(apoderadoDTO.getUserName());
+        if (apoderadoDTO.getPassword() != null && !apoderadoDTO.getPassword().isEmpty()) {
+            if (!apoderadoDTO.getPassword().equals(apoderadoDTO.getConfirmPassword())) {
+                throw new IllegalArgumentException("Las contraseñas no coinciden.");
+            }
+            usuario.setPasswordHash(passwordEncoder.encode(apoderadoDTO.getPassword()));
+        }
+
+        usuarioRepository.save(usuario);
+
+        return convertirA_DTO(savedApoderado);
     }
 
     @Override
-    public ApoderadoDTO mapApoderadoToDTO(Apoderado apoderado) {
+    public void eliminarApoderado(Integer idApoderado) {
+        Apoderado apoderado = apoderadoRepository.findById(idApoderado)
+                .orElseThrow(() -> new EntityNotFoundException("Apoderado no encontrado con ID: " + idApoderado));
+        Persona persona = apoderado.getPersona();
+        usuarioRepository.findByPersonaIdPersona(persona.getIdPersona())
+                .ifPresent(usuarioRepository::delete);
+        apoderadoRepository.delete(apoderado);
+        personaRepository.delete(persona);
+    }
+
+    private ApoderadoDTO convertirA_DTO(Apoderado apoderado) {
         ApoderadoDTO dto = new ApoderadoDTO();
         dto.setIdApoderado(apoderado.getIdApoderado());
-        dto.setParentesco(apoderado.getParentesco());
-        dto.setEsPrincipal(apoderado.getEsPrincipal());
-        dto.setAutorizadoRecoger(apoderado.getAutorizadoRecoger());
-
         if (apoderado.getPersona() != null) {
-            dto.setDniPersona(apoderado.getPersona().getDni());
-            dto.setNombresPersona(apoderado.getPersona().getNombres());
-            dto.setApellidosPersona(apoderado.getPersona().getApellidos());
-            dto.setTelefono(apoderado.getPersona().getTelefono());
-            dto.setEmailPersonal(apoderado.getPersona().getEmailPersonal());
+            Persona persona = apoderado.getPersona();
+            dto.setIdPersona(persona.getIdPersona());
+            dto.setNombres(persona.getNombres());
+            dto.setApellidos(persona.getApellidos());
+            dto.setDni(persona.getDni());
+            dto.setEmailPersonal(persona.getEmailPersonal());
+            dto.setTelefono(persona.getTelefono());
+            dto.setFechaNacimiento(persona.getFechaNacimiento());
+            dto.setDireccion(persona.getDireccion());
+            dto.setGenero(persona.getGenero());
+            dto.setEstadoCivil(persona.getEstadoCivil());
+            dto.setTipoDocumento(persona.getTipoDocumento());
+            dto.setRutaImagen(persona.getFotoUrl());
         }
-        return dto;
-    }
-
-    //metodos para la edicion
-
-    @Override
-    @Transactional
-    public ApoderadoRegistroDTO obtenerApoderadoParaEditar(Integer idApoderado) {
-        Apoderado apoderado = apoderadoRepository.findById(idApoderado)
-                .orElseThrow(() -> new NoSuchElementException("Apoderado no encontrado con ID: " + idApoderado));
-
-        Persona persona = apoderado.getPersona();
-        if (persona == null) {
-            throw new IllegalStateException("Apoderado con ID " + idApoderado + " no tiene persona asociada.");
-        }
-
-        Usuario usuario = usuarioRepository.findByPersona(persona)
-                .orElseThrow(() -> new IllegalStateException("No se encontró usuario para la persona con ID: " + persona.getIdPersona()));
-
-        ApoderadoRegistroDTO dto = new ApoderadoRegistroDTO();
-
-        // seteamos los IDS
-        dto.setIdApoderado(apoderado.getIdApoderado());
-        dto.setIdPersona(persona.getIdPersona());
-        dto.setIdUsuario(usuario.getIdUsuario());
-
-        // Setear campos de Persona
-        dto.setDni(persona.getDni());
-        dto.setNombres(persona.getNombres());
-        dto.setApellidos(persona.getApellidos());
-        dto.setFechaNacimiento(persona.getFechaNacimiento());
-        dto.setGenero(persona.getGenero());
-        dto.setDireccion(persona.getDireccion());
-        dto.setTelefono(persona.getTelefono());
-        dto.setEmailPersonal(persona.getEmailPersonal());
-        dto.setEstadoCivil(persona.getEstadoCivil());
-        dto.setTipoDocumento(persona.getTipoDocumento());
-
-        // Setear campos de Apoderado
         dto.setOcupacion(apoderado.getOcupacion());
         dto.setLugarTrabajo(apoderado.getLugarTrabajo());
         dto.setTelefonoTrabajo(apoderado.getTelefonoTrabajo());
@@ -179,83 +191,12 @@ public class ApoderadoServiceImpl implements ApoderadoService {
         dto.setReferenciaPersonal(apoderado.getReferenciaPersonal());
         dto.setTelefonoReferencia(apoderado.getTelefonoReferencia());
 
-        // Setear campos de Usuario
-        dto.setUsername(usuario.getUserName());
-        dto.setPassword(""); // O null
-        dto.setRol(usuario.getRol());
+        usuarioRepository.findByPersonaIdPersona(apoderado.getPersona().getIdPersona())
+                .ifPresent(usuario -> {
+                    dto.setIdUsuario(usuario.getIdUsuario());
+                    dto.setUserName(usuario.getUserName());
+                });
         return dto;
     }
-
-    @Override
-    @Transactional
-    public Apoderado actualizarApoderado(ApoderadoRegistroDTO apoderadoDTO) {   // 1. Obtener entidades existentes por ID
-        // Es crucial que los IDs no sean nulos para la actualización
-        if (apoderadoDTO.getIdPersona() == null || apoderadoDTO.getIdApoderado() == null || apoderadoDTO.getIdUsuario() == null) {
-            throw new IllegalArgumentException("IDs de Persona, Usuario o Apoderado son requeridos para la actualización.");
-        }
-
-        Persona personaExistente = personaRepository.findById(apoderadoDTO.getIdPersona())
-                .orElseThrow(() -> new NoSuchElementException("Persona no encontrada con ID: " + apoderadoDTO.getIdPersona()));
-        Apoderado apoderadoExistente = apoderadoRepository.findById(apoderadoDTO.getIdApoderado())
-                .orElseThrow(() -> new NoSuchElementException("Apoderado no encontrado con ID: " + apoderadoDTO.getIdApoderado()));
-        Usuario usuarioExistente = usuarioRepository.findById(apoderadoDTO.getIdUsuario())
-                .orElseThrow(() -> new NoSuchElementException("Usuario no encontrado con ID: " + apoderadoDTO.getIdUsuario()));
-
-        // 2. Validaciones de unicidad (DNI, Email, Username)
-        personaRepository.findByDni(apoderadoDTO.getDni()).ifPresent(p -> {
-            if (!p.getIdPersona().equals(personaExistente.getIdPersona())) {
-                throw new IllegalArgumentException("Ya existe una persona con el DNI: " + apoderadoDTO.getDni());
-            }
-        });
-
-        if (StringUtils.hasText(apoderadoDTO.getEmailPersonal())) {
-            personaRepository.findByEmailPersonal(apoderadoDTO.getEmailPersonal()).ifPresent(p -> {
-                if (!p.getIdPersona().equals(personaExistente.getIdPersona())) {
-                    throw new IllegalArgumentException("Ya existe una persona con el email personal: " + apoderadoDTO.getEmailPersonal());
-                }
-            });
-        }
-
-        usuarioRepository.findByUserName(apoderadoDTO.getUsername()).ifPresent(u -> {
-            if (!u.getIdUsuario().equals(usuarioExistente.getIdUsuario())) {
-                throw new IllegalArgumentException("El nombre de usuario '" + apoderadoDTO.getUsername() + "' ya está en uso.");
-            }
-        });
-
-
-        // actuaalizamos los campos de Persona
-        personaExistente.setDni(apoderadoDTO.getDni());
-        personaExistente.setNombres(apoderadoDTO.getNombres());
-        personaExistente.setApellidos(apoderadoDTO.getApellidos());
-        personaExistente.setFechaNacimiento(apoderadoDTO.getFechaNacimiento());
-        personaExistente.setGenero(apoderadoDTO.getGenero());
-        personaExistente.setDireccion(apoderadoDTO.getDireccion());
-        personaExistente.setTelefono(apoderadoDTO.getTelefono());
-        personaExistente.setEmailPersonal(apoderadoDTO.getEmailPersonal());
-        personaExistente.setEstadoCivil(apoderadoDTO.getEstadoCivil());
-        personaExistente.setTipoDocumento(apoderadoDTO.getTipoDocumento());
-        personaRepository.save(personaExistente);
-
-        //actualizamos los campos de Usuario
-        usuarioExistente.setUserName(apoderadoDTO.getUsername());
-        if (StringUtils.hasText(apoderadoDTO.getPassword())) {
-            usuarioExistente.setPasswordHash(passwordEncoder.encode(apoderadoDTO.getPassword()));
-        }
-        usuarioExistente.setRol("APODERADO");
-        usuarioRepository.save(usuarioExistente);
-
-        // actualizamos los campos de Apoderado
-        apoderadoExistente.setOcupacion(apoderadoDTO.getOcupacion());
-        apoderadoExistente.setLugarTrabajo(apoderadoDTO.getLugarTrabajo());
-        apoderadoExistente.setTelefonoTrabajo(apoderadoDTO.getTelefonoTrabajo());
-        apoderadoExistente.setParentesco(apoderadoDTO.getParentesco());
-        apoderadoExistente.setNivelEducativo(apoderadoDTO.getNivelEducativo());
-        apoderadoExistente.setIngresoMensual(apoderadoDTO.getIngresoMensual());
-        apoderadoExistente.setEsPrincipal(apoderadoDTO.getEsPrincipal());
-        apoderadoExistente.setAutorizadoRecoger(apoderadoDTO.getAutorizadoRecoger());
-        apoderadoExistente.setReferenciaPersonal(apoderadoDTO.getReferenciaPersonal());
-        apoderadoExistente.setTelefonoReferencia(apoderadoDTO.getTelefonoReferencia());
-
-        return apoderadoRepository.save(apoderadoExistente); // Guardar cambios en Apoderado
-    }
 }
+

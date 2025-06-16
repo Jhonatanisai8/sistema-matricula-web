@@ -1,180 +1,135 @@
 package com.isai.demowebregistrationsystem.controllers;
 
+
 import com.isai.demowebregistrationsystem.model.dtos.ApoderadoDTO;
-import com.isai.demowebregistrationsystem.model.dtos.ApoderadoRegistroDTO;
 import com.isai.demowebregistrationsystem.services.impl.ApoderadoServiceImpl;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/admin/apoderados")
 public class AdminApoderadoController {
-    private final ApoderadoServiceImpl apoderadoServiceImpl;
 
-  /*
-    @GetMapping
-    public String listarApoderados(Model model) {
-        List<ApoderadoDTO> apoderados = apoderadoServiceImpl.listarApoderados();
-        model.addAttribute("apoderados", apoderados);
-        return "admin/lista-apoderados"; // This view will be src/main/resources/templates/admin/lista-apoderados.html
-    }
-   */
+    private final ApoderadoServiceImpl apoderadoService;
 
-    @RequestMapping(path = "", method = RequestMethod.GET)
+    @RequestMapping(path = "")
     public String listarApoderados(
-            @RequestParam(value = "terminoBusqueda", required = false) String terminoBusqueda, Model model) {
-        //listamos todos los apoderados
-        List<ApoderadoDTO> apoderadoDTOS = apoderadoServiceImpl.listarApoderados();
-        if (terminoBusqueda != null && !terminoBusqueda.trim().isEmpty()) {
-            apoderadoDTOS = apoderadoServiceImpl.buscarApoderados(terminoBusqueda);
-            model.addAttribute("terminoBusqueda", terminoBusqueda);
-        } else {
-            apoderadoDTOS = apoderadoServiceImpl.listarApoderados();
-        }
-        model.addAttribute("apoderados", apoderadoDTOS);
-        return "admin/lista-apoderados";
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String dni,
+            Model model) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("persona.apellidos").ascending());
+        Page<ApoderadoDTO> apoderadosPage = apoderadoService.buscarApoderados(dni, pageable);
+        model.addAttribute("apoderadosPage", apoderadosPage);
+        model.addAttribute("dni", dni);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", apoderadosPage.getTotalPages());
+        model.addAttribute("totalItems", apoderadosPage.getTotalElements());
+        model.addAttribute("title", "Gestión de Apoderados");
+        return "admin/apoderados/lista_apoderados";
     }
 
-    // Método para mostrar el formulario de registro (GET)
-    @GetMapping("/registro")
-    public String mostrarFormularioRegistroApoderado(Model model) {
-        // Si hay un apoderadoRegistroDTO como flash attribute (debido a un error previo), se usará.
-        // Si no, se crea uno nuevo.
-        if (!model.containsAttribute("apoderadoRegistroDTO")) {
-            model.addAttribute("apoderadoRegistroDTO", new ApoderadoRegistroDTO());
-        }
-
-        // para el campo genero
-        model.addAttribute("generos", List.of("Masculino", "Femenino"));
-        model.addAttribute("parentescos", List.of("Padre", "Madre", "Abuelo(a)", "Tío(a)", "Hermano(a)", "Otro"));
-        model.addAttribute("roles", List.of("APODERADO"));
-
-        return "admin/registro-apoderado";
+    @RequestMapping(path = "nuevo")
+    public String mostrarFormularioCrear(Model model) {
+        model.addAttribute("apoderadoDTO", new ApoderadoDTO());
+        model.addAttribute("title", "Registrar Nuevo Apoderado");
+        model.addAttribute("isEdit", false);
+        return "admin/apoderados/crear_apoderado";
     }
 
-    @PostMapping("/registro")
-    public String registrarApoderado(@Valid @ModelAttribute("apoderadoRegistroDTO") ApoderadoRegistroDTO apoderadoDTO,
-                                     BindingResult result,
-                                     RedirectAttributes redirectAttributes) {
-
-        System.out.println("--- DENTRO DEL MÉTODO POST /admin/apoderados/registro ---");
-        System.out.println("DTO recibido: " + apoderadoDTO.getDni() + ", " + apoderadoDTO.getNombres() + ", " + apoderadoDTO.getUsername()); // Imprime algunos campos para verificar que llegan
-        System.out.println("BindingResult tiene errores: " + result.hasErrors());
+    @RequestMapping(path = "/guardar", method = RequestMethod.POST)
+    public String guardarApoderado(@Valid @ModelAttribute("apoderadoDTO") ApoderadoDTO apoderadoDTO,
+                                   BindingResult result,
+                                   RedirectAttributes redirectAttributes,
+                                   Model model) {
+        if (apoderadoDTO.isPasswordRequired() || (apoderadoDTO.getPassword() != null && !apoderadoDTO.getPassword().isEmpty())) {
+            if (apoderadoDTO.getPassword() == null || apoderadoDTO.getPassword().isEmpty()) {
+                result.rejectValue("password", "field.notblank", "La contraseña no puede estar vacía.");
+            } else if (apoderadoDTO.getPassword().length() < 6) {
+                result.rejectValue("password", "size.password", "La contraseña debe tener al menos 6 caracteres.");
+            }
+            if (!apoderadoDTO.getPassword().equals(apoderadoDTO.getConfirmPassword())) {
+                result.rejectValue("confirmPassword", "password.mismatch", "Las contraseñas no coinciden.");
+            }
+        }
 
         if (result.hasErrors()) {
-            System.out.println("--- ERRORES DE VALIDACIÓN DETECTADOS ---");
-            result.getAllErrors().forEach(error -> System.out.println("Error: " + error.getDefaultMessage() + " en campo: " + (error instanceof org.springframework.validation.FieldError ? ((org.springframework.validation.FieldError) error).getField() : "global")));
-            // ... (resto de tu código de redirección para errores)
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.apoderadoRegistroDTO", result);
-            redirectAttributes.addFlashAttribute("apoderadoRegistroDTO", apoderadoDTO);
-            redirectAttributes.addFlashAttribute("errorMessage", "Por favor, corrige los errores en el formulario.");
-            return "redirect:/admin/apoderados/registro";
+            model.addAttribute("title", apoderadoDTO.getIdApoderado() == null ? "Registrar Nuevo Apoderado" : "Editar Apoderado");
+            model.addAttribute("isEdit", apoderadoDTO.getIdApoderado() != null);
+            return "admin/apoderados/crear_apoderado";
         }
 
         try {
-            System.out.println("--- INTENTANDO REGISTRAR APODERADO EN EL SERVICIO ---");
-            apoderadoServiceImpl.registrarApoderado(apoderadoDTO);
-            System.out.println("--- APODERADO REGISTRADO EXITOSAMENTE (supuestamente) ---");
-            redirectAttributes.addFlashAttribute("successMessage", "Apoderado registrado exitosamente.");
-            return "redirect:/admin/apoderados";
+            apoderadoService.guardarApoderado(apoderadoDTO);
+            redirectAttributes.addFlashAttribute("successMessage", "Apoderado y cuenta de usuario guardados exitosamente!");
         } catch (IllegalArgumentException e) {
-            System.err.println("--- ERROR DE LÓGICA DE NEGOCIO: " + e.getMessage() + " ---");
-            // ... (resto de tu código de redirección para errores de negocio)
-            if (e.getMessage().contains("DNI")) {
-                result.rejectValue("dni", "duplicate.dni", e.getMessage());
-            } else if (e.getMessage().contains("Email Personal")) {
-                result.rejectValue("emailPersonal", "duplicate.email", e.getMessage());
-            } else if (e.getMessage().contains("nombre de usuario")) {
-                result.rejectValue("username", "duplicate.username", e.getMessage());
-            } else {
-                result.rejectValue(null, null, e.getMessage());
-            }
-
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.apoderadoRegistroDTO", result);
-            redirectAttributes.addFlashAttribute("apoderadoRegistroDTO", apoderadoDTO);
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/admin/apoderados/registro";
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("title", apoderadoDTO.getIdApoderado() == null ? "Registrar Nuevo Apoderado" : "Editar Apoderado");
+            model.addAttribute("isEdit", apoderadoDTO.getIdApoderado() != null);
+            return "admin/apoderados/crear_apoderado";
+        } catch (EntityNotFoundException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("title", apoderadoDTO.getIdApoderado() == null ? "Registrar Nuevo Apoderado" : "Editar Apoderado");
+            model.addAttribute("isEdit", apoderadoDTO.getIdApoderado() != null);
+            return "admin/apoderados/crear_apoderado";
         } catch (Exception e) {
-            System.err.println("--- ERROR INESPERADO AL REGISTRAR: " + e.getMessage() + " ---");
-            e.printStackTrace(); // Imprime el stack trace completo para errores inesperados
-            // ... (resto de tu código de redirección para errores inesperados)
-            redirectAttributes.addFlashAttribute("errorMessage", "Error inesperado al registrar el apoderado: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("apoderadoRegistroDTO", apoderadoDTO);
-            return "redirect:/admin/apoderados/registro";
+            model.addAttribute("errorMessage", "Error inesperado al guardar el apoderado: " + e.getMessage());
+            model.addAttribute("title", apoderadoDTO.getIdApoderado() == null ? "Registrar Nuevo Apoderado" : "Editar Apoderado");
+            model.addAttribute("isEdit", apoderadoDTO.getIdApoderado() != null);
+            return "admin/apoderados/crear_apoderado";
         }
+        return "redirect:/admin/apoderados";
     }
 
-    // Método para mostrar el formulario de edición (GET)
-    @GetMapping("/editar/{idApoderado}")
-    public String mostrarFormularioEdicionApoderado(@PathVariable Integer idApoderado, Model model, RedirectAttributes redirectAttributes) {
+    @GetMapping("/editar/{id}")
+    public String mostrarFormularioEditar(@PathVariable("id") Integer id, Model model, RedirectAttributes redirectAttributes) {
+        return apoderadoService.buscarApoderadoPorId(id).map(apoderadoDTO -> {
+            model.addAttribute("apoderadoDTO", apoderadoDTO);
+            model.addAttribute("title", "Editar Apoderado");
+            model.addAttribute("isEdit", true);
+            apoderadoDTO.setPassword(null);
+            apoderadoDTO.setConfirmPassword(null);
+            return "admin/apoderados/crear_apoderado";
+        }).orElseGet(() -> {
+            redirectAttributes.addFlashAttribute("errorMessage", "Apoderado no encontrado para editar.");
+            return "redirect:/admin/apoderados";
+        });
+    }
+
+    @GetMapping("/detalle/{id}")
+    public String verDetalleApoderado(@PathVariable("id") Integer id, Model model, RedirectAttributes redirectAttributes) {
+        return apoderadoService.buscarApoderadoPorId(id).map(apoderadoDTO -> {
+            model.addAttribute("apoderado", apoderadoDTO);
+            model.addAttribute("title", "Detalle de Apoderado");
+            System.out.println(apoderadoDTO.getRutaImagen());
+            return "admin/apoderados/detalle_apoderado";
+        }).orElseGet(() -> {
+            redirectAttributes.addFlashAttribute("errorMessage", "Apoderado no encontrado para ver detalle.");
+            return "redirect:/admin/apoderados";
+        });
+    }
+
+    @PostMapping("/eliminar/{id}")
+    public String eliminarApoderado(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
         try {
-            ApoderadoRegistroDTO apoderadoDTO = apoderadoServiceImpl.obtenerApoderadoParaEditar(idApoderado);
-            model.addAttribute("apoderadoRegistroDTO", apoderadoDTO);
-
-            model.addAttribute("generos", List.of("Masculino", "Femenino"));
-            model.addAttribute("parentescos", List.of("Padre", "Madre", "Abuelo(a)", "Tío(a)", "Hermano(a)", "Otro"));
-            model.addAttribute("roles", List.of("APODERADO")); // Opcional, ya que no se muestra
-
-            return "admin/editar-apoderado";
-        } catch (NoSuchElementException e) {
+            apoderadoService.eliminarApoderado(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Apoderado, persona y cuenta de usuario eliminados exitosamente.");
+        } catch (EntityNotFoundException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/admin/apoderados";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error al cargar los datos del apoderado para edición: " + e.getMessage());
-            return "redirect:/admin/apoderados";
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al eliminar el apoderado: " + e.getMessage());
         }
+        return "redirect:/admin/apoderados";
     }
-
-    // Método para procesar el envío del formulario de edición (POST)
-    @PostMapping("/editar")
-    public String actualizarApoderado(@Valid @ModelAttribute("apoderadoRegistroDTO") ApoderadoRegistroDTO apoderadoDTO,
-                                      BindingResult result,
-                                      RedirectAttributes redirectAttributes) {
-
-        if (result.hasErrors()) {
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.apoderadoRegistroDTO", result);
-            redirectAttributes.addFlashAttribute("apoderadoRegistroDTO", apoderadoDTO); // Para precargar los datos
-            redirectAttributes.addFlashAttribute("errorMessage", "Por favor, corrige los errores en el formulario.");
-            return "redirect:/admin/apoderados/editar/" + apoderadoDTO.getIdApoderado();
-        }
-
-        try {
-            apoderadoServiceImpl.actualizarApoderado(apoderadoDTO);
-            redirectAttributes.addFlashAttribute("successMessage", "Apoderado actualizado exitosamente.");
-            return "redirect:/admin/apoderados"; // Redirige a la lista después de actualizar
-        } catch (IllegalArgumentException e) {
-            // errores de dupliucado de dni, email y username
-            if (e.getMessage().contains("DNI")) {
-                result.rejectValue("dni", "duplicate.dni", e.getMessage());
-            } else if (e.getMessage().contains("email")) {
-                result.rejectValue("emailPersonal", "duplicate.email", e.getMessage());
-            } else if (e.getMessage().contains("nombre de usuario")) {
-                result.rejectValue("username", "duplicate.username", e.getMessage());
-            } else {
-                result.rejectValue(null, null, e.getMessage()); // error global si no coincide
-            }
-
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.apoderadoRegistroDTO", result);
-            redirectAttributes.addFlashAttribute("apoderadoRegistroDTO", apoderadoDTO);
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/admin/apoderados/editar/" + apoderadoDTO.getIdApoderado();
-        } catch (NoSuchElementException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error al actualizar: " + e.getMessage());
-            return "redirect:/admin/apoderados";
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error inesperado al actualizar el apoderado: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("apoderadoRegistroDTO", apoderadoDTO);
-            return "redirect:/admin/apoderados/editar/" + apoderadoDTO.getIdApoderado();
-        }
-    }
-
 }
