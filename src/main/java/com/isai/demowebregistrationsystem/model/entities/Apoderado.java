@@ -43,9 +43,6 @@ public class Apoderado {
     @Column(name = "autorizado_recoger", nullable = false)
     private Boolean autorizadoRecoger;
 
-    @Column(name = "foto_url", length = 255)
-    private String fotoUrl;
-
     @Column(name = "referencia_personal", length = 255)
     private String referenciaPersonal;
 

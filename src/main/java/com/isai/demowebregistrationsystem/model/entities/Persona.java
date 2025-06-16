@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -76,4 +77,12 @@ public class Persona {
     protected void onUpdate() {
         this.fechaActualizacion = LocalDateTime.now();
     }
+
+
+    @Column(name = "foto_url", length = 255)
+    private String fotoUrl;
+
+    @Transient
+    private MultipartFile foto;
+
 }

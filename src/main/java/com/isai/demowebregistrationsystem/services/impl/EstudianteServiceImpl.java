@@ -103,7 +103,6 @@ public class EstudianteServiceImpl implements EstudianteService {
         estudiante.setContactoEmergencia(estudianteDTO.getContactoEmergenciaEstudiante());
         estudiante.setTelefonoEmergencia(estudianteDTO.getTelefonoEmergenciaEstudiante());
         estudiante.setSeguroEscolar(estudianteDTO.getSeguroEscolarEstudiante() != null ? estudianteDTO.getSeguroEscolarEstudiante() : false);
-        estudiante.setFotoUrl(estudianteDTO.getFotoUrlEstudiante());
 
         return estudianteRepository.save(estudiante);
     }

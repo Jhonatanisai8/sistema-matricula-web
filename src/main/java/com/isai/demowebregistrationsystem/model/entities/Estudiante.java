@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Estudiante { // Usando Estudiante en lugar de Student para coherencia con tu SQL
+public class Estudiante {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,8 +47,6 @@ public class Estudiante { // Usando Estudiante en lugar de Student para coherenc
     @Column(name = "seguro_escolar", nullable = false)
     private Boolean seguroEscolar;
 
-    @Column(name = "foto_url", length = 255)
-    private String fotoUrl;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_persona", unique = true, nullable = false)
