@@ -1,5 +1,6 @@
 package com.isai.demowebregistrationsystem.model.entities;
 
+import com.isai.demowebregistrationsystem.model.enums.Rol;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,8 +26,9 @@ public class Usuario {
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
-    @Column(name = "rol", nullable = false, length = 50)
-    private String rol;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Rol rol;
 
     @Column(name = "ultimo_acceso")
     private LocalDateTime ultimoAcceso;

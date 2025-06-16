@@ -1,92 +1,136 @@
 package com.isai.demowebregistrationsystem.controllers.admin;
 
 import com.isai.demowebregistrationsystem.model.dtos.UsuarioDTO;
-import com.isai.demowebregistrationsystem.services.impl.UsuarioServiceImpl;
+import com.isai.demowebregistrationsystem.model.enums.Rol; // Asegúrate de que tu Enum se llame 'Rol' y esté en 'enums'
+import com.isai.demowebregistrationsystem.services.UsuarioService; // Usar la interfaz, no la implementación directa
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Arrays;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/admin/usuarios")
 public class AdminUsuarioController {
 
-    private final UsuarioServiceImpl usuarioServiceImpl;
+    private final UsuarioService usuarioService; // ¡Cambio a la interfaz!
 
     @GetMapping
-    public String listarUsuarios(@RequestParam(value = "terminoBusqueda", required = false) String terminoBusqueda, Model model) {
-        List<UsuarioDTO> usuarioDTOS;
-        if (terminoBusqueda != null && !terminoBusqueda.trim().isEmpty()) {
-            usuarioDTOS = usuarioServiceImpl.buscarUsuarios(terminoBusqueda);
-            model.addAttribute("terminoBusqueda", terminoBusqueda);
+    public String listUsuarios(Model model,
+                               @RequestParam(defaultValue = "0") int page,
+                               @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<UsuarioDTO> usuariosPage = usuarioService.obtenerUsuarios(pageable);
+        model.addAttribute("usuarios", usuariosPage);
+        return "admin/usuarios/lista_usuarios";
+    }
+
+    @GetMapping("/nuevo")
+    public String mostrarFormularioCrearUsuario(Model model) {
+        model.addAttribute("usuarioDTO", new UsuarioDTO());
+        model.addAttribute("isEdit", false);
+        model.addAttribute("roles", Arrays.asList(Rol.values()));
+        model.addAttribute("personasDisponibles", usuarioService.encontrarPersonasDisponibles()); // Correcto
+        return "admin/usuarios/crear_usuario";
+    }
+
+    @GetMapping("/editar/{id}")
+    public String mostrarFormularioEditar(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
+        Optional<UsuarioDTO> usuarioOptional = usuarioService.obtenerUsuarioPorId(id);
+        if (usuarioOptional.isPresent()) {
+            model.addAttribute("usuarioDTO", usuarioOptional.get());
+            model.addAttribute("isEdit", true);
+            model.addAttribute("roles", Arrays.asList(Rol.values()));
+            // CAMBIO CRÍTICO AQUÍ: Usar encontrarPersonasDisponiblesParaUsuario
+            model.addAttribute("personasDisponibles", usuarioService.encontrarPersonasDisponiblesParaUsuario(id));
+            return "admin/usuarios/crear_usuario";
         } else {
-            usuarioDTOS = usuarioServiceImpl.listarUsuarios();
-        }
-        model.addAttribute("usuarios", usuarioDTOS);
-        return "admin/lista-usuarios";
-    }
-
-
-    @GetMapping("/editar/{idUsuario}")
-    public String mostrarFormularioEdicionUsuario(@PathVariable Integer idUsuario, Model model, RedirectAttributes redirectAttributes) {
-        // ... (código sin cambios) ...
-        try {
-            UsuarioDTO usuarioDTO = usuarioServiceImpl.obtenerUsuarioParaEdicion(idUsuario);
-            model.addAttribute("usuarioDTO", usuarioDTO);
-            model.addAttribute("roles", List.of("ADMIN", "APODERADO", "PROFESOR"));
-            return "admin/editar-usuario";
-        } catch (NoSuchElementException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/admin/usuarios";
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error al cargar los datos del usuario para edición: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Usuario no encontrado.");
             return "redirect:/admin/usuarios";
         }
     }
 
-    @PostMapping("/editar")
-    public String actualizarUsuario(@Valid @ModelAttribute("usuarioDTO") UsuarioDTO usuarioDTO,
-                                    BindingResult result,
-                                    RedirectAttributes redirectAttributes) {
-        // ... (código sin cambios) ...
+    @PostMapping("/guardar")
+    public String guardarUsuario(@Valid @ModelAttribute("usuarioDTO") UsuarioDTO usuarioDTO,
+                                 BindingResult result,
+                                 RedirectAttributes redirectAttributes,
+                                 Model model) {
+        if (usuarioDTO.getPassword() != null && !usuarioDTO.getPassword().isEmpty()) {
+            if (!usuarioDTO.getPassword().equals(usuarioDTO.getConfirmPassword())) {
+                result.rejectValue("confirmPassword", "password.mismatch", "Las contraseñas no coinciden.");
+            }
+        } else if (usuarioDTO.getIdUsuario() == null && (usuarioDTO.getPassword() == null || usuarioDTO.getPassword().isEmpty())) {
+            result.rejectValue("password", "password.required", "La contraseña es obligatoria para un nuevo usuario.");
+        }
+
+
         if (result.hasErrors()) {
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.usuarioDTO", result);
-            redirectAttributes.addFlashAttribute("usuarioDTO", usuarioDTO);
-            redirectAttributes.addFlashAttribute("errorMessage", "Por favor, corrige los errores en el formulario.");
-            return "redirect:/admin/usuarios/editar/" + usuarioDTO.getIdUsuario();
+            model.addAttribute("isEdit", usuarioDTO.getIdUsuario() != null && usuarioDTO.getIdUsuario() != 0);
+            model.addAttribute("roles", Arrays.asList(Rol.values()));
+            // CAMBIO CRÍTICO AQUÍ: Usar encontrarPersonasDisponiblesParaUsuario
+            model.addAttribute("personasDisponibles", usuarioService.encontrarPersonasDisponiblesParaUsuario(usuarioDTO.getIdUsuario()));
+            return "admin/usuarios/crear_usuario";
         }
 
         try {
-            usuarioServiceImpl.actualizarUsuario(usuarioDTO);
-            redirectAttributes.addFlashAttribute("successMessage", "Usuario actualizado exitosamente.");
+            usuarioService.guardarUsuario(usuarioDTO);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    usuarioDTO.getIdUsuario() == null || usuarioDTO.getIdUsuario() == 0 ? "Usuario registrado exitosamente." : "Usuario actualizado exitosamente.");
             return "redirect:/admin/usuarios";
         } catch (IllegalArgumentException e) {
+
             if (e.getMessage().contains("nombre de usuario")) {
-                result.rejectValue("userName", "duplicate.username", e.getMessage());
+                result.rejectValue("userName", "error.usuarioDTO", e.getMessage());
+            } else if (e.getMessage().contains("persona")) {
+                result.rejectValue("personaId", "error.usuarioDTO", e.getMessage());
             } else if (e.getMessage().contains("contraseña")) {
-                result.rejectValue("password", "invalid.password", e.getMessage());
+                result.rejectValue("password", "error.usuarioDTO", e.getMessage());
             } else {
-                result.rejectValue(null, null, e.getMessage());
+                result.rejectValue("idUsuario", "error.usuarioDTO", e.getMessage());
             }
 
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.usuarioDTO", result);
-            redirectAttributes.addFlashAttribute("usuarioDTO", usuarioDTO);
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/admin/usuarios/editar/" + usuarioDTO.getIdUsuario();
-        } catch (NoSuchElementException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error al actualizar: " + e.getMessage());
-            return "redirect:/admin/usuarios";
+            model.addAttribute("isEdit", usuarioDTO.getIdUsuario() != null && usuarioDTO.getIdUsuario() != 0);
+            model.addAttribute("roles", Arrays.asList(Rol.values()));
+            // CAMBIO CRÍTICO AQUÍ: Usar encontrarPersonasDisponiblesParaUsuario
+            model.addAttribute("personasDisponibles", usuarioService.encontrarPersonasDisponiblesParaUsuario(usuarioDTO.getIdUsuario()));
+            return "admin/usuarios/crear_usuario";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error inesperado al actualizar el usuario: " + e.getMessage());
-            redirectAttributes.addFlashAttribute("usuarioDTO", usuarioDTO);
-            return "redirect:/admin/usuarios/editar/" + usuarioDTO.getIdUsuario();
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al guardar el usuario: " + e.getMessage());
+            return "redirect:/admin/usuarios";
         }
+    }
+
+    @GetMapping("/detalle/{id}")
+    public String viewUserDetails(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
+        Optional<UsuarioDTO> usuarioOptional = usuarioService.obtenerUsuarioPorId(id);
+        if (usuarioOptional.isPresent()) {
+            model.addAttribute("usuario", usuarioOptional.get());
+            return "admin/usuarios/detalle_usuario";
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "Usuario no encontrado.");
+            return "redirect:/admin/usuarios";
+        }
+    }
+
+    @GetMapping("/toggleActivo/{id}")
+    public String toggleActiveStatus(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        try {
+            usuarioService.alternarEstadoUsuario(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Estado del usuario actualizado.");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al cambiar el estado del usuario: " + e.getMessage());
+        }
+        return "redirect:/admin/usuarios";
     }
 }
