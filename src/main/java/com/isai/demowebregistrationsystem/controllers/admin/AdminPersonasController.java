@@ -1,4 +1,4 @@
-package com.isai.demowebregistrationsystem.controllers;
+package com.isai.demowebregistrationsystem.controllers.admin;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
