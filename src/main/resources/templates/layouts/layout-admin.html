@@ -13,35 +13,48 @@
           rel="stylesheet">
 
     <style th:inline="css">
-        /* Variables CSS */
+
+
         :root {
-            --primary-color: #007bff; /* Azul de Bootstrap */
-            --secondary-color: #6c757d; /* Gris de Bootstrap */
+            --primary-color: #007bff;
+
+            --secondary-color: #6c757d;
+
             --success-color: #28a745;
             --info-color: #17a2b8;
             --warning-color: #ffc107;
             --danger-color: #dc3545;
 
-            --dark-bg: #2c3e50; /* Azul oscuro pizarra */
-            --darker-bg: #233140; /* Más oscuro para hover */
-            --text-light: #ecf0f1; /* Gris claro para texto */
-            --highlight-color: #3498db; /* Azul brillante para resaltar */
+            --dark-bg: #2c3e50;
+
+            --darker-bg: #233140;
+
+            --text-light: #ecf0f1;
+
+            --highlight-color: #3498db;
+
 
             --font-family-base: 'Roboto', 'Segoe UI', Arial, sans-serif;
-            --main-bg-color: #f4f7f6; /* Gris muy claro para el fondo principal */
-            --content-bg-color: #ffffff; /* Blanco para el contenido principal */
+            --main-bg-color: #f4f7f6;
 
-            --border-color-light: #e0e0e0; /* Bordes claros */
-            --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.08); /* Sombra ligera */
-            --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15); /* Sombra media */
+            --content-bg-color: #ffffff;
+
+
+            --border-color-light: #e0e0e0;
+
+            --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.08);
+
+            --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+
         }
 
-        /* Estilos generales */
+
         html, body {
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow-x: hidden; /* Evitar scroll horizontal no deseado */
+            overflow-x: hidden;
+
         }
 
         body {
@@ -49,38 +62,48 @@
             font-family: var(--font-family-base);
             display: flex;
             flex-direction: column;
-            min-height: 100vh; /* Asegura que el body ocupe al menos la altura de la ventana */
+            min-height: 100vh;
+
         }
 
-        /* Contenedor principal de la aplicación (navbar + sidebar + main content) */
+
         #app-container {
             display: flex;
-            flex: 1; /* Permite que este contenedor crezca y ocupe el espacio restante */
-            min-height: calc(100vh - 56px); /* Altura de la ventana menos la altura del navbar */
+            flex: 1;
+
+            min-height: calc(100vh - 56px);
+
         }
 
-        /* Estilos del Sidebar */
+
         aside {
             background-color: var(--dark-bg);
             color: var(--text-light);
             min-width: 260px;
-            max-width: 260px; /* Asegura un ancho fijo */
+            max-width: 260px;
+
             padding: 1.5rem 1rem;
             box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
-            position: sticky; /* Sidebar pegajoso */
-            top: 0; /* Pegado a la parte superior */
-            height: calc(100vh - 56px); /* Ocupa el resto de la altura vertical */
+            position: sticky;
+
+            top: 0;
+
+            height: calc(100vh - 56px);
+
             z-index: 1000;
-            overflow-y: auto; /* Scroll si el contenido es muy largo */
-            transition: all 0.3s ease; /* Transición para posibles cambios de ancho */
+            overflow-y: auto;
+
+            transition: all 0.3s ease;
+
         }
 
         aside .nav-link {
             padding: 0.8rem 1rem;
             border-radius: 0.35rem;
-            color: var(--text-light); /* Color de texto por defecto */
+            color: var(--text-light);
+
             transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
             font-size: 0.95rem;
             display: flex;
@@ -88,16 +111,22 @@
         }
 
         aside .nav-link:hover {
-            background-color: var(--darker-bg); /* Un tono más oscuro en hover */
-            color: #ffffff; /* Blanco puro en hover */
-            transform: translateX(5px); /* Pequeño desplazamiento visual */
+            background-color: var(--darker-bg);
+
+            color: #ffffff;
+
+            transform: translateX(5px);
+
         }
 
         aside .nav-link.active {
-            background-color: var(--highlight-color); /* Color de resaltado para activo */
+            background-color: var(--highlight-color);
+
             color: #ffffff;
-            font-weight: 700; /* Negrita para el activo */
-            box-shadow: var(--shadow-light); /* Sombra sutil para activo */
+            font-weight: 700;
+
+            box-shadow: var(--shadow-light);
+
         }
 
         aside .nav-link i {
@@ -106,31 +135,40 @@
         }
 
         aside .sidebar-heading {
-            color: rgba(255, 255, 255, 0.6); /* Color más claro para las cabeceras */
+            color: rgba(255, 255, 255, 0.6);
+
             font-size: 0.85rem;
             font-weight: bold;
             padding-left: 1rem;
             margin-bottom: 0.8rem;
-            margin-top: 1.5rem; /* Espacio superior para separar secciones */
-            text-transform: uppercase; /* Convertir a mayúsculas */
+            margin-top: 1.5rem;
+
+            text-transform: uppercase;
+
         }
 
-        /* Estilos del contenido principal (Main) */
+
         main {
-            flex-grow: 1; /* Permite que el contenido principal ocupe todo el espacio restante */
-            padding: 2.5rem 3rem; /* Padding generoso */
+            flex-grow: 1;
+
+            padding: 2.5rem 3rem;
+
             background-color: var(--content-bg-color);
-            box-shadow: -2px 0 8px rgba(0, 0, 0, 0.05); /* Sombra lateral */
+            box-shadow: -2px 0 8px rgba(0, 0, 0, 0.05);
+
             display: flex;
             flex-direction: column;
-            min-height: calc(100vh - 56px); /* Asegura que ocupe la altura adecuada */
-            overflow-y: auto; /* Scroll si el contenido es muy largo */
+            min-height: calc(100vh - 56px);
+
+            overflow-y: auto;
+
         }
 
         main header {
             margin-bottom: 2.5rem;
             padding-bottom: 1.2rem;
-            border-bottom: 1px solid var(--border-color-light); /* Separador visual */
+            border-bottom: 1px solid var(--border-color-light);
+
         }
 
         main header h1 {
@@ -139,20 +177,24 @@
         }
 
         main section[layout\:fragment="content"] {
-            flex-grow: 1; /* El contenido dentro de la sección crecerá para ocupar el espacio */
+            flex-grow: 1;
+
         }
 
-        /* Estilos del Navbar */
+
         .navbar {
-            background-color: var(--dark-bg) !important; /* Fondo oscuro */
-            box-shadow: var(--shadow-medium); /* Sombra para elevarlo */
+            background-color: var(--dark-bg) !important;
+
+            box-shadow: var(--shadow-medium);
+
             padding: 0.75rem 1.5rem;
         }
 
         .navbar-brand {
             font-size: 1.3rem;
             font-weight: 700;
-            color: #ffffff !important; /* Blanco puro para el brand */
+            color: #ffffff !important;
+
         }
 
         .navbar-nav .nav-item .text-white {
@@ -172,9 +214,10 @@
             border-color: #ffffff;
         }
 
-        /* Estilos del pie de página del sidebar */
+
         aside .mt-auto {
-            border-top: 1px solid rgba(255, 255, 255, 0.15); /* Separador */
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+
             padding-top: 1.5rem;
             margin-top: 2rem !important;
             text-align: center;
@@ -185,52 +228,65 @@
             color: rgba(255, 255, 255, 0.4);
         }
 
-        /* Media Queries para responsividad (tablets y móviles) */
+
         @media (max-width: 992px) {
             #app-container {
-                flex-direction: column; /* Apilar sidebar y main */
-                min-height: auto; /* Resetear altura mínima */
+                flex-direction: column;
+
+                min-height: auto;
+
             }
 
             aside {
                 min-width: 100%;
                 min-height: auto;
-                position: relative; /* Quitar sticky para móviles */
+                position: relative;
+
                 box-shadow: none;
-                flex-direction: row; /* Menú horizontal para móviles */
-                overflow-x: auto; /* Scroll horizontal si hay muchos items */
+                flex-direction: row;
+
+                overflow-x: auto;
+
                 overflow-y: hidden;
-                white-space: nowrap; /* Evitar que los items se envuelvan */
+                white-space: nowrap;
+
                 padding-bottom: 0;
-                height: auto; /* Altura automática */
+                height: auto;
+
             }
 
             aside .nav {
                 flex-direction: row !important;
                 gap: 0.5rem;
                 padding-bottom: 1rem;
-                justify-content: center; /* Centrar items en móvil */
+                justify-content: center;
+
             }
 
             aside .sidebar-heading, aside .mt-auto, aside .text-center.d-none.d-lg-block {
-                display: none; /* Ocultar cabeceras y pie de página en móvil */
+                display: none;
+
             }
 
             aside .nav-link {
-                padding: 0.7rem 1.2rem; /* Ajustar padding para botones de menú */
+                padding: 0.7rem 1.2rem;
+
             }
 
             aside .nav-link i {
-                margin-right: 0.5rem; /* Menos espacio para el ícono */
+                margin-right: 0.5rem;
+
             }
 
             main {
-                padding: 1.5rem; /* Menos padding en móvil */
+                padding: 1.5rem;
+
                 min-height: auto;
             }
 
             .navbar-collapse {
-                flex-grow: 0; /* No permitir que crezca el collapse del navbar */
+                flex-grow: 0;
+
             }
         }
     </style>
@@ -288,7 +344,7 @@
                 <h6 class="sidebar-heading">Usuarios y Personas</h6>
             </li>
             <li>
-                <a class="nav-link" th:href="@{/admin/usuarios}">
+                <a class="nav-link" th:href="@{/templates/admin/usuarios}">
                     <i class="bi bi-people-fill"></i> Usuarios
                 </a>
             </li>
@@ -308,7 +364,7 @@
                 </a>
             </li>
             <li>
-                <a class="nav-link" th:href="@{/admin/docentes}">
+                <a class="nav-link" th:href="@{/templates/admin/docentes}">
                     <i class="bi bi-person-video2"></i> Docentes
                 </a>
             </li>
