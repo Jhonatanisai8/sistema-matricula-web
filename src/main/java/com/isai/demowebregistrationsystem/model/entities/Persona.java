@@ -21,7 +21,7 @@ public class Persona {
     @Column(name = "id_persona")
     private Integer idPersona;
 
-    @Column(name = "dni", unique = true, nullable = false, length = 20)
+    @Column(name = "dni", unique = true, nullable = false, length = 8)
     private String dni;
 
     @Column(name = "nombres", nullable = false, length = 100)
