@@ -1,23 +1,19 @@
 package com.isai.demowebregistrationsystem.services;
 
-
 import com.isai.demowebregistrationsystem.model.dtos.ApoderadoDTO;
-import com.isai.demowebregistrationsystem.model.dtos.ApoderadoRegistroDTO;
-import com.isai.demowebregistrationsystem.model.entities.Apoderado;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
+import java.util.Optional;
 
-// ApoderadoService.java
 public interface ApoderadoService {
-    List<ApoderadoDTO> listarApoderados();
 
-    ApoderadoDTO mapApoderadoToDTO(Apoderado apoderado);
+    Page<ApoderadoDTO> buscarApoderados(String dni, Pageable pageable);
 
-    Apoderado registrarApoderado(ApoderadoRegistroDTO apoderadoRegistroDTO);
+    Optional<ApoderadoDTO> buscarApoderadoPorId(Integer idApoderado);
 
-    //metodo para las ediciones
-    ApoderadoRegistroDTO obtenerApoderadoParaEditar(Integer idApoderado);
+    ApoderadoDTO guardarApoderado(ApoderadoDTO apoderado);
 
-    Apoderado actualizarApoderado(ApoderadoRegistroDTO apoderado);
+    void eliminarApoderado(Integer idApoderado);
 
 }
