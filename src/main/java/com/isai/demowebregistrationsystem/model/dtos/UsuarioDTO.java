@@ -1,5 +1,6 @@
 package com.isai.demowebregistrationsystem.model.dtos;
 
+import com.isai.demowebregistrationsystem.model.enums.Rol;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -10,28 +11,26 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UsuarioDTO {
-    @NotNull(message = "El ID de usuario es requerido para la edición.")
     private Integer idUsuario;
-    private Integer idPersona;
 
-    @NotBlank(message = "El nombre de usuario no puede estar vacío.")
-    @Size(min = 5, max = 50, message = "El nombre de usuario debe tener entre 5 y 50 caracteres.")
+    @NotBlank(message = "El nombre de usuario es obligatorio.")
+    @Size(min = 4, max = 50, message = "El nombre de usuario debe tener entre 4 y 50 caracteres.")
     private String userName;
 
-    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres si se proporciona.")
+    @Size(min = 6, max = 255, message = "La contraseña debe tener al menos 6 caracteres.")
     private String password;
+    private String confirmPassword;
 
-    @NotBlank(message = "El rol no puede estar vacío.")
-    private String rol;
+    @NotNull(message = "El rol es obligatorio.")
+    private Rol rol;
 
     private LocalDateTime ultimoAcceso;
-    @NotNull(message = "El estado activo no puede estar vacío.")
     private Boolean activo;
     private LocalDateTime fechaCreacion;
     private Integer intentosFallidos;
 
+    @NotNull(message = "Debe asociar el usuario a una persona.")
+    private Integer personaId;
+    private String nombreCompletoPersona;
 
-    private String dniPersona;
-    private String nombresPersona;
-    private String apellidosPersona;
 }

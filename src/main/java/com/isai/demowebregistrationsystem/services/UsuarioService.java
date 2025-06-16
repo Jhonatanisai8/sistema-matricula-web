@@ -1,18 +1,29 @@
 package com.isai.demowebregistrationsystem.services;
 
+
 import com.isai.demowebregistrationsystem.model.dtos.UsuarioDTO;
+import com.isai.demowebregistrationsystem.model.entities.Persona;
 import com.isai.demowebregistrationsystem.model.entities.Usuario;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UsuarioService {
-    List<UsuarioDTO> listarUsuarios();
+    Page<UsuarioDTO> obtenerUsuarios(Pageable pageable);
 
-    List<UsuarioDTO> buscarUsuarios(String terminoBusqueda);
+    Optional<UsuarioDTO> obtenerUsuarioPorId(Integer id);
 
-    UsuarioDTO mapUsuarioToDTO(Usuario usuario);
+    UsuarioDTO guardarUsuario(UsuarioDTO usuarioDTO);
 
-    UsuarioDTO obtenerUsuarioParaEdicion(Integer idUsuario);
+    void eliminarUsuario(Integer id);
 
-    UsuarioDTO actualizarUsuario(UsuarioDTO usuarioDTO);
+    void alternarEstadoUsuario(Integer id);
+
+    List<Persona> encontrarPersonasDisponibles();
+
+    List<Persona> encontrarPersonasDisponiblesParaUsuario(Integer id);
+
+
 }
