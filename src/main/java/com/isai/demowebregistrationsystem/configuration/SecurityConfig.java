@@ -1,5 +1,6 @@
 package com.isai.demowebregistrationsystem.configuration;
 
+import com.isai.demowebregistrationsystem.services.impl.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,18 +20,18 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomUserDetailsService customUserDetailsService;
+    private final UserDetailsServiceImpl userDetailsService;
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // Algoritmo seguro por defecto
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(customUserDetailsService);
+        authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
@@ -38,36 +39,49 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // Solo para desarrollo. En producción: activar con tokens CSRF.
+                .csrf(AbstractHttpConfigurer::disable) // Deshabilita CSRF, considera habilitarlo con tokens para producción
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
+                        // Permitir acceso público a todas las rutas de autenticación y registro bajo /auth/
+                        // ¡VERIFICA DOBLEMENTE ESTAS RUTAS!
                         .requestMatchers(
-                                "/", "/login**", "/registro/**",
-                                "/css/**", "/js/**", "/img/**",
-                                "/webjars/**", "/favicon.ico"
-                        ).permitAll()
+                                "/",
+                                "/auth/login", // Tu página de login real
+                                "/auth/registro", // La página de selección de rol
+                                "/auth/registro/form/**", // Los formularios de registro específicos (ej. /auth/registro/form/docente)
+                                "/auth/registro/guardar/**", // Los endpoints para guardar los registros
+                                "/css/**",
+                                "/js/**",
+                                "/img/**",
+                                "/webjars/**",
+                                "/favicon.ico"
+                        ).permitAll() // ¡ESTO ES CLAVE! Asegura que estas rutas NO sean protegidas.
+
+                        // Reglas de acceso basado en roles para los dashboards
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/docente/**").hasAnyRole("ADMIN", "DOCENTE")
                         .requestMatchers("/estudiante/**").hasAnyRole("ADMIN", "ESTUDIANTE")
                         .requestMatchers("/apoderado/**").hasAnyRole("ADMIN", "APODERADO")
+
+                        // Cualquier otra solicitud requiere autenticación
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/login")
-                        .loginProcessingUrl("/login") // debe coincidir con el 'action' del form
-                        .successHandler(customAuthenticationSuccessHandler)
-                        .failureUrl("/login?error=true")
-                        .permitAll()
+                        .loginPage("/auth/login") // **¡CLAVE!** Aquí le dices a Spring Security cuál es tu página de login real
+                        .loginProcessingUrl("/auth/login") // La URL donde tu formulario POSTea las credenciales
+                        .successHandler(customAuthenticationSuccessHandler) // Tu manejador para redirecciones después del login
+                        .failureUrl("/auth/login?error=true") // A dónde ir si el login falla
+                        .permitAll() // Asegura que la página de login en sí sea accesible - ¡Esta también es CLAVE!
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/logout") // usa POST por defecto, seguro y moderno
-                        .logoutSuccessUrl("/login?logout=true")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                        .permitAll()
+                        .logoutUrl("/logout") // URL para cerrar sesión (normalmente un POST)
+                        .logoutSuccessUrl("/auth/login?logout=true") // A dónde ir después de cerrar sesión
+                        .invalidateHttpSession(true) // Invalida la sesión HTTP
+                        .deleteCookies("JSESSIONID") // Borra la cookie de sesión
+                        .permitAll() // Asegura que la URL de logout sea accesible
                 )
                 .exceptionHandling(ex -> ex
-                        .accessDeniedPage("/access-denied")
+                        .accessDeniedPage("/access-denied") // Página para acceso denegado
                 );
 
         return http.build();
