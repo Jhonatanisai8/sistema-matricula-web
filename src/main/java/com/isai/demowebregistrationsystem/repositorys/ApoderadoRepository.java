@@ -14,8 +14,6 @@ public interface ApoderadoRepository extends JpaRepository<Apoderado, Integer> {
 
     Optional<Apoderado> findByPersonaDni(String dni);
 
-    boolean existsByPersonaDni(String dni);
-
     Page<Apoderado> findByPersonaDniContainingIgnoreCase(String dni, Pageable pageable);
 
     Page<Apoderado> findAll(Pageable pageable);

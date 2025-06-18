@@ -1,6 +1,7 @@
 package com.isai.demowebregistrationsystem.services.impl;
 
-import com.isai.demowebregistrationsystem.model.Rol;
+import com.isai.demowebregistrationsystem.model.dtos.RegistroApoderadoDTO;
+import com.isai.demowebregistrationsystem.model.enums.Rol;
 import com.isai.demowebregistrationsystem.model.dtos.ApoderadoDTO;
 import com.isai.demowebregistrationsystem.model.entities.Apoderado;
 import com.isai.demowebregistrationsystem.model.entities.Persona;
@@ -197,6 +198,11 @@ public class ApoderadoServiceImpl implements ApoderadoService {
                     dto.setUserName(usuario.getUserName());
                 });
         return dto;
+    }
+
+    @Override
+    public Apoderado registrarNuevoApoderado(RegistroApoderadoDTO apoderadoDTO) {
+        return null;
     }
 }
 
