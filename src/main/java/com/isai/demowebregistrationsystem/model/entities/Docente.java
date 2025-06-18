@@ -67,4 +67,7 @@ public class Docente {
     protected void onCreate() {
         if (this.coordinador == null) this.coordinador = false;
     }
+
+    @Column(name = "activo")
+    private Boolean activo;
 }

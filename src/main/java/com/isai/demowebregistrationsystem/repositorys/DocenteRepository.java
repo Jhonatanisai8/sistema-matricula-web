@@ -10,6 +10,4 @@ import java.util.Optional;
 public interface DocenteRepository extends JpaRepository<Docente, Integer> {
     Optional<Docente> findByCodigoDocente(String codigoDocente);
 
-    Optional<Docente> findByPersonaDni(String dni);
-    // metodo si si el DNI de la persona ya es un docente
 }

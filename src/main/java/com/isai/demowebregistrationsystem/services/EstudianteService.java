@@ -1,6 +1,7 @@
 package com.isai.demowebregistrationsystem.services;
 
 import com.isai.demowebregistrationsystem.model.dtos.EstudianteDTO;
+import com.isai.demowebregistrationsystem.model.dtos.RegistroEstudianteDTO;
 import com.isai.demowebregistrationsystem.model.entities.Estudiante;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,4 +17,7 @@ public interface EstudianteService {
     Estudiante actualizar(Integer id, Estudiante estudiante);
 
     void eliminar(Integer id);
+
+    Estudiante registrarNuevoEstudiante(RegistroEstudianteDTO estudianteDTO);
+
 }

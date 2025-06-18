@@ -52,4 +52,6 @@ public class Usuario {
         if (this.intentosFallidos == null) this.intentosFallidos = 0;
         if (this.fechaCreacion == null) this.fechaCreacion = LocalDateTime.now();
     }
+
+
 }

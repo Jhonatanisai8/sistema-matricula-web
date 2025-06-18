@@ -1,6 +1,8 @@
 package com.isai.demowebregistrationsystem.services;
 
 import com.isai.demowebregistrationsystem.model.dtos.ApoderadoDTO;
+import com.isai.demowebregistrationsystem.model.dtos.RegistroApoderadoDTO;
+import com.isai.demowebregistrationsystem.model.entities.Apoderado;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -16,4 +18,5 @@ public interface ApoderadoService {
 
     void eliminarApoderado(Integer idApoderado);
 
+    Apoderado registrarNuevoApoderado(RegistroApoderadoDTO apoderadoDTO);
 }

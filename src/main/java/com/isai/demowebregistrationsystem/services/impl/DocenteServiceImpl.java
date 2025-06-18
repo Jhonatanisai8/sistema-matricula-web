@@ -2,6 +2,7 @@ package com.isai.demowebregistrationsystem.services.impl;
 
 import com.isai.demowebregistrationsystem.model.dtos.DocenteDTO;
 import com.isai.demowebregistrationsystem.model.dtos.DocenteRegistroDTO;
+import com.isai.demowebregistrationsystem.model.dtos.RegistroDocenteDTO;
 import com.isai.demowebregistrationsystem.model.entities.Docente;
 import com.isai.demowebregistrationsystem.model.entities.Persona;
 import com.isai.demowebregistrationsystem.model.entities.Usuario;
@@ -97,7 +98,6 @@ public class DocenteServiceImpl implements DocenteService {
 
         nuevoUsuario.setUserName(finalUsername);
         nuevoUsuario.setPasswordHash(passwordEncoder.encode(generatedPassword)); // Encriptar la contraseña
-        nuevoUsuario.setRol("DOCENTE"); // Rol por defecto para docentes
         nuevoUsuario.setPersona(personaGuardada);
         nuevoUsuario.setActivo(true); // Usuario activo por defecto
         // Los campos fechaCreacion, intentosFallidos se setean con @PrePersist en la entidad Usuario
@@ -136,10 +136,13 @@ public class DocenteServiceImpl implements DocenteService {
         // No obtenemos el username ni password generada aquí para el listado por seguridad,
         // solo se hace en el método de registro para retornarla una vez.
         // Si necesitas el username en el listado, tendrías que cargar el Usuario asociado.
-        usuarioRepository.findByPersona(docente.getPersona()).ifPresent(
-                usuario -> dto.setUsername(usuario.getUserName())
-        );
+
 
         return dto;
+    }
+
+    @Override
+    public Docente registrarNuevoDocente(RegistroDocenteDTO docenteRegistroDTO) {
+        return null;
     }
 }

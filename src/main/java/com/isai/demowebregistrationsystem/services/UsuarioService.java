@@ -1,6 +1,7 @@
 package com.isai.demowebregistrationsystem.services;
 
 
+import com.isai.demowebregistrationsystem.model.dtos.RegistroUsuarioDTO;
 import com.isai.demowebregistrationsystem.model.dtos.UsuarioDTO;
 import com.isai.demowebregistrationsystem.model.entities.Persona;
 import com.isai.demowebregistrationsystem.model.entities.Usuario;
@@ -25,5 +26,7 @@ public interface UsuarioService {
 
     List<Persona> encontrarPersonasDisponiblesParaUsuario(Integer id);
 
+    UsuarioDTO registrarNuevoUsuario(RegistroUsuarioDTO registroDTO);
 
+    Optional<Usuario> findByUsername(String username);
 }
