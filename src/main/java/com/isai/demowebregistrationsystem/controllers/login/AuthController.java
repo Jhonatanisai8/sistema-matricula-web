@@ -18,11 +18,12 @@ import java.util.Arrays;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/registro")
+@RequestMapping(path = "/auth")
 public class AuthController {
 
     private final UsuarioService usuarioService;
 
+    // --- Métodos de Login ---
     @GetMapping("/login")
     public String showLoginForm(@RequestParam(value = "error", required = false) String error,
                                 @RequestParam(value = "logout", required = false) String logout,
@@ -36,28 +37,40 @@ public class AuthController {
         return "auth/login";
     }
 
-    @GetMapping("")
+
+    @GetMapping("/registro")
     public String showRegistroSelectionForm(Model model) {
-        model.addAttribute("roles", Arrays.asList(Rol.DOCENTE, Rol.ESTUDIANTE, Rol.APODERADO, Rol.ADMIN));
+        model.addAttribute("roles", Arrays.asList(Rol.DOCENTE, Rol.ESTUDIANTE, Rol.APODERADO));
         return "auth/registro_seleccion_rol";
     }
 
-    @GetMapping("/{rol}")
+    @GetMapping("/registro/form/{rol}")
     public String showSpecificRegistrationForm(@PathVariable String rol, Model model, RedirectAttributes redirectAttributes) {
         try {
             Rol selectedRol = Rol.valueOf(rol.toUpperCase());
+            RegistroUsuarioDTO registroDTO; // Usamos el DTO base
+
             switch (selectedRol) {
-                case DOCENTE -> model.addAttribute("registroDTO", new RegistroDocenteDTO());
-                case ESTUDIANTE -> model.addAttribute("registroDTO", new RegistroEstudianteDTO());
-                case APODERADO -> model.addAttribute("registroDTO", new RegistroApoderadoDTO());
-                case ADMIN -> model.addAttribute("registroDTO", new RegistroUsuarioDTO());
-                default -> {
+                case DOCENTE:
+                    registroDTO = new RegistroDocenteDTO();
+                    break;
+                case ESTUDIANTE:
+                    registroDTO = new RegistroEstudianteDTO();
+                    break;
+                case APODERADO:
+                    registroDTO = new RegistroApoderadoDTO();
+                    break;
+                default:
                     redirectAttributes.addFlashAttribute("errorMessage", "Rol de registro no válido.");
-                    return "redirect:/registro";
-                }
+                    return "redirect:/auth/registro"; // Redirige a la selección de rol (con el prefijo /auth)
             }
 
-            model.addAttribute("selectedRol", selectedRol); // ← clave para acceder a descripcion en la vista
+            registroDTO.setRol(selectedRol); // Establecer el rol en el DTO
+
+            model.addAttribute("registroDTO", registroDTO);
+            model.addAttribute("selectedRol", selectedRol);
+
+            // Aquí se pasan las listas de String
             model.addAttribute("generos", Arrays.asList("MASCULINO", "FEMENINO", "OTRO"));
             model.addAttribute("tiposDocumento", Arrays.asList("DNI", "PASAPORTE", "CARNET_EXTRANJERIA"));
             model.addAttribute("estadosCivil", Arrays.asList("SOLTERO", "CASADO", "DIVORCIADO", "VIUDO"));
@@ -65,25 +78,63 @@ public class AuthController {
             return "auth/registro_form_dinamico";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Rol de registro no válido.");
-            return "redirect:/registro";
+            return "redirect:/auth/registro"; // Redirige a la selección de rol (con el prefijo /auth)
         }
     }
 
-    @PostMapping("/guardar")
-    public String registrarUsuario(@ModelAttribute("registroDTO") @Valid RegistroUsuarioDTO registroDTO,
+    // --- MÉTODOS POST DE REGISTRO ESPECÍFICOS POR ROL ---
+
+    @PostMapping("/registro/guardar/admin") // Necesitas este PostMapping para ADMIN
+    public String registrarAdmin(@ModelAttribute("registroDTO") @Valid RegistroUsuarioDTO registroDTO, // O RegistroAdminDTO si es específico
+                                 BindingResult result,
+                                 RedirectAttributes redirectAttributes,
+                                 Model model) {
+        registroDTO.setRol(Rol.ADMIN);
+        return handleRegistration(registroDTO, result, redirectAttributes, model);
+    }
+
+    @PostMapping("/registro/guardar/docente")
+    public String registrarDocente(@ModelAttribute("registroDTO") @Valid RegistroDocenteDTO registroDTO,
                                    BindingResult result,
                                    RedirectAttributes redirectAttributes,
                                    Model model) {
+        registroDTO.setRol(Rol.DOCENTE);
+        return handleRegistration(registroDTO, result, redirectAttributes, model);
+    }
 
+    @PostMapping("/registro/guardar/estudiante")
+    public String registrarEstudiante(@ModelAttribute("registroDTO") @Valid RegistroEstudianteDTO registroDTO,
+                                      BindingResult result,
+                                      RedirectAttributes redirectAttributes,
+                                      Model model) {
+        registroDTO.setRol(Rol.ESTUDIANTE);
+        return handleRegistration(registroDTO, result, redirectAttributes, model);
+    }
+
+    @PostMapping("/registro/guardar/apoderado")
+    public String registrarApoderado(@ModelAttribute("registroDTO") @Valid RegistroApoderadoDTO registroDTO,
+                                     BindingResult result,
+                                     RedirectAttributes redirectAttributes,
+                                     Model model) {
+        registroDTO.setRol(Rol.APODERADO);
+        return handleRegistration(registroDTO, result, redirectAttributes, model);
+    }
+
+    // Método auxiliar para manejar la lógica común de registro y errores
+    private String handleRegistration(RegistroUsuarioDTO registroDTO,
+                                      BindingResult result,
+                                      RedirectAttributes redirectAttributes,
+                                      Model model) {
         if (!registroDTO.getPassword().equals(registroDTO.getConfirmPassword())) {
             result.rejectValue("confirmPassword", "error.registroDTO", "Las contraseñas no coinciden.");
         }
 
         if (result.hasErrors()) {
-            model.addAttribute("selectedRol", registroDTO.getRol()); // ← pasamos el Enum, no el String
+            model.addAttribute("selectedRol", registroDTO.getRol());
             model.addAttribute("generos", Arrays.asList("MASCULINO", "FEMENINO", "OTRO"));
             model.addAttribute("tiposDocumento", Arrays.asList("DNI", "PASAPORTE", "CARNET_EXTRANJERIA"));
             model.addAttribute("estadosCivil", Arrays.asList("SOLTERO", "CASADO", "DIVORCIADO", "VIUDO"));
+            model.addAttribute("registroDTO", registroDTO);
             return "auth/registro_form_dinamico";
         }
 
@@ -103,12 +154,16 @@ public class AuthController {
             model.addAttribute("generos", Arrays.asList("MASCULINO", "FEMENINO", "OTRO"));
             model.addAttribute("tiposDocumento", Arrays.asList("DNI", "PASAPORTE", "CARNET_EXTRANJERIA"));
             model.addAttribute("estadosCivil", Arrays.asList("SOLTERO", "CASADO", "DIVORCIADO", "VIUDO"));
-            return "auth/registro_form_dinamico";
+            model.addAttribute("registroDTO", registroDTO);
+            return "auth/registro_form_dinamico"; // <-- ¡OJO! Esto estaba mal: "auth/registro_form_dinamicoth/"
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Error al registrar: " + e.getMessage());
-            return "redirect:/registro";
+            redirectAttributes.addFlashAttribute("errorMessage", "Error inesperado al registrar: " + e.getMessage());
+            return "redirect:/auth/registro"; // Redirige a la selección de rol (con el prefijo /auth)
         }
     }
+
+    // --- MÉTODOS DE DASHBOARD Y ACCESO DENEGADO ---
+    // ¡Recuerda resolver la duplicidad de /admin/dashboard!
 
     @GetMapping("/admin/dashboard")
     public String adminDashboard() {

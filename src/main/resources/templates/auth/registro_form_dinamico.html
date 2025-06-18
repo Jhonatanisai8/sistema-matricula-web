@@ -5,7 +5,8 @@
       layout:decorate="~{layouts/layout-auth.html}">
 <head>
     <meta charset="UTF-8">
-    <title layout:fragment="title" th:text="${'Registro como ' + #strings.capitalize(selectedRol)}"></title>
+    <title layout:fragment="title"
+           th:text="${'Registro como ' + #strings.capitalize(selectedRol.name().toLowerCase())}"></title>
 </head>
 <body>
 <section layout:fragment="content" class="d-flex align-items-center justify-content-center min-vh-100 bg-light py-5">
@@ -16,13 +17,17 @@
                     <div class="card-body">
                         <div class="text-center mb-4">
                             <h1 class="h3 fw-bold text-primary">
-                                <span th:if="${selectedRol == 'docente'}"><i class="bi bi-mortarboard-fill me-2"></i>Registro de Docente</span>
-                                <span th:if="${selectedRol == 'estudiante'}"><i class="bi bi-backpack-fill me-2"></i>Registro de Estudiante</span>
-                                <span th:if="${selectedRol == 'apoderado'}"><i class="bi bi-person-fill-lock me-2"></i>Registro de Apoderado</span>
-                                <span th:if="${selectedRol == 'admin'}"><i class="bi bi-person-gear-fill me-2"></i>Registro de Administrador</span>
+                                <span th:if="${selectedRol == T(com.isai.demowebregistrationsystem.model.enums.Rol).DOCENTE}"><i
+                                        class="bi bi-mortarboard-fill me-2"></i>Registro de Docente</span>
+                                <span th:if="${selectedRol == T(com.isai.demowebregistrationsystem.model.enums.Rol).ESTUDIANTE}"><i
+                                        class="bi bi-backpack-fill me-2"></i>Registro de Estudiante</span>
+                                <span th:if="${selectedRol == T(com.isai.demowebregistrationsystem.model.enums.Rol).APODERADO}"><i
+                                        class="bi bi-person-fill-lock me-2"></i>Registro de Apoderado</span>
+                                <span th:if="${selectedRol == T(com.isai.demowebregistrationsystem.model.enums.Rol).ADMIN}"><i
+                                        class="bi bi-person-gear-fill me-2"></i>Registro de Administrador</span>
                             </h1>
                             <p class="text-muted"
-                               th:text="${'Completa tus datos para registrar tu cuenta como ' + #strings.toLowerCase(selectedRol)}"></p>
+                               th:text="${'Completa tus datos para registrar tu cuenta como ' + #strings.toLowerCase(selectedRol.name())}"></p>
                         </div>
 
                         <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show"
@@ -38,9 +43,11 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
 
-                        <form th:action="@{/registro/guardar}" th:object="${registroDTO}" method="post">
-                            <input type="hidden" th:field="*{rol}"/> <h5 class="mb-3 text-secondary"><i
-                                class="bi bi-person-bounding-box me-2"></i>Datos de Cuenta</h5>
+                        <form th:action="@{'/auth/registro/guardar/' + ${selectedRol.name().toLowerCase()}}"
+                              th:object="${registroDTO}" method="post">
+                            <input type="hidden" th:field="*{rol}"/>
+                            <h5 class="mb-3 text-secondary"><i class="bi bi-person-bounding-box me-2"></i>Datos de
+                                Cuenta</h5>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="username" class="form-label">Nombre de Usuario <span
@@ -187,7 +194,7 @@
                             <h5 class="mb-3 text-secondary"><i class="bi bi-briefcase-fill me-2"></i>Datos de Rol
                                 Específico</h5>
 
-                            <div th:if="${selectedRol == 'docente'}">
+                            <div th:if="${selectedRol == T(com.isai.demowebregistrationsystem.model.enums.Rol).DOCENTE}">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="codigoDocente" class="form-label">Código de Docente <span
@@ -299,7 +306,7 @@
                                 </div>
                             </div>
 
-                            <div th:if="${selectedRol == 'estudiante'}">
+                            <div th:if="${selectedRol == T(com.isai.demowebregistrationsystem.model.enums.Rol).ESTUDIANTE}">
                                 <div class="mb-3">
                                     <label for="codigoEstudiante" class="form-label">Código de Estudiante <span
                                             class="text-danger">*</span></label>
@@ -380,7 +387,7 @@
                                 </div>
                             </div>
 
-                            <div th:if="${selectedRol == 'apoderado'}">
+                            <div th:if="${selectedRol == T(com.isai.demowebregistrationsystem.model.enums.Rol).APODERADO}">
                                 <div class="mb-3">
                                     <label for="parentesco" class="form-label">Parentesco <span
                                             class="text-danger">*</span></label>
@@ -447,7 +454,8 @@
                                 <div class="form-check mb-3">
                                     <input type="checkbox" class="form-check-input" id="autorizadoRecoger"
                                            th:field="*{autorizadoRecoger}">
-                                    <label class="form-check-label" for="autorizadoRecoger">Autorizado a Recoger</label>
+                                    <label class="form-check-label" for="autorizadoRecoger">Autorizado a Recoger
+                                        Estudiante</label>
                                 </div>
                                 <div class="form-check mb-3">
                                     <input type="checkbox" class="form-check-input" id="esPrincipal"
@@ -456,14 +464,18 @@
                                 </div>
                             </div>
 
-                            <div class="d-grid gap-2 mt-4">
-                                <button type="submit" class="btn btn-success btn-lg">
-                                    <i class="bi bi-person-plus-fill me-2"></i> Registrar
-                                </button>
+
+                            <div th:if="${selectedRol == T(com.isai.demowebregistrationsystem.model.enums.Rol).ADMIN}">
+                                <p class="alert alert-warning">No se requieren campos adicionales para el rol de
+                                    Administrador.</p>
                             </div>
-                            <div class="text-center mt-3">
-                                ¿Ya tienes una cuenta? <a th:href="@{/login}" class="text-primary fw-bold">Inicia
-                                Sesión</a>
+
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg"><i
+                                        class="bi bi-person-plus-fill me-2"></i>Registrarse
+                                </button>
+                                <a th:href="@{/auth/registro}" class="btn btn-outline-secondary btn-lg"><i
+                                        class="bi bi-arrow-left-circle me-2"></i>Cambiar Rol / Volver</a>
                             </div>
                         </form>
                     </div>
