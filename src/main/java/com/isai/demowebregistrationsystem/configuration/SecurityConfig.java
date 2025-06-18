@@ -67,11 +67,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/auth/login") // **¡CLAVE!** Aquí le dices a Spring Security cuál es tu página de login real
-                        .loginProcessingUrl("/auth/login") // La URL donde tu formulario POSTea las credenciales
-                        .successHandler(customAuthenticationSuccessHandler) // Tu manejador para redirecciones después del login
-                        .failureUrl("/auth/login?error=true") // A dónde ir si el login falla
-                        .permitAll() // Asegura que la página de login en sí sea accesible - ¡Esta también es CLAVE!
+                        .loginPage("/auth/login") // Página que muestra el formulario
+                        .loginProcessingUrl("/auth/do-login") // URL donde se procesa el login
+                        .successHandler(customAuthenticationSuccessHandler)
+                        .failureUrl("/auth/login?error=true")
+                        .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout") // URL para cerrar sesión (normalmente un POST)
