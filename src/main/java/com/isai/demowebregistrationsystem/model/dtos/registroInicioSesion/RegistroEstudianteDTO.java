@@ -1,4 +1,4 @@
-package com.isai.demowebregistrationsystem.model.dtos;
+package com.isai.demowebregistrationsystem.model.dtos.registroInicioSesion;
 
 import com.isai.demowebregistrationsystem.model.enums.Rol;
 import jakarta.validation.constraints.NotBlank;

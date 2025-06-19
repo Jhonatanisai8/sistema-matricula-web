@@ -1,10 +1,9 @@
-package com.isai.demowebregistrationsystem.model.dtos;
+package com.isai.demowebregistrationsystem.model.dtos.registroInicioSesion;
 
 import com.isai.demowebregistrationsystem.model.enums.Rol;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
