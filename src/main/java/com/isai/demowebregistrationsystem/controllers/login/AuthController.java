@@ -1,9 +1,9 @@
 package com.isai.demowebregistrationsystem.controllers.login;
 
-import com.isai.demowebregistrationsystem.model.dtos.RegistroApoderadoDTO;
-import com.isai.demowebregistrationsystem.model.dtos.RegistroDocenteDTO;
-import com.isai.demowebregistrationsystem.model.dtos.RegistroEstudianteDTO;
-import com.isai.demowebregistrationsystem.model.dtos.RegistroUsuarioDTO;
+import com.isai.demowebregistrationsystem.model.dtos.registroInicioSesion.RegistroApoderadoDTO;
+import com.isai.demowebregistrationsystem.model.dtos.registroInicioSesion.RegistroDocenteDTO;
+import com.isai.demowebregistrationsystem.model.dtos.registroInicioSesion.RegistroEstudianteDTO;
+import com.isai.demowebregistrationsystem.model.dtos.registroInicioSesion.RegistroUsuarioDTO;
 import com.isai.demowebregistrationsystem.model.enums.Rol;
 import com.isai.demowebregistrationsystem.services.UsuarioService;
 import jakarta.validation.Valid;

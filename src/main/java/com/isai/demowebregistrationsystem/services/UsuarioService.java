@@ -1,7 +1,7 @@
 package com.isai.demowebregistrationsystem.services;
 
 
-import com.isai.demowebregistrationsystem.model.dtos.RegistroUsuarioDTO;
+import com.isai.demowebregistrationsystem.model.dtos.registroInicioSesion.RegistroUsuarioDTO;
 import com.isai.demowebregistrationsystem.model.dtos.UsuarioDTO;
 import com.isai.demowebregistrationsystem.model.entities.Persona;
 import com.isai.demowebregistrationsystem.model.entities.Usuario;

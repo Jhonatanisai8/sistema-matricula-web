@@ -1,6 +1,6 @@
 package com.isai.demowebregistrationsystem.services.impl;
 
-import com.isai.demowebregistrationsystem.model.dtos.RegistroApoderadoDTO;
+import com.isai.demowebregistrationsystem.model.dtos.registroInicioSesion.RegistroApoderadoDTO;
 import com.isai.demowebregistrationsystem.model.enums.Rol;
 import com.isai.demowebregistrationsystem.model.dtos.ApoderadoDTO;
 import com.isai.demowebregistrationsystem.model.entities.Apoderado;

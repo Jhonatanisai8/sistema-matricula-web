@@ -1,7 +1,5 @@
 package com.isai.demowebregistrationsystem.controllers.admin;
 
-import com.isai.demowebregistrationsystem.model.dtos.DocenteDTO;
-import com.isai.demowebregistrationsystem.model.dtos.DocenteRegistroDTO;
 import com.isai.demowebregistrationsystem.services.DocenteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

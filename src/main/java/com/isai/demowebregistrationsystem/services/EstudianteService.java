@@ -1,7 +1,7 @@
 package com.isai.demowebregistrationsystem.services;
 
 import com.isai.demowebregistrationsystem.model.dtos.EstudianteDTO;
-import com.isai.demowebregistrationsystem.model.dtos.RegistroEstudianteDTO;
+import com.isai.demowebregistrationsystem.model.dtos.registroInicioSesion.RegistroEstudianteDTO;
 import com.isai.demowebregistrationsystem.model.entities.Estudiante;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

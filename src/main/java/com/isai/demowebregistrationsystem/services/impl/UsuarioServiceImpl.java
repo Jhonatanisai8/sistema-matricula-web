@@ -2,6 +2,10 @@ package com.isai.demowebregistrationsystem.services.impl;
 
 
 import com.isai.demowebregistrationsystem.model.dtos.*;
+import com.isai.demowebregistrationsystem.model.dtos.registroInicioSesion.RegistroApoderadoDTO;
+import com.isai.demowebregistrationsystem.model.dtos.registroInicioSesion.RegistroDocenteDTO;
+import com.isai.demowebregistrationsystem.model.dtos.registroInicioSesion.RegistroEstudianteDTO;
+import com.isai.demowebregistrationsystem.model.dtos.registroInicioSesion.RegistroUsuarioDTO;
 import com.isai.demowebregistrationsystem.model.entities.*;
 import com.isai.demowebregistrationsystem.repositorys.*;
 import com.isai.demowebregistrationsystem.services.UsuarioService;
