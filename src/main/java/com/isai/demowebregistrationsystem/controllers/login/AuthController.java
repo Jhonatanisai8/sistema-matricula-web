@@ -180,9 +180,9 @@ public class AuthController {
         return "dashboards/estudiante_dashboard";
     }
 
-    @GetMapping("/apoderado/dashboard")
+    @GetMapping("/apoderado/layaout")
     public String apoderadoDashboard() {
-        return "dashboards/apoderado_dashboard";
+        return "layouts/apoderado-layout";
     }
 
     @GetMapping("/access-denied")
