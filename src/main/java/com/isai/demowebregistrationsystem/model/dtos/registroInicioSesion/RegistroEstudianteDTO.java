@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
 
 @Setter
 @Getter
@@ -40,7 +41,8 @@ public class RegistroEstudianteDTO
     @Size(max = 10, message = "El tipo de sangre no puede exceder los 10 caracteres.")
     private String tipoSangre;
 
-    private Integer idApoderado;
+    @Length(max = 8)
+    private String dniApoderadoPrin;
 
     public RegistroEstudianteDTO() {
         this.setRol(Rol.ESTUDIANTE);
