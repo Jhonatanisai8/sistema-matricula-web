@@ -71,7 +71,7 @@ public class AuthController {
             model.addAttribute("selectedRol", selectedRol);
 
             // Aquí se pasan las listas de String
-            model.addAttribute("generos", Arrays.asList("MASCULINO", "FEMENINO", "OTRO"));
+            model.addAttribute("generos", Arrays.asList("MASCULINO", "FEMENINO"));
             model.addAttribute("tiposDocumento", Arrays.asList("DNI", "PASAPORTE", "CARNET_EXTRANJERIA"));
             model.addAttribute("estadosCivil", Arrays.asList("SOLTERO", "CASADO", "DIVORCIADO", "VIUDO"));
 

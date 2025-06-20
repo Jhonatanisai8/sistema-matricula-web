@@ -235,12 +235,13 @@ public class UsuarioServiceImpl implements UsuarioService {
                 BeanUtils.copyProperties(estudianteDTO, estudiante);
                 estudiante.setPersona(persona); // Asocia la Persona
                 estudiante.setSeguroEscolar(estudianteDTO.getSeguroEscolar() != null ? estudianteDTO.getSeguroEscolar() : false);
-                //  lógica para asociar un apoderado existente
-                // if (estudianteDTO.getIdApoderado() != null) {
-                //     Apoderado apoderado = apoderadoRepository.findById(estudianteDTO.getIdApoderado())
-                //                               .orElseThrow(() -> new IllegalArgumentException("Apoderado no encontrado."));
-                //     estudiante.setApoderado(apoderado);
-                // }
+                //lógica para asociar un apoderado existente
+                if (estudianteDTO.getDniApoderadoPrin() != null) {
+                    Apoderado apoderado = apoderadoRepository.findByPersonaDni(estudianteDTO.getDniApoderadoPrin())
+                            .orElseThrow(() -> new IllegalArgumentException("Apoderado no encontrado."));
+                    System.out.println(apoderado.getPersona().getNombres());
+                    estudiante.setApoderadoPrincipal(apoderado);
+                }
                 estudianteRepository.save(estudiante);
                 break;
             case APODERADO:

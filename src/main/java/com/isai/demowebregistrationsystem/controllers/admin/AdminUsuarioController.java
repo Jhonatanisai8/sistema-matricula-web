@@ -22,7 +22,7 @@ import java.util.Optional;
 @RequestMapping("/admin/usuarios")
 public class AdminUsuarioController {
 
-    private final UsuarioService usuarioService; // ¡Cambio a la interfaz!
+    private final UsuarioService usuarioService;
 
     @GetMapping
     public String listUsuarios(Model model,

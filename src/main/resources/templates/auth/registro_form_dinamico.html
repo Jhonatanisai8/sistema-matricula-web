@@ -308,6 +308,16 @@
 
                             <div th:if="${selectedRol == T(com.isai.demowebregistrationsystem.model.enums.Rol).ESTUDIANTE}">
                                 <div class="mb-3">
+                                    <label for="dniApoderadoPrin" class="form-label">Dni del Apoderado: <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="dniApoderadoPrin"
+                                           th:field="*{dniApoderadoPrin}"
+                                           th:classappend="${#fields.hasErrors('dniApoderadoPrin') ? 'is-invalid' : ''}"
+                                           required>
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('dniApoderadoPrin')}"
+                                         th:errors="*{dniApoderadoPrin}"></div>
+                                </div>
+                                <div class="mb-3">
                                     <label for="codigoEstudiante" class="form-label">Código de Estudiante <span
                                             class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="codigoEstudiante"
@@ -317,6 +327,7 @@
                                     <div class="invalid-feedback" th:if="${#fields.hasErrors('codigoEstudiante')}"
                                          th:errors="*{codigoEstudiante}"></div>
                                 </div>
+
                                 <div class="mb-3">
                                     <label for="emailEducativo" class="form-label">Email Educativo</label>
                                     <input type="email" class="form-control" id="emailEducativo"
