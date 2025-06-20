@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -132,5 +133,10 @@ public class AdminUsuarioController {
             redirectAttributes.addFlashAttribute("errorMessage", "Error al cambiar el estado del usuario: " + e.getMessage());
         }
         return "redirect:/admin/usuarios";
+    }
+
+    public static void main(String[] args) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        System.out.println(encoder.encode("asd asd @1"));
     }
 }

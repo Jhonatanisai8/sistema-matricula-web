@@ -31,7 +31,7 @@ public class CustomAuthenticationSuccessHandler
         } else if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_ESTUDIANTE"))) {
             redirectUrl = "/estudiante/dashboard";
         } else if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_APODERADO"))) {
-            redirectUrl = "/apoderado/dashboard";
+            redirectUrl = "/apoderado/layaout";
         }
 
         response.sendRedirect(request.getContextPath() + redirectUrl);
