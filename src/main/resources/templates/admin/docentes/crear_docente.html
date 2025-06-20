@@ -12,23 +12,60 @@
     <th:block layout:fragment="styles">
         <style>
             .form-section-title {
-                background-color: #f8f9fa;
-                padding: 10px 15px;
-                border-bottom: 1px solid #e9ecef;
-                margin-bottom: 1rem;
-                font-weight: bold;
-                color: #343a40;
-                border-radius: 5px 5px 0 0;
+                background-color: #e9f1fb;
+                padding: 12px 16px;
+                border-left: 4px solid #0d6efd;
+                margin: 1.5rem 0 1rem;
+                font-weight: 600;
+                color: #0d6efd;
+                border-radius: 0.375rem;
             }
 
-            .form-group label {
+            .form-label {
                 font-weight: 500;
+                color: #495057;
             }
 
-            .error-message {
-                color: #dc3545;
+            .form-control:focus {
+                border-color: #0d6efd;
+                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            }
+
+            .btn-primary {
+                background-color: #0d6efd;
+                border-color: #0d6efd;
+            }
+
+            .btn-primary:hover {
+                background-color: #0b5ed7;
+                border-color: #0a58ca;
+            }
+
+            .btn-outline-secondary:hover {
+                background-color: #e2e6ea;
+            }
+
+            .card-header {
+                background-color: #0d6efd;
+                color: #fff;
+                font-weight: 500;
+                font-size: 1.1rem;
+            }
+
+            .img-fluid.rounded-circle {
+                border: 3px solid #6c757d;
+            }
+
+            .invalid-feedback {
                 font-size: 0.875em;
-                margin-top: 0.25rem;
+            }
+
+            .form-text {
+                font-size: 0.85em;
+            }
+
+            .alert {
+                font-size: 0.95rem;
             }
         </style>
     </th:block>
@@ -62,7 +99,7 @@
         </div>
         <div class="card-body">
             <form th:action="${docenteRegistroDTO.idDocente != null ? '/admin/docentes/editar/' + docenteRegistroDTO.idDocente : '/admin/docentes/crear'}"
-                  th:object="${docenteRegistroDTO}" method="post">
+                  th:object="${docenteRegistroDTO}" method="post" enctype="multipart/form-data">
 
                 <input type="hidden" th:field="*{idPersona}" th:if="${docenteRegistroDTO.idPersona != null}"/>
                 <input type="hidden" th:field="*{idDocente}" th:if="${docenteRegistroDTO.idDocente != null}"/>
@@ -75,6 +112,26 @@
 
 
                 <h6 class="form-section-title mt-4">Información Personal</h6>
+                <div class="col-md-6 mb-3">
+                    <label for="foto" class="form-label">Foto de Perfil:</label>
+                    <input type="file" class="form-control" id="foto" th:field="*{foto}" accept="image/*"
+                    >
+                    <div class="form-text text-muted small">Subir una imagen para el apoderado (opcional).</div>
+                </div>
+                <div class="col-md-6 mb-3 text-center">
+                    <div th:if="${docenteRegistroDTO.fotoUrlPersona != null and !docenteRegistroDTO.fotoUrlPersona.isEmpty()}">
+                        <label class="form-label">Foto Actual:</label>
+                        <div>
+                            <img th:src="@{/assets/{filename}(filename=${docenteRegistroDTO.fotoUrlPersona})}"
+                                 alt="Foto actual de perfil"
+                                 class="img-fluid rounded-circle border border-2 border-secondary shadow-sm"
+                                 style="width: 120px; height: 120px; object-fit: cover;">
+                        </div>
+                        <div class="form-text text-muted small mt-1">Se reemplazará si subes una nueva foto.
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label for="dni" class="form-label">DNI <span class="text-danger">*</span></label>
@@ -165,14 +222,6 @@
                                maxlength="50">
                         <div class="invalid-feedback" th:if="${#fields.hasErrors('tipoDocumento')}"
                              th:errors="*{tipoDocumento}"></div>
-                    </div>
-                    <div class="col-md-8 mb-3">
-                        <label for="fotoUrlPersona" class="form-label">URL Foto Perfil (Persona)</label>
-                        <input type="text" class="form-control" id="fotoUrlPersona" th:field="*{fotoUrlPersona}"
-                               th:classappend="${#fields.hasErrors('fotoUrlPersona') ? 'is-invalid' : ''}"
-                               maxlength="255" placeholder="https://example.com/foto.jpg">
-                        <div class="invalid-feedback" th:if="${#fields.hasErrors('fotoUrlPersona')}"
-                             th:errors="*{fotoUrlPersona}"></div>
                     </div>
                 </div>
 
