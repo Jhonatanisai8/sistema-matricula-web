@@ -76,6 +76,7 @@ public class DocenteServiceImpl implements DocenteService {
             ruta = almacenArchivo.almacenarArchivo(dto.getFoto());
             persona.setFotoUrl(ruta);
         }
+        System.out.println(persona.getFotoUrl());
         persona = personaRepository.save(persona);
         // actualizamos el  DTO con el ID generado
         dto.setIdPersona(persona.getIdPersona());
@@ -148,7 +149,13 @@ public class DocenteServiceImpl implements DocenteService {
         personaExistente.setEmailPersonal(dto.getEmailPersonal());
         personaExistente.setEstadoCivil(dto.getEstadoCivil());
         personaExistente.setTipoDocumento(dto.getTipoDocumento());
-        personaExistente.setFotoUrl(dto.getFotoUrlPersona());
+        String ruta = "";
+        if (dto.getFoto() != null
+                && !dto.getFoto().isEmpty()) {
+            ruta = almacenArchivo.almacenarArchivo(dto.getFoto());
+            personaExistente.setFotoUrl(ruta);
+        }
+        System.out.println(personaExistente.getFotoUrl());
         // El campo 'activo' de Persona se gestiona por separado en activar/desactivar
 
         personaRepository.save(personaExistente);

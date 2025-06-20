@@ -15,37 +15,34 @@
                 height: 150px;
                 object-fit: cover;
                 border-radius: 50%;
-                border: 3px solid #007bff;
+                border: 3px solid #0d6efd;
                 box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                margin-bottom: 1rem;
             }
+
             .info-item {
                 margin-bottom: 1rem;
             }
+
             .info-item strong {
-                color: #343a40;
-                display: block;
-                margin-bottom: 0.2rem;
+                color: #212529;
+                font-weight: 600;
             }
-            .info-item span {
-                color: #6c757d;
-                font-size: 0.95rem;
-            }
-            .card-header-custom {
-                background-color: #007bff;
-                color: white;
-                padding: 1rem 1.5rem;
-                border-bottom: 1px solid rgba(0, 0, 0, .125);
-            }
+
             .badge-coordinator {
-                background-color: #28a745;
+                background-color: #198754;
                 color: white;
-                padding: 0.5em 0.8em;
-                border-radius: 0.25rem;
-                font-size: 0.85em;
-                font-weight: normal;
+                font-size: 0.85rem;
             }
-            .table-striped tbody tr:nth-of-type(odd) {
-                background-color: rgba(0, 0, 0, 0.03);
+
+            .card-header-custom {
+                background-color: #0d6efd;
+                color: white;
+                padding: 1rem;
+            }
+
+            .table thead th {
+                background-color: #f8f9fa;
             }
         </style>
     </th:block>
@@ -55,11 +52,12 @@
 <section layout:fragment="content" class="flex-grow-1 container-fluid">
     <header class="mb-4 d-flex justify-content-between align-items-center">
         <h1 class="h3"><i class="bi bi-person-badge me-2"></i>Detalle del Docente</h1>
-        <div>
-            <a th:href="@{/admin/docentes/editar/{id}(id=${docente.idDocente})}" class="btn btn-warning me-2">
+        <div class="d-flex flex-wrap gap-2">
+            <a th:href="@{/admin/docentes/editar/{id}(id=${docente.idDocente})}" class="btn btn-warning">
                 <i class="bi bi-pencil-square me-1"></i> Editar Docente
             </a>
-            <a th:href="@{/admin/docentes/asignar-cursos/{idDocente}(idDocente=${docente.idDocente})}" class="btn btn-secondary me-2" title="Asignar Cursos">
+            <a th:href="@{/admin/docentes/asignar-cursos/{idDocente}(idDocente=${docente.idDocente})}"
+               class="btn btn-secondary">
                 <i class="bi bi-journal-check me-1"></i> Asignar Cursos
             </a>
             <a th:href="@{/admin/docentes}" class="btn btn-outline-secondary">
@@ -79,12 +77,19 @@
 
     <div class="row">
         <div class="col-lg-4 col-md-5">
-            <div class="card shadow-sm mb-4 text-center">
+            <div class="card shadow-sm mb-4 text-center p-3">
                 <div class="card-body">
-                    <img th:src="${docente.fotoUrlPersona != null and !docente.fotoUrlPersona.isEmpty() ? docente.fotoUrlPersona : '/images/default-avatar.png'}"
-                         alt="Foto de perfil" class="profile-img mb-3">
-                    <h4 th:text="${docente.nombresCompletos}" class="card-title mb-1">Nombre Completo</h4>
-                    <p class="text-muted mb-2" th:text="${docente.especialidadPrincipal}">Especialidad</p>
+                    <img th:if="${docente.fotoUrlPersona != null and !docente.fotoUrlPersona.isEmpty()}"
+                         th:src="@{/assets/{filename}(filename=${docente.fotoUrlPersona})}"
+                         alt="Foto de perfil de la Persona"
+                         class="profile-img">
+                    <img th:unless="${docente.fotoUrlPersona != null and !docente.fotoUrlPersona.isEmpty()}"
+                         th:src="@{/img/default-profile.png}"
+                         alt="Sin foto de perfil"
+                         class="profile-img">
+
+                    <h4 th:text="${docente.nombresCompletos}" class="card-title mb-1"></h4>
+                    <p class="text-muted mb-2" th:text="${docente.especialidadPrincipal}"></p>
                     <div th:if="${docente.coordinador}" class="mt-2">
                         <span class="badge-coordinator"><i class="bi bi-star-fill me-1"></i>Coordinador</span>
                     </div>
@@ -102,7 +107,8 @@
                             <strong>DNI:</strong> <span th:text="${docente.dni}"></span>
                         </div>
                         <div class="col-md-6 info-item">
-                            <strong>Fecha de Nacimiento:</strong> <span th:text="${#temporals.format(docente.fechaNacimiento, 'dd/MM/yyyy')}"></span>
+                            <strong>Fecha de Nacimiento:</strong>
+                            <span th:text="${#temporals.format(docente.fechaNacimiento, 'dd/MM/yyyy')}"></span>
                         </div>
                         <div class="col-md-6 info-item">
                             <strong>Género:</strong> <span th:text="${docente.genero}"></span>
@@ -114,13 +120,16 @@
                             <strong>Tipo Documento:</strong> <span th:text="${docente.tipoDocumento}"></span>
                         </div>
                         <div class="col-md-12 info-item">
-                            <strong>Dirección:</strong> <span th:text="${docente.direccion ?: 'No especificada'}"></span>
+                            <strong>Dirección:</strong>
+                            <span th:text="${docente.direccion ?: 'No especificada'}"></span>
                         </div>
                         <div class="col-md-6 info-item">
-                            <strong>Teléfono:</strong> <span th:text="${docente.telefono ?: 'No especificado'}"></span>
+                            <strong>Teléfono:</strong>
+                            <span th:text="${docente.telefono ?: 'No especificado'}"></span>
                         </div>
                         <div class="col-md-6 info-item">
-                            <strong>Email Personal:</strong> <span th:text="${docente.emailPersonal ?: 'No especificado'}"></span>
+                            <strong>Email Personal:</strong>
+                            <span th:text="${docente.emailPersonal ?: 'No especificado'}"></span>
                         </div>
                     </div>
                 </div>
@@ -136,22 +145,27 @@
                             <strong>Código Docente:</strong> <span th:text="${docente.codigoDocente}"></span>
                         </div>
                         <div class="col-md-6 info-item">
-                            <strong>Email Institucional:</strong> <span th:text="${docente.emailInstitucional ?: 'No especificado'}"></span>
+                            <strong>Email Institucional:</strong>
+                            <span th:text="${docente.emailInstitucional ?: 'No especificado'}"></span>
                         </div>
                         <div class="col-md-6 info-item">
-                            <strong>Especialidad Secundaria:</strong> <span th:text="${docente.especialidadSecundaria ?: 'No especificada'}"></span>
+                            <strong>Especialidad Secundaria:</strong>
+                            <span th:text="${docente.especialidadSecundaria ?: 'No especificada'}"></span>
                         </div>
                         <div class="col-md-6 info-item">
                             <strong>Título Profesional:</strong> <span th:text="${docente.tituloProfesional}"></span>
                         </div>
                         <div class="col-md-6 info-item">
-                            <strong>Universidad de Egreso:</strong> <span th:text="${docente.universidadEgreso ?: 'No especificada'}"></span>
+                            <strong>Universidad de Egreso:</strong>
+                            <span th:text="${docente.universidadEgreso ?: 'No especificada'}"></span>
                         </div>
                         <div class="col-md-6 info-item">
-                            <strong>Fecha de Contratación:</strong> <span th:text="${#temporals.format(docente.fechaContratacion, 'dd/MM/yyyy')}"></span>
+                            <strong>Fecha de Contratación:</strong>
+                            <span th:text="${#temporals.format(docente.fechaContratacion, 'dd/MM/yyyy')}"></span>
                         </div>
                         <div class="col-md-6 info-item">
-                            <strong>Salario Base:</strong> <span th:text="${#numbers.formatCurrency(docente.salarioBase)}"></span>
+                            <strong>Salario Base:</strong>
+                            <span th:text="${#numbers.formatCurrency(docente.salarioBase)}"></span>
                         </div>
                         <div class="col-md-6 info-item">
                             <strong>Tipo de Contrato:</strong> <span th:text="${docente.tipoContrato}"></span>
@@ -165,14 +179,18 @@
                         <div class="col-md-12 info-item">
                             <strong>URL CV:</strong>
                             <span th:if="${docente.cvUrl != null and !docente.cvUrl.isEmpty()}">
-                                <a th:href="${docente.cvUrl}" target="_blank" class="btn btn-sm btn-outline-info">Ver CV <i class="bi bi-box-arrow-up-right"></i></a>
+                                <a th:href="${docente.cvUrl}" target="_blank" class="btn btn-sm btn-outline-info">
+                                    Ver CV <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
                             </span>
                             <span th:unless="${docente.cvUrl != null and !docente.cvUrl.isEmpty()}">No disponible</span>
                         </div>
                         <div class="col-md-12 info-item">
                             <strong>Usuario del Sistema:</strong>
                             <span th:text="${docente.username ?: 'No asignado'}"></span>
-                            <span th:if="${docente.username}" th:class="${docente.usuarioActivo ? 'badge bg-success' : 'badge bg-danger'}" th:text="${docente.usuarioActivo ? 'Activo' : 'Inactivo'}"></span>
+                            <span th:if="${docente.username}"
+                                  th:class="${docente.usuarioActivo ? 'badge bg-success ms-2' : 'badge bg-danger ms-2'}"
+                                  th:text="${docente.usuarioActivo ? 'Activo' : 'Inactivo'}"></span>
                         </div>
                     </div>
                 </div>
@@ -213,7 +231,8 @@
                         </table>
                     </div>
                     <div class="text-end mt-3">
-                        <a th:href="@{/admin/docentes/asignar-cursos/{idDocente}(idDocente=${docente.idDocente})}" class="btn btn-info btn-sm">
+                        <a th:href="@{/admin/docentes/asignar-cursos/{idDocente}(idDocente=${docente.idDocente})}"
+                           class="btn btn-info btn-sm">
                             <i class="bi bi-plus-circle me-1"></i> Gestionar Asignaciones
                         </a>
                     </div>

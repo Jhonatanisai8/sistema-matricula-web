@@ -108,6 +108,7 @@ public class AdminDocenteController {
             docenteRegistroDTO.setEstadoCivil(docenteDetalle.getEstadoCivil());
             docenteRegistroDTO.setTipoDocumento(docenteDetalle.getTipoDocumento());
             docenteRegistroDTO.setFotoUrlPersona(docenteDetalle.getFotoUrlPersona());
+            System.out.println(docenteDetalle.getFotoUrlPersona());
 
             // Mapeo de campos de Docente
             docenteRegistroDTO.setIdDocente(docenteDetalle.getIdDocente());
@@ -124,7 +125,6 @@ public class AdminDocenteController {
             docenteRegistroDTO.setAnosExperiencia(docenteDetalle.getAnosExperiencia());
             docenteRegistroDTO.setCvUrl(docenteDetalle.getCvUrl());
             docenteRegistroDTO.setCoordinador(docenteDetalle.getCoordinador());
-
             // Mapeo de campos de Usuario (si es relevante para el formulario de edición)
             docenteRegistroDTO.setUsername(docenteDetalle.getUsername());
 
@@ -144,7 +144,6 @@ public class AdminDocenteController {
         if (result.hasErrors()) {
             return "admin/docentes/crear_docente";
         }
-
         // validamos  que las contraseñas coincidan
         if (docenteRegistroDTO.getPassword() != null && !docenteRegistroDTO.getPassword().isEmpty()) {
             if (!docenteRegistroDTO.getPassword().equals(docenteRegistroDTO.getConfirmPassword())) {
@@ -152,7 +151,6 @@ public class AdminDocenteController {
                 return "admin/docentes/crear_docente";
             }
         }
-
 
         try {
             docenteService.actualizarDocente(idDocente, docenteRegistroDTO);
@@ -208,62 +206,52 @@ public class AdminDocenteController {
                                RedirectAttributes redirectAttributes,
                                Model model) {
 
-        // --- Primer punto de control: Verificación de errores de validación ---
-        // Si hay errores de validación de campos del DTO (incluido idDocente si es @NotNull)
+
         if (result.hasErrors()) {
-            // Aseguramos que el idDocente no sea nulo antes de intentar cargarlo
-            // Si asignacionDocenteDTO.getIdDocente() es nulo aquí, es un error del formulario.
-            // Podrías añadir un mensaje global si el idDocente es la clave del problema.
+
+
             if (asignacionDocenteDTO.getIdDocente() == null) {
-                // Añade un error global si el ID del docente es el problema principal
+
                 result.reject("global.idDocente.null", "No se pudo identificar al docente para la asignación.");
-                // Si el idDocente es nulo, no podemos cargar el docente ni sus asignaciones existentes.
-                // Es mejor redirigir a una página de error o al listado de docentes.
+
+
                 redirectAttributes.addFlashAttribute("errorMessage", "Error: ID del docente no proporcionado. Vuelva a intentar la asignación.");
-                return "redirect:/admin/docentes"; // O a una página de error
+                return "redirect:/admin/docentes";
             }
 
-            // Recuperar y agregar el objeto Docente al modelo.
-            // Solo intentamos cargar el docente si su ID no es nulo.
-            // Si hay otros errores de validación (curso, grado, etc.),
-            // el docente debería existir y podemos cargarlo.
+
             try {
                 DocenteDetalleDTO docente = docenteService.obtenerDetalleDocente(asignacionDocenteDTO.getIdDocente());
                 model.addAttribute("docente", docente);
-                // Recargar datos para los selects y la tabla de asignaciones existentes
+
                 model.addAttribute("cursos", docenteService.listarTodosCursos());
                 model.addAttribute("grados", docenteService.listarTodosGrados());
                 model.addAttribute("periodosAcademicos", docenteService.listarTodosPeriodosAcademicos());
                 model.addAttribute("asignacionesExistentes", docenteService.obtenerAsignacionesPorDocente(asignacionDocenteDTO.getIdDocente()));
             } catch (ResourceNotFoundException e) {
-                // Si el docente no se encuentra a pesar de que el ID no es nulo,
-                // es un error más grave. Podrías añadir un mensaje global aquí.
+
+
                 result.reject("global.docente.notFound", "El docente especificado no fue encontrado.");
-                // Redirige al listado de docentes si el docente base no existe
+
                 redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
                 return "redirect:/admin/docentes";
             }
 
-            return "admin/docentes/asignar_cursos"; // Vuelve a la misma vista con errores
+            return "admin/docentes/asignar_cursos";
         }
 
-        // --- Segundo punto de control: Lógica de negocio si la validación pasó ---
+
         try {
             docenteService.asignarCursoADocente(asignacionDocenteDTO);
             redirectAttributes.addFlashAttribute("successMessage", "Curso asignado exitosamente al docente.");
-            // Redirige al detalle del docente o a la página de asignaciones para ese docente
             return "redirect:/admin/docentes/asignar-cursos/" + asignacionDocenteDTO.getIdDocente();
         } catch (ResourceNotFoundException e) {
-            // Errores específicos si el curso, grado, o período no se encuentran en el servicio
             redirectAttributes.addFlashAttribute("errorMessage", "Error de datos: " + e.getMessage());
-            // En este caso, volvemos a la página de asignación con el ID del docente
             return "redirect:/admin/docentes/asignar-cursos/" + asignacionDocenteDTO.getIdDocente();
         } catch (IllegalArgumentException e) {
-            // Otros errores de argumento ilegal desde la capa de servicio
             redirectAttributes.addFlashAttribute("errorMessage", "Error de asignación: " + e.getMessage());
             return "redirect:/admin/docentes/asignar-cursos/" + asignacionDocenteDTO.getIdDocente();
         } catch (Exception e) {
-            // Captura cualquier otra excepción inesperada
             redirectAttributes.addFlashAttribute("errorMessage", "Ocurrió un error inesperado: " + e.getMessage());
             return "redirect:/admin/docentes/asignar-cursos/" + asignacionDocenteDTO.getIdDocente();
         }
