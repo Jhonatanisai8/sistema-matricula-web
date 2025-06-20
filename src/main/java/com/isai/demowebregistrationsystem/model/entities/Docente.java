@@ -2,6 +2,7 @@ package com.isai.demowebregistrationsystem.model.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 @Table(name = "DOCENTE")
 @Data
 @NoArgsConstructor
+@Builder
 @AllArgsConstructor
 public class Docente {
 

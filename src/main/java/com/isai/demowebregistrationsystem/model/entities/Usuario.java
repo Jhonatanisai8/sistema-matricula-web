@@ -3,6 +3,7 @@ package com.isai.demowebregistrationsystem.model.entities;
 import com.isai.demowebregistrationsystem.model.enums.Rol;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Usuario {
 
     @Id

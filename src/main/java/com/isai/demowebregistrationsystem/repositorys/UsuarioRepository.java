@@ -15,5 +15,4 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     Optional<Usuario> findByPersonaIdPersona(Integer idPersona);
 
-    boolean existsByPersonaDni(String dni);
 }
