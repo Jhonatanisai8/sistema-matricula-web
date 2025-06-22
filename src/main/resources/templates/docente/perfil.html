@@ -7,43 +7,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title layout:fragment="title">Mi Perfil - Docente</title>
-    <th:block layout:fragment="styles">
-        <style>
-            .form-section-title {
-                background-color: #f8f9fa;
-                padding: 10px 15px;
-                border-bottom: 1px solid #e9ecef;
-                margin-bottom: 1rem;
-                font-weight: bold;
-                color: #343a40;
-                border-radius: 5px 5px 0 0;
-            }
-
-            .profile-img-container {
-                width: 150px;
-                height: 150px;
-                border-radius: 50%;
-                overflow: hidden;
-                margin: 0 auto 20px auto;
-                border: 3px solid #007bff;
-                background-color: #f0f0f0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .profile-img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
-
-            .profile-img-placeholder {
-                font-size: 3rem;
-                color: #ccc;
-            }
-        </style>
-    </th:block>
 </head>
 <body>
 <section layout:fragment="content" class="flex-grow-1 container-fluid">
@@ -68,28 +31,37 @@
             <h5 class="mb-0">Información de Perfil</h5>
         </div>
         <div class="card-body">
-            <form th:action="@{/docente/perfil}" th:object="${docentePerfilDTO}" method="post">
-
+            <form th:action="@{/docente/perfil}" th:object="${docentePerfilDTO}" method="post"
+                  enctype="multipart/form-data">
                 <input type="hidden" th:field="*{idDocente}"/>
                 <input type="hidden" th:field="*{idPersona}"/>
 
                 <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger alert-dismissible fade show"
                      role="alert">
-                    <div th:each="err : ${#fields.globalErrors()}" th:text="${err}">Error global</div>
+                    <div th:each="err : ${#fields.globalErrors()}" th:text="${err}"></div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
 
-                <div class="text-center mb-4">
-                    <div class="profile-img-container">
-                        <img th:if="*{fotoUrl}" th:src="*{fotoUrl}" class="profile-img" alt="Foto de Perfil">
-                        <i th:unless="*{fotoUrl}" class="bi bi-person-circle profile-img-placeholder"></i>
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label for="foto" class="form-label">Foto de Perfil:</label>
+                        <input type="file" class="form-control" id="foto" th:field="*{foto}" accept="image/*">
+                        <div class="form-text text-muted small">Subir una imagen para el apoderado (opcional).</div>
                     </div>
-                    <small class="text-muted">La foto de perfil se puede cambiar subiendo una URL o, en el futuro, un
-                        archivo.</small>
+                    <div class="col-md-3 offset-md-1 text-center">
+                        <div class="mx-auto border border-primary rounded-circle overflow-hidden bg-light"
+                             style="width: 150px; height: 150px;">
+                            <img th:if="${docentePerfilDTO.fotoUrl != null and !docentePerfilDTO.fotoUrl.isEmpty()}"
+                                 th:src="@{/assets/{filename}(filename=${docentePerfilDTO.fotoUrl})}"
+                                 alt="Foto de perfil" class="img-fluid w-100 h-100 object-fit-cover"/>
+                            <img th:unless="${docentePerfilDTO.fotoUrl != null and !docentePerfilDTO.fotoUrl.isEmpty()}"
+                                 th:src="@{/img/default-profile.png}"
+                                 alt="Sin foto" class="img-fluid w-100 h-100 object-fit-cover"/>
+                        </div>
+                    </div>
                 </div>
 
-
-                <h6 class="form-section-title mt-4">Datos Personales</h6>
+                <h6 class="bg-light px-3 py-2 border-bottom mb-3 fw-bold text-dark rounded-top">Datos Personales</h6>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="nombres" class="form-label">Nombres <span class="text-danger">*</span></label>
@@ -170,17 +142,9 @@
                         <div class="invalid-feedback" th:if="${#fields.hasErrors('direccion')}"
                              th:errors="*{direccion}"></div>
                     </div>
-                    <div class="col-md-12 mb-3">
-                        <label for="fotoUrl" class="form-label">URL de la Foto de Perfil</label>
-                        <input type="url" class="form-control" id="fotoUrl" th:field="*{fotoUrl}"
-                               placeholder="https://ejemplo.com/mi-foto.jpg"
-                               th:classappend="${#fields.hasErrors('fotoUrl') ? 'is-invalid' : ''}">
-                        <div class="invalid-feedback" th:if="${#fields.hasErrors('fotoUrl')}"
-                             th:errors="*{fotoUrl}"></div>
-                    </div>
                 </div>
 
-                <h6 class="form-section-title mt-4">Datos Profesionales</h6>
+                <h6 class="bg-light px-3 py-2 border-bottom mb-3 fw-bold text-dark rounded-top">Datos Profesionales</h6>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="emailInstitucional" class="form-label">Email Institucional</label>
@@ -238,7 +202,8 @@
                     </div>
                 </div>
 
-                <h6 class="form-section-title mt-4">Datos Administrativos (Solo Lectura)</h6>
+                <h6 class="bg-light px-3 py-2 border-bottom mb-3 fw-bold text-dark rounded-top">Datos Administrativos
+                    (Solo Lectura)</h6>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Código Docente:</label>
