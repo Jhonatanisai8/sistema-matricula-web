@@ -1,10 +1,7 @@
 package com.isai.demowebregistrationsystem.services;
 
 
-import com.isai.demowebregistrationsystem.model.dtos.docente.AsignacionDocenteDTO;
-import com.isai.demowebregistrationsystem.model.dtos.docente.DocenteDetalleDTO;
-import com.isai.demowebregistrationsystem.model.dtos.docente.DocentePerfilDTO;
-import com.isai.demowebregistrationsystem.model.dtos.docente.DocenteRegistroDTO;
+import com.isai.demowebregistrationsystem.model.dtos.docente.*;
 import com.isai.demowebregistrationsystem.model.entities.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -130,4 +127,6 @@ public interface DocenteService {
     DocentePerfilDTO actualizarPerfilDocente(DocentePerfilDTO docentePerfilDTO);
 
     Optional<Docente> findByPersonaId(Integer personaId);
+
+    List<CursoAsignadoDTO> listarCursosAsignadosPorUserName(String username);
 }

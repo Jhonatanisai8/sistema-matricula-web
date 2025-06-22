@@ -10,4 +10,6 @@ public interface AsignacionDocenteRepository
 
     List<AsignacionDocente> findByDocente_IdDocente(Integer docenteId);
 
+    List<AsignacionDocente> findByDocente_IdDocenteAndEstadoAsignacion(Long idDocente, String estadoAsignacion);
+
 }
