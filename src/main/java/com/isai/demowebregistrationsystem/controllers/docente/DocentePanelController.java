@@ -1,9 +1,8 @@
-package com.isai.demowebregistrationsystem.controllers.profesor;
+package com.isai.demowebregistrationsystem.controllers.docente;
 
 import com.isai.demowebregistrationsystem.exceptions.ResourceNotFoundException;
 import com.isai.demowebregistrationsystem.exceptions.ValidationException;
 import com.isai.demowebregistrationsystem.model.dtos.docente.DocentePerfilDTO;
-import com.isai.demowebregistrationsystem.services.DocenteService;
 import com.isai.demowebregistrationsystem.services.impl.DocenteServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

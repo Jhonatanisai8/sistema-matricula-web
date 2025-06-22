@@ -28,13 +28,13 @@
             <h5 class="card-title">¡Bienvenido, <span th:text="${username}">Docente</span>!</h5>
             <p class="card-text">Este es tu panel principal. Aquí podrás ver la información relevante para tu rol.</p>
             <div class="d-flex flex-wrap gap-3">
-                <a th:href="@{/profesor/perfil}" class="btn btn-primary btn-lg">
+                <a th:href="@{/docente/perfil}" class="btn btn-primary btn-lg">
                     <i class="bi bi-person-circle me-2"></i> Ver/Editar Mi Perfil
                 </a>
-                <a th:href="@{/profesor/horarios}" class="btn btn-info btn-lg">
+                <a th:href="@{/docente/horarios}" class="btn btn-info btn-lg">
                     <i class="bi bi-calendar-week me-2"></i> Mis Horarios
                 </a>
-                <a th:href="@{/profesor/cursos}" class="btn btn-success btn-lg">
+                <a th:href="@{/docente/cursos}" class="btn btn-success btn-lg">
                     <i class="bi bi-book me-2"></i> Mis Cursos
                 </a>
             </div>
