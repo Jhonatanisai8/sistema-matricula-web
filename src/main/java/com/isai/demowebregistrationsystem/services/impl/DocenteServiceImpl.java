@@ -2,10 +2,7 @@ package com.isai.demowebregistrationsystem.services.impl;
 
 import com.isai.demowebregistrationsystem.exceptions.ResourceNotFoundException;
 import com.isai.demowebregistrationsystem.exceptions.ValidationException;
-import com.isai.demowebregistrationsystem.model.dtos.docente.AsignacionDocenteDTO;
-import com.isai.demowebregistrationsystem.model.dtos.docente.DocenteDetalleDTO;
-import com.isai.demowebregistrationsystem.model.dtos.docente.DocentePerfilDTO;
-import com.isai.demowebregistrationsystem.model.dtos.docente.DocenteRegistroDTO;
+import com.isai.demowebregistrationsystem.model.dtos.docente.*;
 import com.isai.demowebregistrationsystem.model.entities.*;
 import com.isai.demowebregistrationsystem.model.enums.Rol;
 import com.isai.demowebregistrationsystem.repositorys.*;
@@ -548,4 +545,30 @@ public class DocenteServiceImpl implements DocenteService {
         return TIPOS_DOCUMENTO;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<CursoAsignadoDTO> listarCursosAsignadosPorUserName(String username) {
+        Docente docente = usuarioRepository.findByUserName(username)
+                .map(Usuario::getPersona)
+                .flatMap(persona -> docenteRepository.findByPersonaIdPersona(persona.getIdPersona()))
+                .orElseThrow(() -> new ResourceNotFoundException("Docente no encontrado para el usuario: " + username));
+        List<AsignacionDocente> asignaciones = asignacionDocenteRepository.findByDocente_IdDocente(docente.getIdDocente());
+        return asignaciones.stream()
+                .map(this::convertirACursoAsignadoDTO)
+                .collect(Collectors.toList());
+    }
+
+    private CursoAsignadoDTO convertirACursoAsignadoDTO(AsignacionDocente asignacion) {
+        CursoAsignadoDTO dto = new CursoAsignadoDTO();
+        dto.setIdAsignacion(asignacion.getIdAsignacion());
+        dto.setIdCurso(asignacion.getCurso().getIdCurso());
+        dto.setNombreCurso(asignacion.getCurso().getNombreCurso());
+        dto.setCodigoCurso(asignacion.getCurso().getCodigoCurso());
+        dto.setIdPeriodoAcademico(asignacion.getPeriodoAcademico().getIdPeriodo());
+        dto.setNombrePeriodoAcademico(asignacion.getPeriodoAcademico().getNombrePeriodo());
+        dto.setAnoAcademico(asignacion.getPeriodoAcademico().getAnoAcademico());
+        dto.setNombreGrado(asignacion.getGrado().getNombreGrado());
+        dto.setEstadoAsignacion(asignacion.getEstadoAsignacion());
+        return dto;
+    }
 }
