@@ -1,8 +1,10 @@
 package com.isai.demowebregistrationsystem.services.impl;
 
 import com.isai.demowebregistrationsystem.exceptions.ResourceNotFoundException;
+import com.isai.demowebregistrationsystem.exceptions.ValidationException;
 import com.isai.demowebregistrationsystem.model.dtos.docente.AsignacionDocenteDTO;
 import com.isai.demowebregistrationsystem.model.dtos.docente.DocenteDetalleDTO;
+import com.isai.demowebregistrationsystem.model.dtos.docente.DocentePerfilDTO;
 import com.isai.demowebregistrationsystem.model.dtos.docente.DocenteRegistroDTO;
 import com.isai.demowebregistrationsystem.model.entities.*;
 import com.isai.demowebregistrationsystem.model.enums.Rol;
@@ -16,6 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -414,4 +418,130 @@ public class DocenteServiceImpl implements DocenteService {
     public List<PeriodoAcademico> listarTodosPeriodosAcademicos() {
         return periodoAcademicoRepository.findAll();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<DocentePerfilDTO> obtenerPerfilDocentePorUsername(String username) {
+        return usuarioRepository.findByUserName(username)
+                .map(Usuario::getPersona)
+                .flatMap(persona -> docenteRepository.findByPersonaIdPersona(persona.getIdPersona()))
+                .map(this::convertirADocentePerfilDTO);
+    }
+
+    @Override
+    public DocentePerfilDTO actualizarPerfilDocente(DocentePerfilDTO docentePerfilDTO) {
+        personaRepository.findByDni(docentePerfilDTO.getDni()).ifPresent(existingPersona -> {
+            if (!existingPersona.getIdPersona().equals(docentePerfilDTO.getIdPersona())) {
+                throw new ValidationException("El DNI '" + docentePerfilDTO.getDni() + "' ya está registrado para otra persona.");
+            }
+        });
+
+        // Buscar el docente y la persona
+        Docente docente = docenteRepository.findById(docentePerfilDTO.getIdDocente())
+                .orElseThrow(() -> new ResourceNotFoundException("Docente no encontrado con ID: " + docentePerfilDTO.getIdDocente()));
+
+        Persona persona = personaRepository.findById(docentePerfilDTO.getIdPersona())
+                .orElseThrow(() -> new ResourceNotFoundException("Persona no encontrada con ID: " + docentePerfilDTO.getIdPersona()));
+
+        // Actualizar datos de Persona
+        persona.setNombres(docentePerfilDTO.getNombres());
+        persona.setApellidos(docentePerfilDTO.getApellidos());
+        persona.setDni(docentePerfilDTO.getDni());
+        persona.setDireccion(docentePerfilDTO.getDireccion());
+        persona.setEmailPersonal(docentePerfilDTO.getEmailPersonal());
+        persona.setEstadoCivil(docentePerfilDTO.getEstadoCivil());
+        persona.setFechaNacimiento(docentePerfilDTO.getFechaNacimiento());
+        persona.setFotoUrl(docentePerfilDTO.getFotoUrl());
+        persona.setGenero(docentePerfilDTO.getGenero());
+        persona.setTelefono(docentePerfilDTO.getTelefono());
+        persona.setTipoDocumento(docentePerfilDTO.getTipoDocumento());
+        persona.setFechaActualizacion(LocalDateTime.now());
+
+        Persona personaActualizada = personaRepository.save(persona);
+
+        // Actualizar datos de Docente
+        docente.setAnosExperiencia(docentePerfilDTO.getAnosExperiencia());
+        docente.setCvUrl(docentePerfilDTO.getCvUrl());
+        docente.setEmailInstitucional(docentePerfilDTO.getEmailInstitucional());
+        docente.setEspecialidadPrincipal(docentePerfilDTO.getEspecialidadPrincipal());
+        docente.setEspecialidadSecundaria(docentePerfilDTO.getEspecialidadSecundaria());
+        docente.setTituloProfesional(docentePerfilDTO.getTituloProfesional());
+        docente.setUniversidadEgreso(docentePerfilDTO.getUniversidadEgreso());
+
+        Docente docenteActualizado = docenteRepository.save(docente);
+
+        return convertirADocentePerfilDTO(docenteActualizado);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Docente> findByPersonaId(Integer personaId) {
+        return docenteRepository.findByPersonaIdPersona(personaId);
+    }
+
+    private static final List<String> ESTADOS_CIVILES = Arrays.asList(
+            "Soltero/a", "Casado/a", "Divorciado/a", "Viudo/a"
+    );
+    private static final List<String> GENEROS = Arrays.asList(
+            "Masculino", "Femenino"
+    );
+    private static final List<String> TIPOS_DOCUMENTO = Arrays.asList(
+            "DNI", "Pasaporte", "Carnet de Extranjería"
+    );
+
+    private DocentePerfilDTO convertirADocentePerfilDTO(Docente docente) {
+        Persona persona = docente.getPersona();
+        if (persona == null) {
+            throw new ResourceNotFoundException("La persona asociada al docente no fue encontrada.");
+        }
+
+        DocentePerfilDTO dto = new DocentePerfilDTO();
+        dto.setIdDocente(docente.getIdDocente());
+        dto.setIdPersona(persona.getIdPersona());
+
+        // Datos de Persona
+        dto.setNombres(persona.getNombres());
+        dto.setApellidos(persona.getApellidos());
+        dto.setDni(persona.getDni());
+        dto.setDireccion(persona.getDireccion());
+        dto.setEmailPersonal(persona.getEmailPersonal());
+        dto.setEstadoCivil(persona.getEstadoCivil());
+        dto.setFechaNacimiento(persona.getFechaNacimiento());
+        dto.setFotoUrl(persona.getFotoUrl());
+        dto.setGenero(persona.getGenero());
+        dto.setTelefono(persona.getTelefono());
+        dto.setTipoDocumento(persona.getTipoDocumento());
+        dto.setPersonaActivo(persona.getActivo());
+
+        // Datos de Docente
+        dto.setAnosExperiencia(docente.getAnosExperiencia());
+        dto.setCvUrl(docente.getCvUrl());
+        dto.setEmailInstitucional(docente.getEmailInstitucional());
+        dto.setEspecialidadPrincipal(docente.getEspecialidadPrincipal());
+        dto.setEspecialidadSecundaria(docente.getEspecialidadSecundaria());
+        dto.setTituloProfesional(docente.getTituloProfesional());
+        dto.setUniversidadEgreso(docente.getUniversidadEgreso());
+
+        dto.setCodigoDocente(docente.getCodigoDocente());
+        dto.setCoordinador(docente.getCoordinador());
+        dto.setEstadoLaboral(docente.getEstadoLaboral());
+        dto.setFechaContratacion(docente.getFechaContratacion());
+        dto.setSalarioBase(docente.getSalarioBase());
+        dto.setTipoContrato(docente.getTipoContrato());
+
+        return dto;
+    }
+
+    public List<String> getEstadosCiviles() {
+        return ESTADOS_CIVILES;
+    }
+
+    public List<String> getGeneros() {
+        return GENEROS;
+    }
+
+    public List<String> getTiposDocumento() {
+        return TIPOS_DOCUMENTO;
+    }
+
 }

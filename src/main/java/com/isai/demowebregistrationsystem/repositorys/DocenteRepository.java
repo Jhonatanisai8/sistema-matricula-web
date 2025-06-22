@@ -9,10 +9,11 @@ import java.util.Optional;
 @Repository
 public interface DocenteRepository extends JpaRepository<Docente, Integer> {
 
-    Optional<Docente> findByCodigoDocente(String codigoDocente);
 
     boolean existsByCodigoDocente(String codigoDocente);
 
     boolean existsByEmailInstitucional(String emailInstitucional);
+
+    Optional<Docente> findByPersonaIdPersona(Integer personaId);
 
 }
