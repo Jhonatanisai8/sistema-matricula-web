@@ -46,6 +46,7 @@ public class DocentePanelController {
                     .orElseThrow(() -> new ResourceNotFoundException("Docente no encontrado para el usuario: " + username));
 
             model.addAttribute("docentePerfilDTO", docentePerfilDTO);
+            System.out.println(docentePerfilDTO.getTipoDocumento());
             cargarDatosSelect(model);
             return "docente/perfil";
         } catch (ResourceNotFoundException e) {

@@ -451,12 +451,16 @@ public class DocenteServiceImpl implements DocenteService {
         persona.setEmailPersonal(docentePerfilDTO.getEmailPersonal());
         persona.setEstadoCivil(docentePerfilDTO.getEstadoCivil());
         persona.setFechaNacimiento(docentePerfilDTO.getFechaNacimiento());
-        persona.setFotoUrl(docentePerfilDTO.getFotoUrl());
         persona.setGenero(docentePerfilDTO.getGenero());
         persona.setTelefono(docentePerfilDTO.getTelefono());
         persona.setTipoDocumento(docentePerfilDTO.getTipoDocumento());
         persona.setFechaActualizacion(LocalDateTime.now());
-
+        String ruta = "";
+        if (docentePerfilDTO.getFoto() != null
+                && !docentePerfilDTO.getFoto().isEmpty()) {
+            ruta = almacenArchivo.almacenarArchivo(docentePerfilDTO.getFoto());
+            persona.setFotoUrl(ruta);
+        }
         Persona personaActualizada = personaRepository.save(persona);
 
         // Actualizar datos de Docente
