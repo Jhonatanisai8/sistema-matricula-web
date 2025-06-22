@@ -27,7 +27,7 @@ public class CustomAuthenticationSuccessHandler
         if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
             redirectUrl = "/admin/dashboard";
         } else if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_DOCENTE"))) {
-            redirectUrl = "/profesor/dashboard";
+            redirectUrl = "/docente/dashboard";
         } else if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_ESTUDIANTE"))) {
             redirectUrl = "/estudiante/dashboard";
         } else if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_APODERADO"))) {
