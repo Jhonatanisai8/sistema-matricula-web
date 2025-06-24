@@ -102,4 +102,10 @@ public class EstudianteRegistroDTO {
         this.personaActivo = true;
         this.seguroEscolar = false;
     }
+
+    private Integer idUsuario;
+
+    private String userName;
+
+    private String password;
 }

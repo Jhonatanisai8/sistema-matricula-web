@@ -10,12 +10,16 @@ import com.isai.demowebregistrationsystem.model.dtos.opciones.GradoOptionDTO;
 import com.isai.demowebregistrationsystem.model.entities.Apoderado;
 import com.isai.demowebregistrationsystem.model.entities.Estudiante;
 import com.isai.demowebregistrationsystem.model.entities.Persona;
+import com.isai.demowebregistrationsystem.model.entities.Usuario;
+import com.isai.demowebregistrationsystem.model.enums.Rol;
 import com.isai.demowebregistrationsystem.repositorys.*;
 import com.isai.demowebregistrationsystem.services.EstudianteService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +41,9 @@ public class EstudianteServiceImpl
     private final AlmacenArchivoImpl almacenArchivoImpl;
     private final ApoderadoRepository apoderadoRepository;
     private final GradoRepository gradoRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
+
 
     @Override
     @Transactional(readOnly = true)
@@ -59,6 +66,7 @@ public class EstudianteServiceImpl
         return estudianteRepository.findAll(spec, pageable)
                 .map(this::convertirAEstudianteListadoDTO);
     }
+
     @Override
     @Transactional(readOnly = true)
     public EstudianteDetalleDTO obtenerEstudianteDetalle(Integer idEstudiante) {
@@ -90,6 +98,7 @@ public class EstudianteServiceImpl
                 throw new ValidationException("Ya existe un estudiante con el código: " + dto.getCodigoEstudiante());
             }
         }
+
 
         Persona persona;
         Estudiante estudiante;
@@ -150,7 +159,30 @@ public class EstudianteServiceImpl
             estudiante.setApoderadoPrincipal(null);
         }
 
+        Usuario usuario;
+        if (dto.getIdUsuario() != null) {
+            usuario = usuarioRepository.findById(dto.getIdUsuario())
+                    .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + dto.getIdUsuario()));
+            Optional<Usuario> existingUserByUsername = usuarioRepository.findByUserName(dto.getUserName());
+            if (existingUserByUsername.isPresent() && !existingUserByUsername.get().getIdUsuario().equals(dto.getIdUsuario())) {
+                throw new IllegalArgumentException("El nombre de usuario '" + dto.getUserName() + "' ya está en uso.");
+            }
+        } else {
+            if (usuarioRepository.existsByUserName(dto.getUserName())) {
+                throw new IllegalArgumentException("El nombre de usuario '" + dto.getUserName() + "' ya está en uso.");
+            }
+            usuario = new Usuario();
+            usuario.setFechaCreacion(LocalDateTime.now());
+            usuario.setActivo(true);
+            usuario.setIntentosFallidos(0);
+            usuario.setRol(Rol.ESTUDIANTE);
+            usuario.setPersona(persona);
+        }
+
+        usuario.setUserName(dto.getNombres().substring(0, 5).concat(dto.getNombres().substring(5, 7)));
+        usuario.setPasswordHash(passwordEncoder.encode(dto.getEmailPersonal()));
         estudianteRepository.save(estudiante);
+        usuarioRepository.save(usuario);
     }
 
     @Override

@@ -1,10 +1,13 @@
 package com.isai.demowebregistrationsystem.controllers.admin;
 
 import com.isai.demowebregistrationsystem.exceptions.ResourceNotFoundException;
+import com.isai.demowebregistrationsystem.exceptions.ValidationException;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteDetalleDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteListadoDTO;
+import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteRegistroDTO;
 import com.isai.demowebregistrationsystem.services.EstudianteService;
 import com.isai.demowebregistrationsystem.services.MatriculaService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,10 +15,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -86,4 +87,61 @@ public class AdminEstudianteController {
             return "redirect:/admin/estudiantes/lista";
         }
     }
+
+    @GetMapping("/crear")
+    public String mostrarFormularioCrearEstudiante(Model model) {
+        model.addAttribute("estudiante", new EstudianteRegistroDTO());
+        cargarDatosFormularioEstudiante(model); // Cargar listas para selects
+        return "admin/estudiantes/crear_estudiante";
+    }
+
+    private void cargarDatosFormularioEstudiante(Model model) {
+        model.addAttribute("apoderados", estudianteService.obtenerApoderadosDisponibles());
+        model.addAttribute("grados", estudianteService.obtenerGradosDisponibles());
+        model.addAttribute("estadosCiviles", estudianteService.getEstadosCiviles());
+        model.addAttribute("generos", estudianteService.getGeneros());
+        model.addAttribute("tiposDocumento", estudianteService.getTiposDocumento());
+        model.addAttribute("tiposSangre", estudianteService.getTiposSangre());
+        model.addAttribute("gradosAnteriores", estudianteService.getGradosAnteriores());
+    }
+
+    @GetMapping("/editar/{id}")
+    public String mostrarFormularioEditarEstudiante(@PathVariable("id") Integer id, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            EstudianteRegistroDTO estudianteDTO = estudianteService.obtenerEstudianteParaEdicion(id);
+            model.addAttribute("estudiante", estudianteDTO);
+            cargarDatosFormularioEstudiante(model);
+            return "admin/estudiantes/crear_estudiante";
+        } catch (ResourceNotFoundException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/estudiantes/lista";
+        }
+    }
+
+    @PostMapping("/guardar")
+    public String guardarEstudiante(@Valid @ModelAttribute("estudiante") EstudianteRegistroDTO estudianteDTO,
+                                    BindingResult result,
+                                    Model model,
+                                    RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            cargarDatosFormularioEstudiante(model);
+            model.addAttribute("errorMessage", "Por favor, corrige los errores en el formulario.");
+            return "admin/estudiantes/crear_estudiante";
+        }
+        try {
+            estudianteService.guardarEstudiante(estudianteDTO);
+            String message = (estudianteDTO.getIdEstudiante() == null) ? "Estudiante creado exitosamente." : "Estudiante actualizado exitosamente.";
+            redirectAttributes.addFlashAttribute("successMessage", message);
+            return "redirect:/admin/estudiantes/lista";
+        } catch (ValidationException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            cargarDatosFormularioEstudiante(model);
+            return "admin/estudiantes/crear_estudiante";
+        } catch (ResourceNotFoundException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/estudiantes/lista";
+        }
+    }
+
+
 }
