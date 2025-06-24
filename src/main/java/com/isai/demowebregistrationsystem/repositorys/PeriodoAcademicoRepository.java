@@ -14,4 +14,9 @@ public interface PeriodoAcademicoRepository
     Optional<PeriodoAcademico> findByNombrePeriodoAndAnoAcademico(String nombrePeriodo, Integer anoAcademico);
 
     List<PeriodoAcademico> findByActivoTrue();
+
+    List<PeriodoAcademico> findByActivoTrueOrderByAnoAcademicoDescFechaInicioDesc();
+
+    Optional<PeriodoAcademico> findByActivoTrueAndEstado(String estado);
+
 }
