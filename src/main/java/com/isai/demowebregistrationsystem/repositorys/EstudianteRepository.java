@@ -16,6 +16,8 @@ public interface EstudianteRepository extends JpaRepository<Estudiante, Integer>
     Optional<Estudiante> findByCodigoEstudiante(String codigoEstudiante);
 
     Page<Estudiante> findAll(Specification<Estudiante> spec, Pageable pageable);
+
+    Optional<Estudiante> findByPersonaIdPersona(Integer idPersona);
 }
 
 
