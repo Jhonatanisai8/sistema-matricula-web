@@ -1,5 +1,7 @@
 package com.isai.demowebregistrationsystem.controllers.admin;
 
+import com.isai.demowebregistrationsystem.exceptions.ResourceNotFoundException;
+import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteDetalleDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteListadoDTO;
 import com.isai.demowebregistrationsystem.services.EstudianteService;
 import com.isai.demowebregistrationsystem.services.MatriculaService;
@@ -11,8 +13,10 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -60,5 +64,26 @@ public class AdminEstudianteController {
             model.addAttribute("errorMessage", errorMessage);
         }
         return "admin/estudiantes/lista_estudiantes";
+    }
+
+    @GetMapping("/detalle/{id}")
+    public String verDetalleEstudiante(@PathVariable("id") Integer id, Model model,
+                                       @RequestParam(name = "success", required = false) String successMessage,
+                                       @RequestParam(name = "error", required = false) String errorMessage,
+                                       RedirectAttributes redirectAttributes) { // Added RedirectAttributes
+        try {
+            EstudianteDetalleDTO estudiante = estudianteService.obtenerEstudianteDetalle(id);
+            model.addAttribute("estudiante", estudiante);
+            if (successMessage != null) {
+                model.addAttribute("successMessage", successMessage);
+            }
+            if (errorMessage != null) {
+                model.addAttribute("errorMessage", errorMessage);
+            }
+            return "admin/estudiantes/detalle_estudiante";
+        } catch (ResourceNotFoundException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/estudiantes/lista";
+        }
     }
 }
