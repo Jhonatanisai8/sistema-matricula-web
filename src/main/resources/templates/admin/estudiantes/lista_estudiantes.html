@@ -114,17 +114,17 @@
                     <td>
                         <a th:href="@{/admin/estudiantes/detalle/{id}(id=${estudiante.idEstudiante})}"
                            class="btn btn-info btn-sm text-white" title="Ver Detalle">
-                            <i class="fas fa-eye"></i>
+                            <i class="fas fa-eye">Ver Detalle</i>
                         </a>
                         <a th:href="@{/admin/estudiantes/editar/{id}(id=${estudiante.idEstudiante})}"
                            class="btn btn-warning btn-sm" title="Editar">
-                            <i class="fas fa-edit"></i>
+                            <i class="fas fa-edit">Editar</i>
                         </a>
                         <button th:if="${estudiante.activo}" type="button" class="btn btn-danger btn-sm"
                                 data-bs-toggle="modal"
                                 th:data-bs-target="${'#confirmDeleteModal' + estudiante.idEstudiante}"
                                 title="Inactivar">
-                            <i class="fas fa-user-times"></i></button>
+                            <i class="fas fa-user-times">Inactivar</i></button>
                         <div class="modal fade" th:id="${'confirmDeleteModal' + estudiante.idEstudiante}" tabindex="-1"
                              aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
                             <div class="modal-dialog">
@@ -132,7 +132,7 @@
                                     <div class="modal-header">
                                         <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Inactivación</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
+                                                aria-label="Close">Eliminar</button>
                                     </div>
                                     <div class="modal-body">
                                         ¿Estás seguro de que deseas inactivar al estudiante <strong
