@@ -5,6 +5,9 @@ import com.isai.demowebregistrationsystem.exceptions.ValidationException;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteDetalleDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteListadoDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteRegistroDTO;
+import com.isai.demowebregistrationsystem.model.dtos.estudiantes.MatriculaGestionDTO;
+import com.isai.demowebregistrationsystem.model.dtos.opciones.PeriodoAcademicoOptionDTO;
+import com.isai.demowebregistrationsystem.model.dtos.opciones.SeccionOptionDTO;
 import com.isai.demowebregistrationsystem.services.EstudianteService;
 import com.isai.demowebregistrationsystem.services.MatriculaService;
 import jakarta.validation.Valid;
@@ -19,7 +22,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
@@ -143,5 +148,106 @@ public class AdminEstudianteController {
         }
     }
 
+    @PostMapping("/eliminar/{id}")
+    public String eliminarEstudiante(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+        try {
+            estudianteService.eliminarEstudiante(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Estudiante inactivado exitosamente.");
+        } catch (ResourceNotFoundException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/admin/estudiantes/lista";
+    }
+
+    @GetMapping("/matricula/{idEstudiante}")
+    public String gestionarMatricula(@PathVariable("idEstudiante") Integer idEstudiante,
+                                     @RequestParam(name = "idPeriodo", required = false) Integer idPeriodo,
+                                     Model model,
+                                     RedirectAttributes redirectAttributes,
+                                     @RequestParam(name = "success", required = false) String successMessage,
+                                     @RequestParam(name = "error", required = false) String errorMessage) {
+        try {
+            if (idPeriodo == null) {
+                Optional<PeriodoAcademicoOptionDTO> currentPeriod = matriculaService.obtenerPeriodosAcademicosDisponibles().stream()
+                        .filter(p -> p.getNombrePeriodo().contains(String.valueOf(LocalDate.now().getYear())))
+                        .findFirst();
+                if (currentPeriod.isPresent()) {
+                    idPeriodo = currentPeriod.get().getId();
+                }
+            }
+
+            MatriculaGestionDTO matriculaDTO = matriculaService.obtenerMatriculaParaGestion(idEstudiante, idPeriodo);
+            model.addAttribute("matricula", matriculaDTO);
+            model.addAttribute("estudianteId", idEstudiante); // Para saber de qué estudiante es la matrícula
+            // Pasar el id del grado y periodo a cargarDatosFormularioMatricula para que pueda cargar las secciones
+            cargarDatosFormularioMatricula(model, matriculaDTO.getIdGrado(), matriculaDTO.getIdPeriodoAcademico());
+
+            if (successMessage != null) {
+                model.addAttribute("successMessage", successMessage);
+            }
+            if (errorMessage != null) {
+                model.addAttribute("errorMessage", errorMessage);
+            }
+            return "admin/estudiantes/gestionar_matricula";
+        } catch (ResourceNotFoundException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/estudiantes/detalle/" + idEstudiante;
+        }
+    }
+
+
+    private void cargarDatosFormularioMatricula(Model model, Integer idGradoSeleccionado, Integer idPeriodoSeleccionado) {
+        model.addAttribute("periodosAcademicos", matriculaService.obtenerPeriodosAcademicosDisponibles());
+        model.addAttribute("estadosMatricula", matriculaService.getEstadosMatricula());
+        model.addAttribute("modalidadesPago", matriculaService.getModalidadesPago());
+        model.addAttribute("grados", estudianteService.obtenerGradosDisponibles());
+
+        // Cargar secciones dinámicamente si ya hay un grado y periodo seleccionados
+        if (idGradoSeleccionado != null && idPeriodoSeleccionado != null) {
+            model.addAttribute("secciones", matriculaService.obtenerSeccionesPorGradoYPeriodo(idGradoSeleccionado, idPeriodoSeleccionado));
+        } else {
+            model.addAttribute("secciones", List.of()); // Si no hay selecciones, enviar lista vacía
+        }
+
+        model.addAttribute("apoderadosParaMatricula", estudianteService.obtenerApoderadosDisponibles());
+    }
+
+    @PostMapping("/guardar_matricula")
+    public String guardarMatricula(@Valid @ModelAttribute("matricula") MatriculaGestionDTO matriculaDTO,
+                                   BindingResult result,
+                                   Model model,
+                                   RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            model.addAttribute("estudianteId", matriculaDTO.getIdEstudiante()); // Asegurar que el ID del estudiante esté en el modelo
+            cargarDatosFormularioMatricula(model, matriculaDTO.getIdGrado(), matriculaDTO.getIdPeriodoAcademico());
+            model.addAttribute("errorMessage", "Por favor, corrige los errores en el formulario.");
+            return "admin/estudiantes/gestionar_matricula";
+        }
+        try {
+            matriculaService.guardarMatricula(matriculaDTO);
+            String message = (matriculaDTO.getIdMatricula() == null) ? "Matrícula creada exitosamente." : "Matrícula actualizada exitosamente.";
+            redirectAttributes.addFlashAttribute("successMessage", message);
+            return "redirect:/admin/estudiantes/detalle/" + matriculaDTO.getIdEstudiante();
+        } catch (ValidationException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("estudianteId", matriculaDTO.getIdEstudiante());
+            cargarDatosFormularioMatricula(model, matriculaDTO.getIdGrado(), matriculaDTO.getIdPeriodoAcademico());
+            return "admin/estudiantes/gestionar_matricula";
+        } catch (ResourceNotFoundException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/estudiantes/detalle/" + matriculaDTO.getIdEstudiante();
+        }
+    }
+
+    @GetMapping("/api/secciones")
+    @ResponseBody
+    public List<SeccionOptionDTO> getSeccionesByGradoAndPeriodo(
+            @RequestParam(name = "idGrado", required = false) Integer idGrado,
+            @RequestParam(name = "idPeriodo", required = false) Integer idPeriodo) {
+        if (idGrado == null || idPeriodo == null) {
+            return List.of();
+        }
+        return matriculaService.obtenerSeccionesPorGradoYPeriodo(idGrado, idPeriodo);
+    }
 
 }

@@ -15,7 +15,7 @@ public interface MatriculaService {
 
     List<PeriodoAcademicoOptionDTO> obtenerPeriodosAcademicosDisponibles();
 
-    List<SeccionOptionDTO> obtenerSeccionesPorGradoYPeriodo(Integer idGrado, Integer idPeriodo); // Para carga dinámica
+    List<SeccionOptionDTO> obtenerSeccionesPorGradoYPeriodo(Integer idGrado, Integer idPeriodo);
 
     Map<String, String> getEstadosMatricula();
 
