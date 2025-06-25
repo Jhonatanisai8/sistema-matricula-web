@@ -87,6 +87,7 @@ public class EstudianteServiceImpl
     @Override
     @Transactional
     public void guardarEstudiante(EstudianteRegistroDTO dto) {
+
         Optional<Persona> existingPersonaByDni = personaRepository.findByDni(dto.getDni());
         if (existingPersonaByDni.isPresent() && !existingPersonaByDni.get().getIdPersona().equals(dto.getIdPersona())) {
             throw new ValidationException("Ya existe una persona con el DNI: " + dto.getDni());
@@ -99,11 +100,10 @@ public class EstudianteServiceImpl
             }
         }
 
-
         Persona persona;
         Estudiante estudiante;
 
-        if (dto.getIdPersona() != null) { // Es una edición
+        if (dto.getIdPersona() != null) {
             persona = personaRepository.findById(dto.getIdPersona())
                     .orElseThrow(() -> new ResourceNotFoundException("Persona no encontrada para el ID: " + dto.getIdPersona()));
             estudiante = estudianteRepository.findById(dto.getIdEstudiante())
@@ -113,9 +113,10 @@ public class EstudianteServiceImpl
             estudiante = new Estudiante();
             persona.setFechaRegistro(LocalDateTime.now());
             if (dto.getCodigoEstudiante() == null || dto.getCodigoEstudiante().isEmpty()) {
-                estudiante.setCodigoEstudiante(generarCodigoEstudiante()); // Implementar este método
+                estudiante.setCodigoEstudiante(generarCodigoEstudiante());
             }
         }
+
 
         persona.setNombres(dto.getNombres());
         persona.setApellidos(dto.getApellidos());
@@ -124,7 +125,7 @@ public class EstudianteServiceImpl
         persona.setEmailPersonal(dto.getEmailPersonal());
         persona.setEstadoCivil(dto.getEstadoCivil());
         persona.setFechaNacimiento(dto.getFechaNacimiento());
-        persona.setFotoUrl(dto.getFotoUrl());
+
         persona.setGenero(dto.getGenero());
         persona.setTelefono(dto.getTelefono());
         persona.setTipoDocumento(dto.getTipoDocumento());
@@ -132,15 +133,17 @@ public class EstudianteServiceImpl
         persona.setFechaActualizacion(LocalDateTime.now());
 
         String ruta = "";
-        if (dto.getFoto() != null
-                && !dto.getFoto().isEmpty()) {
+        if (dto.getFoto() != null && !dto.getFoto().isEmpty() && dto.getFoto().getSize() > 0) {
             ruta = almacenArchivoImpl.almacenarArchivo(dto.getFoto());
             persona.setFotoUrl(ruta);
         }
+
+
         personaRepository.save(persona);
 
+
         estudiante.setPersona(persona);
-        estudiante.setCodigoEstudiante(dto.getCodigoEstudiante() != null && !dto.getCodigoEstudiante().isEmpty() ? dto.getCodigoEstudiante() : estudiante.getCodigoEstudiante()); // Si viene en DTO, úsalo; si no, mantén el generado.
+        estudiante.setCodigoEstudiante(dto.getCodigoEstudiante() != null && !dto.getCodigoEstudiante().isEmpty() ? dto.getCodigoEstudiante() : estudiante.getCodigoEstudiante());
         estudiante.setEmailEducativo(dto.getEmailEducativo());
         estudiante.setInstitucionProcedencia(dto.getInstitucionProcedencia());
         estudiante.setGradoAnterior(dto.getGradoAnterior());
@@ -159,29 +162,57 @@ public class EstudianteServiceImpl
             estudiante.setApoderadoPrincipal(null);
         }
 
+        estudianteRepository.save(estudiante);
+
+
         Usuario usuario;
-        if (dto.getIdUsuario() != null) {
-            usuario = usuarioRepository.findById(dto.getIdUsuario())
-                    .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + dto.getIdUsuario()));
-            Optional<Usuario> existingUserByUsername = usuarioRepository.findByUserName(dto.getUserName());
-            if (existingUserByUsername.isPresent() && !existingUserByUsername.get().getIdUsuario().equals(dto.getIdUsuario())) {
-                throw new IllegalArgumentException("El nombre de usuario '" + dto.getUserName() + "' ya está en uso.");
+
+        Optional<Usuario> existingUserByPersonId = usuarioRepository.findByPersonaIdPersona(persona.getIdPersona());
+
+        if (existingUserByPersonId.isPresent()) {
+
+            usuario = existingUserByPersonId.get();
+
+
+            if (dto.getIdUsuario() != null && !dto.getIdUsuario().equals(usuario.getIdUsuario())) {
+                throw new ValidationException("La persona ya está asociada a otro usuario. ID de persona: " + persona.getIdPersona());
             }
+
+
+            String newUsername = dto.getNombres().substring(0, Math.min(dto.getNombres().length(), 5)).concat(dto.getApellidos().substring(0, Math.min(dto.getApellidos().length(), 2))).toLowerCase();
+            if (!usuario.getUserName().equals(newUsername)) {
+
+                Optional<Usuario> userWithNewName = usuarioRepository.findByUserName(newUsername);
+                if (userWithNewName.isPresent() && !userWithNewName.get().getIdUsuario().equals(usuario.getIdUsuario())) {
+                    throw new ValidationException("El nombre de usuario '" + newUsername + "' ya está en uso por otro usuario.");
+                }
+                usuario.setUserName(newUsername);
+            }
+
+
+            usuario.setPasswordHash(passwordEncoder.encode(dto.getEmailPersonal()));
+            usuario.setFechaCreacion(LocalDateTime.now());
+
         } else {
-            if (usuarioRepository.existsByUserName(dto.getUserName())) {
-                throw new IllegalArgumentException("El nombre de usuario '" + dto.getUserName() + "' ya está en uso.");
-            }
+
             usuario = new Usuario();
             usuario.setFechaCreacion(LocalDateTime.now());
             usuario.setActivo(true);
             usuario.setIntentosFallidos(0);
             usuario.setRol(Rol.ESTUDIANTE);
             usuario.setPersona(persona);
+
+
+            String newUsername = dto.getNombres().substring(0, Math.min(dto.getNombres().length(), 5)).concat(dto.getApellidos().substring(0, Math.min(dto.getApellidos().length(), 2))).toLowerCase();
+            if (usuarioRepository.existsByUserName(newUsername)) {
+
+
+                throw new ValidationException("El nombre de usuario generado ('" + newUsername + "') ya está en uso. Por favor, intente con nombres diferentes.");
+            }
+            usuario.setUserName(newUsername);
+            usuario.setPasswordHash(passwordEncoder.encode(dto.getEmailPersonal()));
         }
 
-        usuario.setUserName(dto.getNombres().substring(0, 5).concat(dto.getNombres().substring(5, 7)));
-        usuario.setPasswordHash(passwordEncoder.encode(dto.getEmailPersonal()));
-        estudianteRepository.save(estudiante);
         usuarioRepository.save(usuario);
     }
 
@@ -296,7 +327,7 @@ public class EstudianteServiceImpl
         EstudianteDetalleDTO dto = new EstudianteDetalleDTO();
         Persona persona = estudiante.getPersona();
 
-        // Info de Persona
+
         dto.setIdPersona(persona.getIdPersona());
         dto.setNombres(persona.getNombres());
         dto.setApellidos(persona.getApellidos());
@@ -313,7 +344,7 @@ public class EstudianteServiceImpl
         dto.setFechaRegistroPersona(persona.getFechaRegistro());
         dto.setFechaActualizacionPersona(persona.getFechaActualizacion());
 
-        // Info de Estudiante
+
         dto.setIdEstudiante(estudiante.getIdEstudiante());
         dto.setCodigoEstudiante(estudiante.getCodigoEstudiante());
         dto.setEmailEducativo(estudiante.getEmailEducativo());
@@ -326,7 +357,7 @@ public class EstudianteServiceImpl
         dto.setTelefonoEmergencia(estudiante.getTelefonoEmergencia());
         dto.setTipoSangre(estudiante.getTipoSangre());
 
-        // Info del Apoderado principal
+
         if (estudiante.getApoderadoPrincipal() != null) {
             Apoderado apoderado = estudiante.getApoderadoPrincipal();
             Persona apoderadoPersona = apoderado.getPersona();
@@ -337,7 +368,7 @@ public class EstudianteServiceImpl
             dto.setApoderadoEmailPersonal(apoderadoPersona.getEmailPersonal());
         }
 
-        // Info de la Matrícula actual (obtener la más reciente, idealmente la del periodo actual si existe)
+
         matriculaRepository.findTopByEstudiante_IdEstudianteOrderByFechaMatriculaDesc(estudiante.getIdEstudiante())
                 .ifPresent(matricula -> {
                     dto.setIdMatriculaActual(matricula.getIdMatricula());
@@ -359,7 +390,7 @@ public class EstudianteServiceImpl
         dto.setIdEstudiante(estudiante.getIdEstudiante());
         dto.setIdPersona(persona.getIdPersona());
 
-        // Campos de Persona
+
         dto.setNombres(persona.getNombres());
         dto.setApellidos(persona.getApellidos());
         dto.setDni(persona.getDni());
@@ -373,7 +404,7 @@ public class EstudianteServiceImpl
         dto.setTipoDocumento(persona.getTipoDocumento());
         dto.setPersonaActivo(persona.getActivo());
 
-        // Campos de Estudiante
+
         dto.setCodigoEstudiante(estudiante.getCodigoEstudiante());
         dto.setEmailEducativo(estudiante.getEmailEducativo());
         dto.setInstitucionProcedencia(estudiante.getInstitucionProcedencia());
@@ -385,7 +416,7 @@ public class EstudianteServiceImpl
         dto.setTelefonoEmergencia(estudiante.getTelefonoEmergencia());
         dto.setTipoSangre(estudiante.getTipoSangre());
 
-        // Apoderado asociado
+
         if (estudiante.getApoderadoPrincipal() != null) {
             dto.setIdApoderado(estudiante.getApoderadoPrincipal().getIdApoderado());
         }
