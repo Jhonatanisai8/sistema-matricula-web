@@ -4,12 +4,12 @@ import com.isai.demowebregistrationsystem.model.entities.AsignacionDocente;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AsignacionDocenteRepository
         extends JpaRepository<AsignacionDocente, Integer> {
 
-    List<AsignacionDocente> findByDocente_IdDocente(Integer docenteId);
+    Optional<AsignacionDocente> findByIdAsignacionAndDocente_IdDocente(Integer idAsignacion, Integer idDocente);
 
-    List<AsignacionDocente> findByDocente_IdDocenteAndEstadoAsignacion(Long idDocente, String estadoAsignacion);
-
+    List<AsignacionDocente> findByDocente_IdDocente(Integer idDocente);
 }

@@ -129,4 +129,6 @@ public interface DocenteService {
     Optional<Docente> findByPersonaId(Integer personaId);
 
     List<CursoAsignadoDTO> listarCursosAsignadosPorUserName(String username);
+
+    AsignacionDocenteDetalleDTO obtenerDetallesAsignacion(Integer idAsignacion, String username);
 }

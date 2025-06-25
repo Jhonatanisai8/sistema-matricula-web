@@ -21,4 +21,11 @@ public interface HorarioRepository
     List<Horario> findByDiaSemanaAndSalon_IdSalonAndPeriodoAcademico_IdPeriodoAndIdHorarioIsNot(String diaSemana, Integer salonId, Integer periodoAcademicoId, Integer idHorario);
 
     List<Horario> findByDiaSemanaAndSeccion_IdSeccionAndGrado_IdGradoAndPeriodoAcademico_IdPeriodoAndIdHorarioIsNot(String diaSemana, Integer seccionId, Integer gradoId, Integer periodoAcademicoId, Integer idHorario);
+
+    List<Horario> findByCurso_IdCursoAndDocente_IdDocenteAndGrado_IdGradoAndPeriodoAcademico_IdPeriodo(
+            Integer idCurso,
+            Integer idDocente,
+            Integer idGrado,
+            Integer idPeriodoAcademico
+    );
 }

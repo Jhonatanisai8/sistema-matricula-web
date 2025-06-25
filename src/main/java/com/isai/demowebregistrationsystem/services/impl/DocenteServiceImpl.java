@@ -3,6 +3,7 @@ package com.isai.demowebregistrationsystem.services.impl;
 import com.isai.demowebregistrationsystem.exceptions.ResourceNotFoundException;
 import com.isai.demowebregistrationsystem.exceptions.ValidationException;
 import com.isai.demowebregistrationsystem.model.dtos.docente.*;
+import com.isai.demowebregistrationsystem.model.dtos.secciones.SeccionDetalleDTO;
 import com.isai.demowebregistrationsystem.model.entities.*;
 import com.isai.demowebregistrationsystem.model.enums.Rol;
 import com.isai.demowebregistrationsystem.repositorys.*;
@@ -34,6 +35,8 @@ public class DocenteServiceImpl implements DocenteService {
     private final AsignacionDocenteRepository asignacionDocenteRepository;
     private final PasswordEncoder passwordEncoder;
     private final AlmacenArchivoImpl almacenArchivo;
+    private final HorarioRepository horarioRepository;
+    private final MatriculaRepository matriculaRepository;
 
 
     @Override
@@ -570,5 +573,123 @@ public class DocenteServiceImpl implements DocenteService {
         dto.setNombreGrado(asignacion.getGrado().getNombreGrado());
         dto.setEstadoAsignacion(asignacion.getEstadoAsignacion());
         return dto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AsignacionDocenteDetalleDTO obtenerDetallesAsignacion(Integer idAsignacion, String username) {
+        Usuario usuario = usuarioRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + username));
+        Integer idPersonaDocente = usuario.getPersona().getIdPersona();
+
+        Docente docente = docenteRepository.findByPersonaIdPersona(idPersonaDocente)
+                .orElseThrow(() -> new ResourceNotFoundException("Docente no encontrado para el usuario: " + username));
+        Integer idDocente = docente.getIdDocente();
+
+        AsignacionDocente asignacion = asignacionDocenteRepository
+                .findByIdAsignacionAndDocente_IdDocente(idAsignacion, idDocente)
+                .orElseThrow(() -> new ResourceNotFoundException("Asignación no encontrada o no pertenece a este docente."));
+
+        List<Horario> horarios = horarioRepository.findByCurso_IdCursoAndDocente_IdDocenteAndGrado_IdGradoAndPeriodoAcademico_IdPeriodo(
+                asignacion.getCurso().getIdCurso(),
+                asignacion.getDocente().getIdDocente(),
+                asignacion.getGrado().getIdGrado(),
+                asignacion.getPeriodoAcademico().getIdPeriodo()
+        );
+
+        List<Matricula> matriculas = matriculaRepository.findByGrado_IdGradoAndPeriodoAcademico_IdPeriodo(
+                asignacion.getGrado().getIdGrado(),
+                asignacion.getPeriodoAcademico().getIdPeriodo()
+        );
+
+        List<EstudianteBasicoDTO> estudiantes = matriculas.stream()
+                .map(matricula -> EstudianteBasicoDTO.builder()
+                        .idEstudiante(matricula.getEstudiante().getIdEstudiante())
+                        .codigoEstudiante(matricula.getEstudiante().getCodigoEstudiante())
+                        .nombresCompletos(matricula.getEstudiante().getPersona().getNombres() + " " + matricula.getEstudiante().getPersona().getApellidos())
+                        .dni(matricula.getEstudiante().getPersona().getDni())
+                        .estadoMatricula(matricula.getEstadoMatricula())
+                        .build())
+                .collect(Collectors.toList());
+
+        return AsignacionDocenteDetalleDTO.builder()
+                .idAsignacion(asignacion.getIdAsignacion())
+                .fechaAsignacion(asignacion.getFechaAsignacion())
+                .esTitular(asignacion.getEsTitular())
+                .estadoAsignacion(asignacion.getEstadoAsignacion())
+                .observaciones(asignacion.getObservaciones())
+                .nombreDocente(asignacion.getDocente().getPersona().getNombres() + " " + asignacion.getDocente().getPersona().getApellidos())
+                .curso(convertirACursoDetalleAsignacionDTO(asignacion.getCurso()))
+                .grado(convertirAGradoDetalleAsignacionDTO(asignacion.getGrado()))
+                .periodoAcademico(convertirAPeriodoAcademicoDetalleAsignacionDTO(asignacion.getPeriodoAcademico()))
+                .horarios(null)
+                .estudiantes(null)
+                .build();
+    }
+
+    private HorarioAsignacionDTO convertirAHorarioAsignacionDTO(Horario horario) {
+        return HorarioAsignacionDTO.builder()
+                .idHorario(horario.getIdHorario())
+                .diaSemana(horario.getDiaSemana())
+                .horaInicio(horario.getHoraInicio())
+                .horaFin(horario.getHoraFin())
+                .tipoClase(horario.getTipoClase())
+                .observaciones(horario.getObservaciones())
+                .salon(convertirASalonDTO(horario.getSalon()))
+                .seccion(convertirASeccionDTO(horario.getSeccion()))
+                .build();
+    }
+
+    private SeccionDetalleDTO convertirASeccionDTO(Seccion seccion) {
+        return SeccionDetalleDTO.builder()
+                .idSeccion(seccion.getIdSeccion())
+                .nombreSeccion(seccion.getNombreSeccion())
+                .build();
+    }
+
+    private SalonDocenteDTO convertirASalonDTO(Salon salon) {
+        return SalonDocenteDTO.builder()
+                .idSalon(salon.getIdSalon())
+                .nombreSalon(salon.getNombreSalon())
+                .codigoSalon(salon.getCodigoSalon())
+                .ubicacion(salon.getUbicacion())
+                .capacidadMaxima(salon.getCapacidadMaxima())
+                .build();
+    }
+
+    private PeriodoAcademicoDetalleAsignacionDTO convertirAPeriodoAcademicoDetalleAsignacionDTO(PeriodoAcademico periodo) {
+        return PeriodoAcademicoDetalleAsignacionDTO.builder()
+                .idPeriodo(periodo.getIdPeriodo())
+                .nombrePeriodo(periodo.getNombrePeriodo())
+                .anoAcademico(periodo.getAnoAcademico())
+                .fechaInicio(periodo.getFechaInicio())
+                .fechaFin(periodo.getFechaFin())
+                .estado(periodo.getEstado())
+                .build();
+    }
+
+    private GradoDetalleAsignacionDTO convertirAGradoDetalleAsignacionDTO(Grado grado) {
+        return GradoDetalleAsignacionDTO.builder()
+                .idGrado(grado.getIdGrado())
+                .nombreGrado(grado.getNombreGrado())
+                .codigoGrado(grado.getCodigoGrado())
+                .descripcion(grado.getDescripcion())
+                .nivel(grado.getNivel())
+                .build();
+    }
+
+    private CursoDetalleAsignacionDTO convertirACursoDetalleAsignacionDTO(Curso curso) {
+        return CursoDetalleAsignacionDTO.builder()
+                .idCurso(curso.getIdCurso())
+                .codigoCurso(curso.getCodigoCurso())
+                .nombreCurso(curso.getNombreCurso())
+                .descripcion(curso.getDescripcion())
+                .areaConocimiento(curso.getAreaConocimiento())
+                .creditos(curso.getCreditos())
+                .horasSemanales(curso.getHorasSemanales())
+                .esObligatorio(curso.getEsObligatorio())
+                .prerequisitos(curso.getPrerequisitos())
+                .competencias(curso.getCompetencias())
+                .build();
     }
 }
