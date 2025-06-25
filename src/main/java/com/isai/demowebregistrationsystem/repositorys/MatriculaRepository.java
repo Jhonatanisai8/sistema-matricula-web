@@ -13,7 +13,10 @@ public interface MatriculaRepository
 
     Optional<Matricula> findByEstudiante_IdEstudianteAndPeriodoAcademico_IdPeriodoAndEstadoMatricula(Integer idEstudiante, Integer idPeriodo, String estadoMatricula);
 
-    List<Matricula> findByEstudiante_IdEstudiante(Integer idEstudiante);
+    List<Matricula> findByGrado_IdGradoAndPeriodoAcademico_IdPeriodo(
+            Integer idGrado,
+            Integer idPeriodoAcademico
+    );
 
     Optional<Matricula> findTopByEstudiante_IdEstudianteOrderByFechaMatriculaDesc(Integer idEstudiante);
 }
