@@ -31,7 +31,7 @@ public class AdminCursoController {
     @GetMapping
     public String listarCursos(Model model,
                                @RequestParam(defaultValue = "0") int page,
-                               @RequestParam(defaultValue = "7") int size) {
+                               @RequestParam(defaultValue = "5") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<CursoDTO> cursosPage = cursoService.obtenerCursos(pageable);
         model.addAttribute("cursos", cursosPage);

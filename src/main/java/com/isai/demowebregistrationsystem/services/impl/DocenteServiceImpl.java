@@ -590,6 +590,7 @@ public class DocenteServiceImpl implements DocenteService {
                 .findByIdAsignacionAndDocente_IdDocente(idAsignacion, idDocente)
                 .orElseThrow(() -> new ResourceNotFoundException("Asignación no encontrada o no pertenece a este docente."));
 
+        // Obtener los horarios
         List<Horario> horarios = horarioRepository.findByCurso_IdCursoAndDocente_IdDocenteAndGrado_IdGradoAndPeriodoAcademico_IdPeriodo(
                 asignacion.getCurso().getIdCurso(),
                 asignacion.getDocente().getIdDocente(),
@@ -597,11 +598,18 @@ public class DocenteServiceImpl implements DocenteService {
                 asignacion.getPeriodoAcademico().getIdPeriodo()
         );
 
+        // Convertir la lista de Horario a List<HorarioAsignacionDTO>
+        List<HorarioAsignacionDTO> horariosDTO = horarios.stream()
+                .map(this::convertirAHorarioAsignacionDTO)
+                .collect(Collectors.toList());
+
+        // Obtener las matrículas
         List<Matricula> matriculas = matriculaRepository.findByGrado_IdGradoAndPeriodoAcademico_IdPeriodo(
                 asignacion.getGrado().getIdGrado(),
                 asignacion.getPeriodoAcademico().getIdPeriodo()
         );
 
+        // Convertir la lista de Matricula a List<EstudianteBasicoDTO>
         List<EstudianteBasicoDTO> estudiantes = matriculas.stream()
                 .map(matricula -> EstudianteBasicoDTO.builder()
                         .idEstudiante(matricula.getEstudiante().getIdEstudiante())
@@ -622,8 +630,8 @@ public class DocenteServiceImpl implements DocenteService {
                 .curso(convertirACursoDetalleAsignacionDTO(asignacion.getCurso()))
                 .grado(convertirAGradoDetalleAsignacionDTO(asignacion.getGrado()))
                 .periodoAcademico(convertirAPeriodoAcademicoDetalleAsignacionDTO(asignacion.getPeriodoAcademico()))
-                .horarios(null)
-                .estudiantes(null)
+                .horarios(horariosDTO) // <-- Asigna la lista de DTOs de horarios
+                .estudiantes(estudiantes) // <-- Asigna la lista de DTOs de estudiantes
                 .build();
     }
 

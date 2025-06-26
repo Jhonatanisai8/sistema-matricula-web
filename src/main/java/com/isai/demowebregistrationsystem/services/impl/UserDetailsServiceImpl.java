@@ -24,7 +24,9 @@ public class UserDetailsServiceImpl
         Usuario usuario = usuarioRepository.findByUserName(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con username: " + username));
 
+        System.out.println(usuario.getUserName());
         System.out.println(usuario.getPasswordHash());
+        System.out.println(usuario.getRol().name());
         String roleName = "ROLE_" + usuario.getRol();
 
         return new User(
