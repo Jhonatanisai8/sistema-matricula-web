@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,6 +41,7 @@ public class DocenteServiceImpl implements DocenteService {
     private final MatriculaRepository matriculaRepository;
     private final CalificacionRepository calificacionRepository;
     private final EstudianteRepository estudianteRepository;
+    private final AsistenciaRepository asistenciaRepository;
 
 
     @Override
@@ -902,4 +904,140 @@ public class DocenteServiceImpl implements DocenteService {
         return "Notas registradas/actualizadas exitosamente para la asignación " + asignacion.getCurso().getNombreCurso() + ".";
 
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<HorarioAsistenciaDTO> getHorariosParaAsistencia(String username) {
+        Usuario usuario = usuarioRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + username));
+        Docente docente = docenteRepository.findByPersonaIdPersona(usuario.getPersona().getIdPersona())
+                .orElseThrow(() -> new ResourceNotFoundException("Docente no encontrado para el usuario: " + username));
+
+        List<Horario> horarios = horarioRepository
+                .findByDocente_IdDocenteAndActivoTrueAndPeriodoAcademico_ActivoTrue(docente.getIdDocente());
+
+        return horarios.stream()
+                .map(horario -> HorarioAsistenciaDTO.builder()
+                        .idHorario(horario.getIdHorario())
+                        .diaSemana(horario.getDiaSemana())
+                        .horaInicio(horario.getHoraInicio())
+                        .horaFin(horario.getHoraFin())
+                        .nombreCurso(horario.getCurso().getNombreCurso())
+                        .nombreGrado(horario.getGrado().getNombreGrado())
+                        .nombreSeccion(horario.getSeccion().getNombreSeccion())
+                        .nombrePeriodoAcademico(horario.getPeriodoAcademico().getNombrePeriodo() + " " + horario.getPeriodoAcademico().getAnoAcademico())
+                        .idGrado(horario.getGrado().getIdGrado()) // Necesario para la consulta de matrícula
+                        .idPeriodoAcademico(horario.getPeriodoAcademico().getIdPeriodo()) // Necesario para la consulta de matrícula
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RegistrarAsistenciaViewDTO getRegistrarAsistenciaViewData(String username) {
+        List<HorarioAsistenciaDTO> horariosParaAsistencia = getHorariosParaAsistencia(username);
+        return RegistrarAsistenciaViewDTO.builder()
+                .horariosParaAsistencia(horariosParaAsistencia)
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EstudianteAsistenciaDTO> getEstudiantesConAsistenciaActual(String username, Integer idHorario, LocalDate fechaAsistencia) {
+        Usuario usuario = usuarioRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + username));
+        Docente docente = docenteRepository.findByPersonaIdPersona(usuario.getPersona().getIdPersona())
+                .orElseThrow(() -> new ResourceNotFoundException("Docente no encontrado para el usuario: " + username));
+
+        Horario horario = horarioRepository.findByIdHorarioAndDocente_IdDocente(idHorario, docente.getIdDocente())
+                .orElseThrow(() -> new ResourceNotFoundException("Horario no encontrado o no pertenece a este docente."));
+
+        Integer idGrado = horario.getGrado().getIdGrado();
+        Integer idPeriodoAcademico = horario.getPeriodoAcademico().getIdPeriodo();
+
+        List<Matricula> matriculas = matriculaRepository.findByGrado_IdGradoAndPeriodoAcademico_IdPeriodo(
+                idGrado,
+                idPeriodoAcademico
+        );
+
+        List<Asistencia> asistenciasExistentes = asistenciaRepository
+                .findByHorario_IdHorarioAndFechaAsistencia(idHorario, fechaAsistencia);
+
+        Map<Integer, Asistencia> asistenciasPorEstudiante = asistenciasExistentes.stream()
+                .collect(Collectors.toMap(a -> a.getEstudiante().getIdEstudiante(), a -> a));
+
+        List<EstudianteAsistenciaDTO> estudiantesConAsistencia = new ArrayList<>();
+        for (Matricula matricula : matriculas) {
+            Estudiante estudiante = matricula.getEstudiante();
+            Asistencia asistenciaActual = asistenciasPorEstudiante.get(estudiante.getIdEstudiante());
+
+            estudiantesConAsistencia.add(EstudianteAsistenciaDTO.builder()
+                    .idEstudiante(estudiante.getIdEstudiante())
+                    .codigoEstudiante(estudiante.getCodigoEstudiante())
+                    .nombresCompletos(estudiante.getPersona().getNombres() + " " + estudiante.getPersona().getApellidos())
+                    .dni(estudiante.getPersona().getDni())
+                    .nombreSeccion(matricula.getSeccion().getNombreSeccion()) // La sección de la matrícula
+                    .estadoAsistenciaActual(asistenciaActual != null ? asistenciaActual.getEstado() : null)
+                    .justificadaActual(asistenciaActual != null ? asistenciaActual.getJustificada() : false)
+                    .observacionesActual(asistenciaActual != null ? asistenciaActual.getObservaciones() : null)
+                    .idAsistencia(asistenciaActual != null ? asistenciaActual.getIdAsistencia() : null)
+                    .build());
+        }
+
+        return estudiantesConAsistencia.stream()
+                .sorted((e1, e2) -> e1.getNombresCompletos().compareToIgnoreCase(e2.getNombresCompletos()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public String registrarAsistencia(String username, RegistroAsistenciaRequestDTO requestDTO) throws ResourceNotFoundException {
+
+        Usuario usuario = usuarioRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + username));
+        Docente docente = docenteRepository.findByPersonaIdPersona(usuario.getPersona().getIdPersona())
+                .orElseThrow(() -> new ResourceNotFoundException("Docente no encontrado para el usuario: " + username));
+
+        Horario horario = horarioRepository.findByIdHorarioAndDocente_IdDocente(requestDTO.getIdHorario(), docente.getIdDocente())
+                .orElseThrow(() -> new ResourceNotFoundException("Horario no encontrado o no pertenece a este docente."));
+
+        List<Asistencia> asistenciasParaGuardar = new ArrayList<>();
+        LocalTime horaActual = LocalTime.now();
+
+        for (AsistenciaIndividualRequestDTO asistenciaRequest : requestDTO.getAsistencias()) {
+            Asistencia asistencia;
+
+            Optional<Asistencia> existingAsistencia = asistenciaRepository
+                    .findByEstudiante_IdEstudianteAndHorario_IdHorarioAndFechaAsistencia(
+                            asistenciaRequest.getIdEstudiante(), requestDTO.getIdHorario(), requestDTO.getFechaAsistencia());
+
+            if (existingAsistencia.isPresent()) {
+
+                asistencia = existingAsistencia.get();
+                asistencia.setEstado(asistenciaRequest.getEstadoAsistencia());
+                asistencia.setJustificada(asistenciaRequest.getJustificada());
+                asistencia.setObservaciones(asistenciaRequest.getObservaciones());
+                asistencia.setHoraLlegada(horaActual);
+            } else {
+
+                asistencia = new Asistencia();
+                Estudiante estudiante = estudianteRepository.findById(asistenciaRequest.getIdEstudiante())
+                        .orElseThrow(() -> new ResourceNotFoundException("Estudiante no encontrado con ID: " + asistenciaRequest.getIdEstudiante()));
+                asistencia.setEstudiante(estudiante);
+                asistencia.setHorario(horario);
+                asistencia.setFechaAsistencia(requestDTO.getFechaAsistencia());
+                asistencia.setEstado(asistenciaRequest.getEstadoAsistencia());
+                asistencia.setJustificada(asistenciaRequest.getJustificada());
+                asistencia.setObservaciones(asistenciaRequest.getObservaciones());
+                asistencia.setHoraLlegada(horaActual);
+            }
+            asistenciasParaGuardar.add(asistencia);
+        }
+
+
+        asistenciaRepository.saveAll(asistenciasParaGuardar);
+
+        return "Asistencias registradas/actualizadas exitosamente para el horario de " + horario.getCurso().getNombreCurso() + " el día " + requestDTO.getFechaAsistencia() + ".";
+    }
+
 }

@@ -24,5 +24,6 @@ public interface MatriculaRepository
 
     Page<Matricula> findByGrado_IdGradoAndPeriodoAcademico_IdPeriodo(Integer idGrado, Integer idPeriodo, Pageable pageable);
 
+    List<Matricula> findByGrado_IdGradoAndPeriodoAcademico_IdPeriodoAndEstadoMatricula(Integer idGrado, Integer idPeriodo, String estadoMatricula);
 
 }
