@@ -131,4 +131,11 @@ public interface DocenteService {
     List<CursoAsignadoDTO> listarCursosAsignadosPorUserName(String username);
 
     AsignacionDocenteDetalleDTO obtenerDetallesAsignacion(Integer idAsignacion, String username);
+
+    List<CursoDocenteDTO> getCursosAsignadosAlDocente(String username);
+
+    Page<EstudianteListaDTO> getEstudiantesPorAsignacion(String username, Integer idAsignacion, int page, int size);
+
+    MisEstudiantesViewDTO getMisEstudiantesViewData(String username);
+
 }

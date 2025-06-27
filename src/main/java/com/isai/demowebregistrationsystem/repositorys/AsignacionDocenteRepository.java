@@ -12,4 +12,6 @@ public interface AsignacionDocenteRepository
     Optional<AsignacionDocente> findByIdAsignacionAndDocente_IdDocente(Integer idAsignacion, Integer idDocente);
 
     List<AsignacionDocente> findByDocente_IdDocente(Integer idDocente);
+
+    List<AsignacionDocente> findByDocente_IdDocenteAndPeriodoAcademico_Activo(Integer idDocente, boolean b);
 }
