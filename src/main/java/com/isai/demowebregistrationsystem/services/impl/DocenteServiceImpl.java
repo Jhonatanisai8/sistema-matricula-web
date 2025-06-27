@@ -17,10 +17,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,6 +38,8 @@ public class DocenteServiceImpl implements DocenteService {
     private final AlmacenArchivoImpl almacenArchivo;
     private final HorarioRepository horarioRepository;
     private final MatriculaRepository matriculaRepository;
+    private final CalificacionRepository calificacionRepository;
+    private final EstudianteRepository estudianteRepository;
 
 
     @Override
@@ -766,5 +768,138 @@ public class DocenteServiceImpl implements DocenteService {
         return MisEstudiantesViewDTO.builder()
                 .cursosAsignados(cursosAsignados)
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<CursoCalificacionDTO> getCursosAsignadosParaCalificacion(String username) {
+        Usuario usuario = usuarioRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + username));
+        Docente docente = docenteRepository.findByPersonaIdPersona(usuario.getPersona().getIdPersona())
+                .orElseThrow(() -> new ResourceNotFoundException("Docente no encontrado para el usuario: " + username));
+
+        List<AsignacionDocente> asignaciones = asignacionDocenteRepository
+                .findByDocente_IdDocenteAndPeriodoAcademico_Activo(docente.getIdDocente(), true);
+
+        return asignaciones.stream()
+                .map(asignacion -> CursoCalificacionDTO.builder()
+                        .idAsignacion(asignacion.getIdAsignacion())
+                        .nombreCurso(asignacion.getCurso().getNombreCurso())
+                        .codigoCurso(asignacion.getCurso().getCodigoCurso())
+                        .nombreGrado(asignacion.getGrado().getNombreGrado())
+                        .nombrePeriodoAcademico(asignacion.getPeriodoAcademico().getNombrePeriodo() + " " + asignacion.getPeriodoAcademico().getAnoAcademico())
+                        .idCurso(asignacion.getCurso().getIdCurso()) // Añadir ID de Curso
+                        .idGrado(asignacion.getGrado().getIdGrado()) // Añadir ID de Grado
+                        .idPeriodoAcademico(asignacion.getPeriodoAcademico().getIdPeriodo()) // Añadir ID de Periodo
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public RegistrarNotasViewDTO getRegistrarNotasViewData(String username) {
+        List<CursoCalificacionDTO> cursosParaNotas = getCursosAsignadosParaCalificacion(username);
+        return RegistrarNotasViewDTO.builder()
+                .cursosParaNotas(cursosParaNotas)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<EstudianteNotaDTO> getEstudiantesConNotasActuales(String username, Integer idAsignacion) {
+        Usuario usuario = usuarioRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + username));
+        Docente docente = docenteRepository.findByPersonaIdPersona(usuario.getPersona().getIdPersona())
+                .orElseThrow(() -> new ResourceNotFoundException("Docente no encontrado para el usuario: " + username));
+
+        AsignacionDocente asignacion = asignacionDocenteRepository
+                .findByIdAsignacionAndDocente_IdDocente(idAsignacion, docente.getIdDocente())
+                .orElseThrow(() -> new ResourceNotFoundException("Asignación no encontrada o no pertenece a este docente."));
+
+        Integer idCurso = asignacion.getCurso().getIdCurso();
+        Integer idPeriodoAcademico = asignacion.getPeriodoAcademico().getIdPeriodo();
+        Integer idGrado = asignacion.getGrado().getIdGrado();
+
+        List<Matricula> matriculas = matriculaRepository.findByGrado_IdGradoAndPeriodoAcademico_IdPeriodo(
+                idGrado,
+                idPeriodoAcademico
+        );
+
+        List<Calificacion> calificacionesExistentes = calificacionRepository
+                .findByCurso_IdCursoAndPeriodoAcademico_IdPeriodo(idCurso, idPeriodoAcademico);
+
+        Map<Integer, Calificacion> notasPorEstudiante = calificacionesExistentes.stream()
+                .collect(Collectors.toMap(c -> c.getEstudiante().getIdEstudiante(), c -> c));
+
+        List<EstudianteNotaDTO> estudiantesConNotas = new ArrayList<>();
+        for (Matricula matricula : matriculas) {
+            Estudiante estudiante = matricula.getEstudiante();
+            Calificacion calificacionActual = notasPorEstudiante.get(estudiante.getIdEstudiante());
+
+            estudiantesConNotas.add(EstudianteNotaDTO.builder()
+                    .idEstudiante(estudiante.getIdEstudiante())
+                    .codigoEstudiante(estudiante.getCodigoEstudiante())
+                    .nombresCompletos(estudiante.getPersona().getNombres() + " " + estudiante.getPersona().getApellidos())
+                    .dni(estudiante.getPersona().getDni())
+                    .nombreSeccion(matricula.getSeccion().getNombreSeccion())
+                    .notaActual(calificacionActual != null ? calificacionActual.getNota() : null)
+                    .idCalificacion(calificacionActual != null ? calificacionActual.getIdCalificacion() : null)
+                    .build());
+        }
+
+        return estudiantesConNotas;
+
+    }
+
+    @Transactional
+    @Override
+    public String registrarNotas(String username, RegistroNotasRequestDTO requestDTO) {
+        // 1. Seguridad: Verificar que el docente logueado realmente está asignado a esta asignación
+        Usuario usuario = usuarioRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + username));
+        Docente docente = docenteRepository.findByPersonaIdPersona(usuario.getPersona().getIdPersona())
+                .orElseThrow(() -> new ResourceNotFoundException("Docente no encontrado para el usuario: " + username));
+
+        AsignacionDocente asignacion = asignacionDocenteRepository
+                .findByIdAsignacionAndDocente_IdDocente(requestDTO.getIdAsignacion(), docente.getIdDocente())
+                .orElseThrow(() -> new ResourceNotFoundException("Asignación no encontrada o no pertenece a este docente."));
+
+        Integer idCurso = asignacion.getCurso().getIdCurso();
+        Integer idPeriodoAcademico = asignacion.getPeriodoAcademico().getIdPeriodo();
+
+        List<Calificacion> calificacionesParaGuardar = new ArrayList<>();
+
+
+        for (NotaIndividualRequestDTO notaRequest : requestDTO.getNotas()) {
+            Calificacion calificacion;
+
+            Optional<Calificacion> existingCalificacion = calificacionRepository
+                    .findByEstudiante_IdEstudianteAndCurso_IdCursoAndPeriodoAcademico_IdPeriodo(
+                            notaRequest.getIdEstudiante(), idCurso, idPeriodoAcademico);
+
+            if (existingCalificacion.isPresent()) {
+                calificacion = existingCalificacion.get();
+                calificacion.setNota(notaRequest.getNota());
+                calificacion.setFechaEvaluacion(LocalDate.now());
+            } else {
+                calificacion = new Calificacion();
+                Estudiante estudiante = estudianteRepository.findById(notaRequest.getIdEstudiante())
+                        .orElseThrow(() -> new ResourceNotFoundException("Estudiante no encontrado con ID: " + notaRequest.getIdEstudiante()));
+                calificacion.setEstudiante(estudiante);
+                calificacion.setCurso(asignacion.getCurso());
+                calificacion.setPeriodoAcademico(asignacion.getPeriodoAcademico());
+                calificacion.setNota(notaRequest.getNota());
+                calificacion.setFechaEvaluacion(LocalDate.now());
+                calificacion.setObservaciones("Nota registrada por el docente.");
+                calificacion.setPesoPorcentual(new BigDecimal("100.00"));
+                calificacion.setTipoEvaluacion("Examen Final");
+            }
+            calificacionesParaGuardar.add(calificacion);
+        }
+
+        calificacionRepository.saveAll(calificacionesParaGuardar);
+
+        return "Notas registradas/actualizadas exitosamente para la asignación " + asignacion.getCurso().getNombreCurso() + ".";
+
     }
 }
