@@ -138,4 +138,12 @@ public interface DocenteService {
 
     MisEstudiantesViewDTO getMisEstudiantesViewData(String username);
 
+    List<CursoCalificacionDTO> getCursosAsignadosParaCalificacion(String username);
+
+    RegistrarNotasViewDTO getRegistrarNotasViewData(String username);
+
+    List<EstudianteNotaDTO> getEstudiantesConNotasActuales(String username, Integer idAsignacion);
+
+    String registrarNotas(String username, RegistroNotasRequestDTO requestDTO);
+
 }
