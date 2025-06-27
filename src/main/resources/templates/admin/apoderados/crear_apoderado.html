@@ -45,8 +45,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="foto" class="form-label">Foto de Perfil:</label>
-                            <input type="file" class="form-control" id="foto" th:field="*{foto}" accept="image/*"
-                                   required="required">
+                            <input type="file" class="form-control" id="foto" th:field="*{foto}" accept="image/*">
                             <div class="form-text text-muted small">Subir una imagen para el apoderado (opcional).</div>
                         </div>
                         <div class="col-md-6 mb-3 text-center">
@@ -181,6 +180,8 @@
                                 <option value="Ama de Casa">Ama de Casa</option>
                                 <option value="Independiente">Independiente</option>
                                 <option value="Jubilado">Jubilado</option>
+                                <option value="Mecánico">Mecánico</option>
+                                <option value="Cocinero">Cocinero</option>
                                 <option value="Otro">Otro (Especificar)</option>
                             </select>
                             <div class="invalid-feedback" th:if="${#fields.hasErrors('ocupacion')}"
