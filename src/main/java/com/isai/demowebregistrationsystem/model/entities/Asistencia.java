@@ -1,5 +1,6 @@
 package com.isai.demowebregistrationsystem.model.entities;
 
+import com.isai.demowebregistrationsystem.model.enums.EstadoAsistencia;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,8 +24,9 @@ public class Asistencia {
     @Column(name = "fecha_asistencia", nullable = false)
     private LocalDate fechaAsistencia;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false, length = 50)
-    private String estado;
+    private EstadoAsistencia estado;
 
     @Column(name = "observaciones", length = 255)
     private String observaciones;

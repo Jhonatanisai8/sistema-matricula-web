@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface HorarioRepository
@@ -28,4 +29,9 @@ public interface HorarioRepository
             Integer idGrado,
             Integer idPeriodoAcademico
     );
+
+    List<Horario> findByDocente_IdDocenteAndActivoTrueAndPeriodoAcademico_ActivoTrue(Integer idDocente);
+
+    Optional<Horario> findByIdHorarioAndDocente_IdDocente(Integer idHorario, Integer idDocente);
+
 }

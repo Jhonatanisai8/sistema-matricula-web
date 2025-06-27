@@ -293,27 +293,22 @@
                 </a>
             </li>
             <li>
-                <a class="nav-link" th:href="@{/docente/registrar-asistencia}">
+                <a class="nav-link" th:href="@{/docente/registrar_asistencia}">
                     <i class="bi bi-check2-circle"></i> Registrar Asistencia
                 </a>
             </li>
-            <li>
-                <a class="nav-link" th:href="@{/docente/materiales-subir}">
-                    <i class="bi bi-upload"></i> Subir Materiales
-                </a>
-            </li>
-            <li class="nav-item mt-3">
-                <h6 class="sidebar-heading">Comunicación</h6>
-            </li>
-            <li>
-                <a class="nav-link" th:href="@{/docente/mensajes}">
-                    <i class="bi bi-chat-dots-fill"></i> Mensajes
-                </a>
-            </li>
+            <!--            <li class="nav-item mt-3">-->
+            <!--                <h6 class="sidebar-heading">Comunicación</h6>-->
+            <!--            </li>-->
+            <!--            <li>-->
+            <!--                <a class="nav-link" th:href="@{/docente/mensajes}">-->
+            <!--                    <i class="bi bi-chat-dots-fill"></i> Mensajes-->
+            <!--                </a>-->
+            <!--            </li>-->
         </ul>
 
         <div class="mt-auto pt-3 border-top border-secondary text-center">
-            <small class="text-muted">&copy; [[${#dates.format(#dates.createNow(), 'yyyy')}]] Tu Institución</small>
+            <small class="text-muted">&copy; [[${#dates.format(#dates.createNow(), 'yyyy')}]] Colegio</small>
         </div>
     </aside>
 

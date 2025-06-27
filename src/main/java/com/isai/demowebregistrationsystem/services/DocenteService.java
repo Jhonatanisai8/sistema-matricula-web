@@ -1,11 +1,13 @@
 package com.isai.demowebregistrationsystem.services;
 
 
+import com.isai.demowebregistrationsystem.exceptions.ResourceNotFoundException;
 import com.isai.demowebregistrationsystem.model.dtos.docente.*;
 import com.isai.demowebregistrationsystem.model.entities.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -145,5 +147,13 @@ public interface DocenteService {
     List<EstudianteNotaDTO> getEstudiantesConNotasActuales(String username, Integer idAsignacion);
 
     String registrarNotas(String username, RegistroNotasRequestDTO requestDTO);
+
+    List<HorarioAsistenciaDTO> getHorariosParaAsistencia(String username);
+
+    RegistrarAsistenciaViewDTO getRegistrarAsistenciaViewData(String username);
+
+    List<EstudianteAsistenciaDTO> getEstudiantesConAsistenciaActual(String username, Integer idHorario, LocalDate fechaAsistencia);
+
+    String registrarAsistencia(String username, RegistroAsistenciaRequestDTO requestDTO) throws ResourceNotFoundException;
 
 }
