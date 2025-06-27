@@ -11,6 +11,7 @@ import com.isai.demowebregistrationsystem.services.DocenteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -698,6 +699,72 @@ public class DocenteServiceImpl implements DocenteService {
                 .esObligatorio(curso.getEsObligatorio())
                 .prerequisitos(curso.getPrerequisitos())
                 .competencias(curso.getCompetencias())
+                .build();
+    }
+
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<CursoDocenteDTO> getCursosAsignadosAlDocente(String username) {
+        Usuario usuario = usuarioRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + username));
+        Docente docente = docenteRepository.findByPersonaIdPersona(usuario.getPersona().getIdPersona())
+                .orElseThrow(() -> new ResourceNotFoundException("Docente no encontrado para el usuario: " + username));
+
+        List<AsignacionDocente> asignaciones = asignacionDocenteRepository
+                .findByDocente_IdDocenteAndPeriodoAcademico_Activo(docente.getIdDocente(), true);
+
+        return asignaciones.stream()
+                .map(asignacion -> CursoDocenteDTO.builder()
+                        .idAsignacion(asignacion.getIdAsignacion())
+                        .nombreCurso(asignacion.getCurso().getNombreCurso())
+                        .codigoCurso(asignacion.getCurso().getCodigoCurso())
+                        .nombreGrado(asignacion.getGrado().getNombreGrado())
+                        .nombrePeriodoAcademico(asignacion.getPeriodoAcademico().getNombrePeriodo() + " " + asignacion.getPeriodoAcademico().getAnoAcademico())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<EstudianteListaDTO> getEstudiantesPorAsignacion(String username, Integer idAsignacion, int page, int size) {
+
+        Usuario usuario = usuarioRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + username));
+        Docente docente = docenteRepository.findByPersonaIdPersona(usuario.getPersona().getIdPersona())
+                .orElseThrow(() -> new ResourceNotFoundException("Docente no encontrado para el usuario: " + username));
+
+        AsignacionDocente asignacion = asignacionDocenteRepository
+                .findByIdAsignacionAndDocente_IdDocente(idAsignacion, docente.getIdDocente())
+                .orElseThrow(() -> new ResourceNotFoundException("Asignación no encontrada o no pertenece a este docente."));
+
+
+        Pageable pageable = PageRequest.of(page, size);
+
+
+        Page<Matricula> matriculasPage = matriculaRepository.findByGrado_IdGradoAndPeriodoAcademico_IdPeriodo(
+                asignacion.getGrado().getIdGrado(),
+                asignacion.getPeriodoAcademico().getIdPeriodo(),
+                pageable
+        );
+
+
+        return matriculasPage.map(matricula -> EstudianteListaDTO.builder()
+                .idEstudiante(matricula.getEstudiante().getIdEstudiante())
+                .codigoEstudiante(matricula.getEstudiante().getCodigoEstudiante())
+                .nombresCompletos(matricula.getEstudiante().getPersona().getNombres() + " " + matricula.getEstudiante().getPersona().getApellidos())
+                .dni(matricula.getEstudiante().getPersona().getDni())
+                .nombreSeccion(matricula.getSeccion().getNombreSeccion())
+                .estadoMatricula(matricula.getEstadoMatricula())
+                .build());
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public MisEstudiantesViewDTO getMisEstudiantesViewData(String username) {
+        List<CursoDocenteDTO> cursosAsignados = getCursosAsignadosAlDocente(username);
+        return MisEstudiantesViewDTO.builder()
+                .cursosAsignados(cursosAsignados)
                 .build();
     }
 }
