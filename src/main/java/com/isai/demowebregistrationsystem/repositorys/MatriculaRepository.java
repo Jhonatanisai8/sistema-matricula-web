@@ -26,4 +26,9 @@ public interface MatriculaRepository
 
     List<Matricula> findByGrado_IdGradoAndPeriodoAcademico_IdPeriodoAndEstadoMatricula(Integer idGrado, Integer idPeriodo, String estadoMatricula);
 
+    /*METODOS PARA EL ROL DE ESTUDIANTE*/
+    Optional<Matricula> findByEstudiante_IdEstudianteAndPeriodoAcademico_ActivoTrueAndEstadoMatriculaOrderByFechaMatriculaDesc(Integer idEstudiante, String estadoMatricula);
+
+    Optional<Matricula> findByEstudiante_IdEstudianteAndPeriodoAcademico_ActivoTrue(Integer idEstudiante);
+
 }

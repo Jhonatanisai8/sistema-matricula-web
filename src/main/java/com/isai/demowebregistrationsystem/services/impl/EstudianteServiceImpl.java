@@ -5,12 +5,10 @@ import com.isai.demowebregistrationsystem.exceptions.ValidationException;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteDetalleDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteListadoDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteRegistroDTO;
+import com.isai.demowebregistrationsystem.model.dtos.estudiantes.rolEstudiante.EstudianteDashboardDTO;
 import com.isai.demowebregistrationsystem.model.dtos.opciones.ApoderadoOptionDTO;
 import com.isai.demowebregistrationsystem.model.dtos.opciones.GradoOptionDTO;
-import com.isai.demowebregistrationsystem.model.entities.Apoderado;
-import com.isai.demowebregistrationsystem.model.entities.Estudiante;
-import com.isai.demowebregistrationsystem.model.entities.Persona;
-import com.isai.demowebregistrationsystem.model.entities.Usuario;
+import com.isai.demowebregistrationsystem.model.entities.*;
 import com.isai.demowebregistrationsystem.model.enums.Rol;
 import com.isai.demowebregistrationsystem.repositorys.*;
 import com.isai.demowebregistrationsystem.services.EstudianteService;
@@ -426,5 +424,66 @@ public class EstudianteServiceImpl
 
     private String generarCodigoEstudiante() {
         return "EST" + System.currentTimeMillis();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public EstudianteDashboardDTO obtenerDatosDashboardEstudiante(String username) throws ResourceNotFoundException {
+        Usuario usuario = usuarioRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + username));
+
+        Estudiante estudiante = estudianteRepository.findByPersonaIdPersona(usuario.getPersona().getIdPersona())
+                .orElseThrow(() -> new ResourceNotFoundException("Estudiante no encontrado para el usuario: " + username));
+
+
+        // obtenemos la matrícula activa del estudiante
+        Matricula matriculaActual = matriculaRepository
+                .findByEstudiante_IdEstudianteAndPeriodoAcademico_ActivoTrueAndEstadoMatriculaOrderByFechaMatriculaDesc(
+                        estudiante.getIdEstudiante(), "ACTIVA")
+                .orElse(null);
+
+        String gradoActual = "N/A";
+        String seccionActual = "N/A";
+        String periodoAcademicoActual = "N/A";
+        String numeroMatriculaActual = "N/A";
+
+        if (matriculaActual != null) {
+            gradoActual = matriculaActual.getGrado().getNombreGrado();
+            seccionActual = matriculaActual.getSeccion().getNombreSeccion();
+            periodoAcademicoActual = matriculaActual.getPeriodoAcademico().getNombrePeriodo() + " " + matriculaActual.getPeriodoAcademico().getAnoAcademico();
+            numeroMatriculaActual = matriculaActual.getNumeroMatricula();
+        }
+
+        String apoderadoPrincipalNombre = "N/A";
+        String apoderadoPrincipalTelefono = "N/A";
+
+        // obtenemos el apoderado principal si existe
+        if (estudiante.getApoderadoPrincipal() != null) {
+            Apoderado apoderado = estudiante.getApoderadoPrincipal();
+            apoderadoPrincipalNombre = apoderado.getPersona().getNombres() + " " + apoderado.getPersona().getApellidos();
+            apoderadoPrincipalTelefono = apoderado.getPersona().getTelefono();
+            if (apoderadoPrincipalTelefono == null || apoderadoPrincipalTelefono.isEmpty()) {
+                apoderadoPrincipalTelefono = apoderado.getTelefonoTrabajo();
+            }
+        }
+
+
+        return EstudianteDashboardDTO.builder()
+                .nombresCompletos(estudiante.getPersona().getNombres() + " " + estudiante.getPersona().getApellidos())
+                .codigoEstudiante(estudiante.getCodigoEstudiante())
+                .emailEducativo(estudiante.getEmailEducativo())
+                .fechaNacimiento(estudiante.getPersona().getFechaNacimiento())
+                .fotoUrl(estudiante.getPersona().getFotoUrl())
+                .gradoActual(gradoActual)
+                .seccionActual(seccionActual)
+                .periodoAcademicoActual(periodoAcademicoActual)
+                .numeroMatriculaActual(numeroMatriculaActual)
+                .contactoEmergencia(estudiante.getContactoEmergencia())
+                .telefonoEmergencia(estudiante.getTelefonoEmergencia())
+                .tipoSangre(estudiante.getTipoSangre())
+                .seguroEscolar(estudiante.getSeguroEscolar())
+                .apoderadoPrincipal(apoderadoPrincipalNombre)
+                .telefonoApoderadoPrincipal(apoderadoPrincipalTelefono)
+                .build();
     }
 }

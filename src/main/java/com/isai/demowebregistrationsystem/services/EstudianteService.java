@@ -1,8 +1,10 @@
 package com.isai.demowebregistrationsystem.services;
 
+import com.isai.demowebregistrationsystem.exceptions.ResourceNotFoundException;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteDetalleDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteListadoDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteRegistroDTO;
+import com.isai.demowebregistrationsystem.model.dtos.estudiantes.rolEstudiante.EstudianteDashboardDTO;
 import com.isai.demowebregistrationsystem.model.dtos.opciones.ApoderadoOptionDTO;
 import com.isai.demowebregistrationsystem.model.dtos.opciones.GradoOptionDTO;
 import org.springframework.data.domain.Page;
@@ -18,14 +20,12 @@ public interface EstudianteService {
     EstudianteDetalleDTO obtenerEstudianteDetalle(Integer idEstudiante);
 
     EstudianteRegistroDTO obtenerEstudianteParaEdicion(Integer idEstudiante);
-    // Para precargar el formulario de edición
 
     void guardarEstudiante(EstudianteRegistroDTO estudianteDTO);
 
     // Crear o actualizar
 
     void eliminarEstudiante(Integer idEstudiante);
-    // Considerar inactivar en lugar de eliminar físicamente
 
 
     // Métodos para cargar opciones en los formularios (selects)
@@ -43,4 +43,8 @@ public interface EstudianteService {
 
     Map<String, String> getGradosAnteriores();
 
+    /*METODOS PARA ROL DE ESTUDIANTE*/
+    EstudianteDashboardDTO obtenerDatosDashboardEstudiante(String username) throws ResourceNotFoundException;
+
 }
+
