@@ -43,8 +43,8 @@ public class Grado {
     @Column(name = "cupos_disponibles")
     private Integer cuposDisponibles;
 
-    @Column(name = "pension_mensual", precision = 10, scale = 2)
-    private BigDecimal pensionMensual;
+//    @Column(name = "pension_mensual", precision = 10, scale = 2)
+//    private BigDecimal pensionMensual;
 
     @Column(name = "activo", nullable = false)
     private Boolean activo;

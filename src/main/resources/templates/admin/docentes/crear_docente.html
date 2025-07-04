@@ -177,14 +177,30 @@
                         <div class="invalid-feedback" th:if="${#fields.hasErrors('genero')}"
                              th:errors="*{genero}"></div>
                     </div>
+                    <!--                    <div class="col-md-4 mb-3">-->
+                    <!--                        <label for="estadoCivil" class="form-label">Estado Civil</label>-->
+                    <!--                        <input type="text" class="form-control" id="estadoCivil" th:field="*{estadoCivil}"-->
+                    <!--                               th:classappend="${#fields.hasErrors('estadoCivil') ? 'is-invalid' : ''}"-->
+                    <!--                               maxlength="50">-->
+                    <!--                        <div class="invalid-feedback" th:if="${#fields.hasErrors('estadoCivil')}"-->
+                    <!--                             th:errors="*{estadoCivil}"></div>-->
+                    <!--                    </div>-->
+
                     <div class="col-md-4 mb-3">
-                        <label for="estadoCivil" class="form-label">Estado Civil</label>
-                        <input type="text" class="form-control" id="estadoCivil" th:field="*{estadoCivil}"
-                               th:classappend="${#fields.hasErrors('estadoCivil') ? 'is-invalid' : ''}"
-                               maxlength="50">
+                        <label for="estadoCivil" class="form-label">Estado Civil:</label>
+                        <select class="form-select" id="estadoCivil" th:field="*{estadoCivil}"
+                                th:classappend="${#fields.hasErrors('estadoCivil') ? 'is-invalid' : ''}">
+                            <option value="">Seleccione...</option>
+                            <option value="Soltero/a">Soltero/a</option>
+                            <option value="Casado/a">Casado/a</option>
+                            <option value="Divorciado/a">Divorciado/a</option>
+                            <option value="Viudo/a">Viudo/a</option>
+                        </select>
                         <div class="invalid-feedback" th:if="${#fields.hasErrors('estadoCivil')}"
                              th:errors="*{estadoCivil}"></div>
                     </div>
+
+
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-3">
@@ -213,27 +229,43 @@
                     </div>
                 </div>
                 <div class="row">
+                    <!--                    <div class="col-md-4 mb-3">-->
+                    <!--                        <label for="tipoDocumento" class="form-label">Tipo de Documento <span-->
+                    <!--                                class="text-danger">*</span></label>-->
+                    <!--                        <input type="text" class="form-control" id="tipoDocumento" th:field="*{tipoDocumento}"-->
+                    <!--                               th:classappend="${#fields.hasErrors('tipoDocumento') ? 'is-invalid' : ''}"-->
+                    <!--                               maxlength="50">-->
+                    <!--                        <div class="invalid-feedback" th:if="${#fields.hasErrors('tipoDocumento')}"-->
+                    <!--                             th:errors="*{tipoDocumento}"></div>-->
+                    <!--                    </div>-->
+
                     <div class="col-md-4 mb-3">
-                        <label for="tipoDocumento" class="form-label">Tipo de Documento <span
-                                class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="tipoDocumento" th:field="*{tipoDocumento}"
-                               th:classappend="${#fields.hasErrors('tipoDocumento') ? 'is-invalid' : ''}"
-                               maxlength="50">
+                        <label for="tipoDocumento" class="form-label">Tipo de Documento:</label>
+                        <select class="form-select" id="tipoDocumento" th:field="*{tipoDocumento}"
+                                th:classappend="${#fields.hasErrors('tipoDocumento') ? 'is-invalid' : ''}">
+                            <option value="">Seleccione...</option>
+                            <option value="DNI">DNI</option>
+                            <option value="Pasaporte">Pasaporte</option>
+                            <option value="Carnet Extranjería">Carnet Extranjería</option>
+                            <option value="Cédula de Identidad">Cédula de Identidad</option>
+                            <option value="Licencia de Conducir">Licencia de Conducir</option>
+                        </select>
                         <div class="invalid-feedback" th:if="${#fields.hasErrors('tipoDocumento')}"
                              th:errors="*{tipoDocumento}"></div>
                     </div>
+
                 </div>
 
                 <h6 class="form-section-title mt-4">Información Profesional del Docente</h6>
                 <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label for="codigoDocente" class="form-label">Código Docente <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="codigoDocente" th:field="*{codigoDocente}"
-                               th:classappend="${#fields.hasErrors('codigoDocente') ? 'is-invalid' : ''}"
-                               minlength="5" maxlength="50">
-                        <div class="invalid-feedback" th:if="${#fields.hasErrors('codigoDocente')}"
-                             th:errors="*{codigoDocente}"></div>
-                    </div>
+                    <!--                    <div class="col-md-4 mb-3">-->
+                    <!--                        <label for="codigoDocente" class="form-label">Código Docente <span class="text-danger">*</span></label>-->
+                    <!--                        <input type="text" class="form-control" id="codigoDocente" th:field="*{codigoDocente}"-->
+                    <!--                               th:classappend="${#fields.hasErrors('codigoDocente') ? 'is-invalid' : ''}"-->
+                    <!--                               minlength="5" maxlength="50">-->
+                    <!--                        <div class="invalid-feedback" th:if="${#fields.hasErrors('codigoDocente')}"-->
+                    <!--                             th:errors="*{codigoDocente}"></div>-->
+                    <!--                    </div>-->
                     <div class="col-md-4 mb-3">
                         <label for="emailInstitucional" class="form-label">Email Institucional</label>
                         <input type="email" class="form-control" id="emailInstitucional"
@@ -243,27 +275,65 @@
                         <div class="invalid-feedback" th:if="${#fields.hasErrors('emailInstitucional')}"
                              th:errors="*{emailInstitucional}"></div>
                     </div>
+
+                    <!--                    <div class="col-md-4 mb-3">-->
+                    <!--                        <label for="especialidadPrincipal" class="form-label">Especialidad Principal <span-->
+                    <!--                                class="text-danger">*</span></label>-->
+                    <!--                        <input type="text" class="form-control" id="especialidadPrincipal"-->
+                    <!--                               th:field="*{especialidadPrincipal}"-->
+                    <!--                               th:classappend="${#fields.hasErrors('especialidadPrincipal') ? 'is-invalid' : ''}"-->
+                    <!--                               maxlength="100">-->
+                    <!--                        <div class="invalid-feedback" th:if="${#fields.hasErrors('especialidadPrincipal')}"-->
+                    <!--                             th:errors="*{especialidadPrincipal}"></div>-->
+                    <!--                    </div>-->
+
+
                     <div class="col-md-4 mb-3">
-                        <label for="especialidadPrincipal" class="form-label">Especialidad Principal <span
-                                class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="especialidadPrincipal"
-                               th:field="*{especialidadPrincipal}"
-                               th:classappend="${#fields.hasErrors('especialidadPrincipal') ? 'is-invalid' : ''}"
-                               maxlength="100">
+                        <label for="especialidadPrincipal" class="form-label">Especialidad Principal:</label>
+                        <select class="form-select" id="especialidadPrincipal" th:field="*{especialidadPrincipal}"
+                                th:classappend="${#fields.hasErrors('especialidadPrincipal') ? 'is-invalid' : ''}">
+                            <option value="">Seleccione...</option>
+                            <option value="Comunicación">Comunicación</option>
+                            <option value="Matemática">Matemática</option>
+                            <option value="Personal Social">Personal Social</option>
+                            <option value="Ciencia y Tecnología">Ciencia y Tecnología</option>
+                            <option value="Educación Física">Educación Física</option>
+                            <option value="Arte y Cultura">Arte y Cultura</option>
+                            <option value="Educación Religiosa">Educación Religiosa</option>
+                        </select>
                         <div class="invalid-feedback" th:if="${#fields.hasErrors('especialidadPrincipal')}"
                              th:errors="*{especialidadPrincipal}"></div>
                     </div>
+
                 </div>
                 <div class="row">
+                    <!--                    <div class="col-md-4 mb-3">-->
+                    <!--                        <label for="especialidadSecundaria" class="form-label">Especialidad Secundaria</label>-->
+                    <!--                        <input type="text" class="form-control" id="especialidadSecundaria"-->
+                    <!--                               th:field="*{especialidadSecundaria}"-->
+                    <!--                               th:classappend="${#fields.hasErrors('especialidadSecundaria') ? 'is-invalid' : ''}"-->
+                    <!--                               maxlength="100">-->
+                    <!--                        <div class="invalid-feedback" th:if="${#fields.hasErrors('especialidadSecundaria')}"-->
+                    <!--                             th:errors="*{especialidadSecundaria}"></div>-->
+                    <!--                    </div>-->
+
                     <div class="col-md-4 mb-3">
-                        <label for="especialidadSecundaria" class="form-label">Especialidad Secundaria</label>
-                        <input type="text" class="form-control" id="especialidadSecundaria"
-                               th:field="*{especialidadSecundaria}"
-                               th:classappend="${#fields.hasErrors('especialidadSecundaria') ? 'is-invalid' : ''}"
-                               maxlength="100">
+                        <label for="especialidadSecundaria" class="form-label">Especialidad Secundaria:</label>
+                        <select class="form-select" id="especialidadSecundaria" th:field="*{especialidadSecundaria}"
+                                th:classappend="${#fields.hasErrors('especialidadSecundaria') ? 'is-invalid' : ''}">
+                            <option value="">Seleccione...</option>
+                            <option value="Comunicación">Comunicación</option>
+                            <option value="Matemática">Matemática</option>
+                            <option value="Personal Social">Personal Social</option>
+                            <option value="Ciencia y Tecnología">Ciencia y Tecnología</option>
+                            <option value="Educación Física">Educación Física</option>
+                            <option value="Arte y Cultura">Arte y Cultura</option>
+                            <option value="Educación Religiosa">Educación Religiosa</option>
+                        </select>
                         <div class="invalid-feedback" th:if="${#fields.hasErrors('especialidadSecundaria')}"
                              th:errors="*{especialidadSecundaria}"></div>
                     </div>
+
                     <div class="col-md-4 mb-3">
                         <label for="tituloProfesional" class="form-label">Título Profesional <span
                                 class="text-danger">*</span></label>
@@ -299,24 +369,49 @@
                         <div class="invalid-feedback" th:if="${#fields.hasErrors('salarioBase')}"
                              th:errors="*{salarioBase}"></div>
                     </div>
+                    <!--                    <div class="col-md-4 mb-3">-->
+                    <!--                        <label for="tipoContrato" class="form-label">Tipo de Contrato <span class="text-danger">*</span></label>-->
+                    <!--                        <input type="text" class="form-control" id="tipoContrato" th:field="*{tipoContrato}"-->
+                    <!--                               th:classappend="${#fields.hasErrors('tipoContrato') ? 'is-invalid' : ''}"-->
+                    <!--                               maxlength="50">-->
+                    <!--                        <div class="invalid-feedback" th:if="${#fields.hasErrors('tipoContrato')}"-->
+                    <!--                             th:errors="*{tipoContrato}"></div>-->
+                    <!--                    </div>-->
+
                     <div class="col-md-4 mb-3">
-                        <label for="tipoContrato" class="form-label">Tipo de Contrato <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="tipoContrato" th:field="*{tipoContrato}"
-                               th:classappend="${#fields.hasErrors('tipoContrato') ? 'is-invalid' : ''}"
-                               maxlength="50">
+                        <label for="tipoContrato" class="form-label">Tipo de Contrato:</label>
+                        <select class="form-select" id="tipoContrato" th:field="*{tipoContrato}"
+                                th:classappend="${#fields.hasErrors('tipoContrato') ? 'is-invalid' : ''}">
+                            <option value="">Seleccione...</option>
+                            <option value="Fijo">Fijo</option>
+                            <option value="Temporal">Temporal</option>
+                            <option value="Honorarios">Honorarios</option>
+                        </select>
                         <div class="invalid-feedback" th:if="${#fields.hasErrors('tipoContrato')}"
                              th:errors="*{tipoContrato}"></div>
                     </div>
                 </div>
                 <div class="row">
+                    <!--                    <div class="col-md-4 mb-3">-->
+                    <!--                        <label for="estadoLaboral" class="form-label">Estado Laboral <span class="text-danger">*</span></label>-->
+                    <!--                        <input type="text" class="form-control" id="estadoLaboral" th:field="*{estadoLaboral}"-->
+                    <!--                               th:classappend="${#fields.hasErrors('estadoLaboral') ? 'is-invalid' : ''}"-->
+                    <!--                               maxlength="50">-->
+                    <!--                        <div class="invalid-feedback" th:if="${#fields.hasErrors('estadoLaboral')}"-->
+                    <!--                             th:errors="*{estadoLaboral}"></div>-->
+                    <!--                    </div>-->
+
                     <div class="col-md-4 mb-3">
-                        <label for="estadoLaboral" class="form-label">Estado Laboral <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="estadoLaboral" th:field="*{estadoLaboral}"
-                               th:classappend="${#fields.hasErrors('estadoLaboral') ? 'is-invalid' : ''}"
-                               maxlength="50">
+                        <label for="estadoLaboral" class="form-label">Estado Laboral :</label>
+                        <select class="form-select" id="estadoLaboral" th:field="*{estadoLaboral}"
+                                th:classappend="${#fields.hasErrors('estadoLaboral') ? 'is-invalid' : ''}">
+                            <option value="">Seleccione...</option>
+                            <option value="ACTIVO">ACTIVO</option>
+                        </select>
                         <div class="invalid-feedback" th:if="${#fields.hasErrors('estadoLaboral')}"
                              th:errors="*{estadoLaboral}"></div>
                     </div>
+
                     <div class="col-md-4 mb-3">
                         <label for="anosExperiencia" class="form-label">Años de Experiencia <span
                                 class="text-danger">*</span></label>

@@ -35,9 +35,9 @@ public class GradoDTO {
     @Min(value = 0, message = "Los cupos disponibles no pueden ser negativos.")
     private Integer cuposDisponibles;
 
-    @DecimalMin(value = "0.00", message = "La pensión mensual no puede ser negativa.")
-    @Digits(integer = 8, fraction = 2, message = "La pensión mensual debe tener hasta 8 dígitos enteros y 2 decimales.")
-    private BigDecimal pensionMensual;
+//    @DecimalMin(value = "0.00", message = "La pensión mensual no puede ser negativa.")
+//    @Digits(integer = 8, fraction = 2, message = "La pensión mensual debe tener hasta 8 dígitos enteros y 2 decimales.")
+//    private BigDecimal pensionMensual;
 
     @Size(max = 255, message = "La descripción no puede exceder los 255 caracteres.")
     private String descripcion;

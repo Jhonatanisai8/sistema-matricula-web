@@ -94,14 +94,17 @@
                             <div class="invalid-feedback" th:if="${#fields.hasErrors('cuposDisponibles')}"
                                  th:errors="*{cuposDisponibles}"></div>
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="pensionMensual" class="form-label">Pensión Mensual:</label>
-                            <input type="number" step="0.01" class="form-control" id="pensionMensual"
-                                   th:field="*{pensionMensual}"
-                                   th:classappend="${#fields.hasErrors('pensionMensual') ? 'is-invalid' : ''}">
-                            <div class="invalid-feedback" th:if="${#fields.hasErrors('pensionMensual')}"
-                                 th:errors="*{pensionMensual}"></div>
-                        </div>
+
+                        <!--                                                <div class="col-md-4 mb-3">-->
+                        <!--                                                    <label for="pensionMensual" class="form-label">Pensión Mensual:</label>-->
+                        <!--                                                    <input type="number" step="0.01" class="form-control" id="pensionMensual"-->
+                        <!--                                                           th:field="*{pensionMensual}"-->
+                        <!--                                                           th:classappend="${#fields.hasErrors('pensionMensual') ? 'is-invalid' : ''}">-->
+                        <!--                                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('pensionMensual')}"-->
+                        <!--                                                         th:errors="*{pensionMensual}"></div>-->
+                        <!--                                                </div>-->
+                        <!--                        -->
+
                         <div class="col-md-4 mb-3">
                             <label for="orden" class="form-label">Orden (para listados):</label>
                             <input type="number" class="form-control" id="orden" th:field="*{orden}"

@@ -45,7 +45,7 @@
                             <th>Código</th>
                             <th>Nivel</th>
                             <th>Cupos</th>
-                            <th>Pensión Mensual</th>
+                            <!--                            <th>Pensión Mensual</th>-->
                             <th>Activo</th>
                             <th>Acciones</th>
                         </tr>
@@ -57,7 +57,7 @@
                             <td th:text="${grado.codigoGrado}"></td>
                             <td th:text="${grado.nivel}"></td>
                             <td th:text="${grado.cuposDisponibles}"></td>
-                            <td th:text="${#numbers.formatCurrency(grado.pensionMensual)}"></td>
+                            <!--                            <td th:text="${#numbers.formatCurrency(grado.pensionMensual)}"></td>-->
                             <td>
                                 <i th:class="${grado.activo ? 'bi bi-check-circle-fill text-success' : 'bi bi-x-circle-fill text-danger'}"></i>
                                 <span th:text="${grado.activo ? 'Sí' : 'No'}"></span>
