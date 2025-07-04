@@ -177,7 +177,6 @@
                             </button>
                         </div>
 
-                        <!-- Modal de confirmación -->
                         <div class="modal fade" th:id="${'confirmDeleteModal' + estudiante.idEstudiante}" tabindex="-1"
                              aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
                             <div class="modal-dialog">
@@ -225,7 +224,8 @@
             </div>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap">
+        <div th:if="${estudiantesPage != null and estudiantesPage.totalPages > 0}"
+             class="d-flex justify-content-between align-items-center mt-4 flex-wrap">
             <div class="mb-3 mb-md-0">
                 <label for="pageSizeSelect" class="me-2">Mostrar:</label>
                 <select id="pageSizeSelect" class="form-select d-inline-block w-auto" onchange="changePageSize()">
@@ -259,10 +259,11 @@
                         </a>
                     </li>
 
-                    <li class="page-item" th:each="i : ${#numbers.sequence(
-                        Math.max(0, estudiantesPage.number - 2),
-                        Math.min(estudiantesPage.totalPages - 1, estudiantesPage.number + 2)
-                    }" th:classappend="${i == estudiantesPage.number} ? 'active'">
+                    <li class="page-item" th:if="${estudiantesPage != null and estudiantesPage.totalPages > 0}"
+                        th:each="i : ${#numbers.sequence(
+                        T(java.lang.Math).max(0, estudiantesPage.number - 2),
+                        T(java.lang.Math).min(estudiantesPage.totalPages - 1, estudiantesPage.number + 2)
+                    )}" th:classappend="${i == estudiantesPage.number} ? 'active'">
                         <a class="page-link"
                            th:href="@{/admin/estudiantes/lista(page=${i}, size=${pageSize}, sort=${sortField != null ? sortField + ',' + sortDirection : ''}, keyword=${keyword}, activo=${activo})}"
                            th:text="${i + 1}">1</a>

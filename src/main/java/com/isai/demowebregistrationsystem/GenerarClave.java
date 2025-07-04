@@ -6,7 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class GenerarClave {
     public static void main(String[] args) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        String clave = passwordEncoder.encode("clave");
+        String clave = passwordEncoder.encode("claves123");
         System.out.println(clave);
     }
 }

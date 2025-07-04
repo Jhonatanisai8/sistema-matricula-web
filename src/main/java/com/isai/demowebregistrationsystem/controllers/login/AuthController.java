@@ -62,30 +62,28 @@ public class AuthController {
                     break;
                 default:
                     redirectAttributes.addFlashAttribute("errorMessage", "Rol de registro no válido.");
-                    return "redirect:/auth/registro"; // Redirige a la selección de rol (con el prefijo /auth)
+                    return "redirect:/auth/registro";
             }
 
-            registroDTO.setRol(selectedRol); // Establecer el rol en el DTO
+            registroDTO.setRol(selectedRol);
 
             model.addAttribute("registroDTO", registroDTO);
             model.addAttribute("selectedRol", selectedRol);
 
-            // Aquí se pasan las listas de String
-            model.addAttribute("generos", Arrays.asList("MASCULINO", "FEMENINO"));
-            model.addAttribute("tiposDocumento", Arrays.asList("DNI", "PASAPORTE", "CARNET_EXTRANJERIA"));
-            model.addAttribute("estadosCivil", Arrays.asList("SOLTERO", "CASADO", "DIVORCIADO", "VIUDO"));
+            model.addAttribute("generos", Arrays.asList("Masculino", "Femenino"));
+            model.addAttribute("tiposDocumento", Arrays.asList("DNI", "Pasaporte", "Carnet Extranjería", "Cédula de Identidad", "Licencia de Conducir"));
+            model.addAttribute("estadosCivil", Arrays.asList("Soltero/a", "Casado/a", "Divorciado/a", "Viudo/a"));
 
             return "auth/registro_form_dinamico";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Rol de registro no válido.");
-            return "redirect:/auth/registro"; // Redirige a la selección de rol (con el prefijo /auth)
+            return "redirect:/auth/registro";
         }
     }
 
-    // --- MÉTODOS POST DE REGISTRO ESPECÍFICOS POR ROL ---
 
-    @PostMapping("/registro/guardar/admin") // Necesitas este PostMapping para ADMIN
-    public String registrarAdmin(@ModelAttribute("registroDTO") @Valid RegistroUsuarioDTO registroDTO, // O RegistroAdminDTO si es específico
+    @PostMapping("/registro/guardar/admin")
+    public String registrarAdmin(@ModelAttribute("registroDTO") @Valid RegistroUsuarioDTO registroDTO,
                                  BindingResult result,
                                  RedirectAttributes redirectAttributes,
                                  Model model) {
@@ -131,9 +129,9 @@ public class AuthController {
 
         if (result.hasErrors()) {
             model.addAttribute("selectedRol", registroDTO.getRol());
-            model.addAttribute("generos", Arrays.asList("MASCULINO", "FEMENINO", "OTRO"));
-            model.addAttribute("tiposDocumento", Arrays.asList("DNI", "PASAPORTE", "CARNET_EXTRANJERIA"));
-            model.addAttribute("estadosCivil", Arrays.asList("SOLTERO", "CASADO", "DIVORCIADO", "VIUDO"));
+            model.addAttribute("generos", Arrays.asList("Masculino", "Femenino"));
+            model.addAttribute("tiposDocumento", Arrays.asList("DNI", "Pasaporte", "Carnet Extranjería", "Cédula de Identidad", "Licencia de Conducir"));
+            model.addAttribute("estadosCivil", Arrays.asList("Soltero/a", "Casado/a", "Divorciado/a", "Viudo/a"));
             model.addAttribute("registroDTO", registroDTO);
             return "auth/registro_form_dinamico";
         }
@@ -151,19 +149,17 @@ public class AuthController {
                 model.addAttribute("errorMessage", e.getMessage());
             }
             model.addAttribute("selectedRol", registroDTO.getRol());
-            model.addAttribute("generos", Arrays.asList("MASCULINO", "FEMENINO", "OTRO"));
-            model.addAttribute("tiposDocumento", Arrays.asList("DNI", "PASAPORTE", "CARNET_EXTRANJERIA"));
-            model.addAttribute("estadosCivil", Arrays.asList("SOLTERO", "CASADO", "DIVORCIADO", "VIUDO"));
+            model.addAttribute("generos", Arrays.asList("Masculino", "Femenino"));
+            model.addAttribute("tiposDocumento", Arrays.asList("DNI", "Pasaporte", "Carnet Extranjería", "Cédula de Identidad", "Licencia de Conducir"));
+            model.addAttribute("estadosCivil", Arrays.asList("Soltero/a", "Casado/a", "Divorciado/a", "Viudo/a"));
             model.addAttribute("registroDTO", registroDTO);
-            return "auth/registro_form_dinamico"; // <-- ¡OJO! Esto estaba mal: "auth/registro_form_dinamicoth/"
+            return "auth/registro_form_dinamico";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error inesperado al registrar: " + e.getMessage());
-            return "redirect:/auth/registro"; // Redirige a la selección de rol (con el prefijo /auth)
+            return "redirect:/auth/registro";
         }
     }
 
-    // --- MÉTODOS DE DASHBOARD Y ACCESO DENEGADO ---
-    // ¡Recuerda resolver la duplicidad de /admin/dashboard!
 
     @GetMapping("/admin/dashboard")
     public String adminDashboard() {
