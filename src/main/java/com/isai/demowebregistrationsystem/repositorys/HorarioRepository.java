@@ -34,4 +34,14 @@ public interface HorarioRepository
 
     Optional<Horario> findByIdHorarioAndDocente_IdDocente(Integer idHorario, Integer idDocente);
 
+    /*PARA EL ROL DE ESTUDIANTE*/
+    /*Buscamos los  horarios activos para un curso, grado, sección y periodo académico específico*/
+    List<Horario> findByCurso_IdCursoAndGrado_IdGradoAndSeccion_IdSeccionAndPeriodoAcademico_IdPeriodoAndActivoTrue(
+            Integer idCurso, Integer idGrado, Integer idSeccion, Integer idPeriodoAcademico);
+
+    /*en caso un curso este en multiples horarios  */
+    List<Horario> findByCurso_IdCursoAndGrado_IdGradoAndSeccion_IdSeccionAndPeriodoAcademico_IdPeriodo(
+            Integer idCurso, Integer idGrado, Integer idSeccion, Integer idPeriodoAcademico);
+
+    List<Horario> findByGrado_IdGradoAndSeccion_IdSeccionAndPeriodoAcademico_IdPeriodoAndActivoTrue(Integer idGradoMatriculado, Integer idSeccionMatriculada, Integer idPeriodoAcademicoMatriculado);
 }

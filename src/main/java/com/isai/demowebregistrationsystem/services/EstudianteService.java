@@ -4,6 +4,7 @@ import com.isai.demowebregistrationsystem.exceptions.ResourceNotFoundException;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteDetalleDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteListadoDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteRegistroDTO;
+import com.isai.demowebregistrationsystem.model.dtos.estudiantes.rolEstudiante.CursosEstudianteViewDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.rolEstudiante.EstudianteDashboardDTO;
 import com.isai.demowebregistrationsystem.model.dtos.opciones.ApoderadoOptionDTO;
 import com.isai.demowebregistrationsystem.model.dtos.opciones.GradoOptionDTO;
@@ -45,6 +46,8 @@ public interface EstudianteService {
 
     /*METODOS PARA ROL DE ESTUDIANTE*/
     EstudianteDashboardDTO obtenerDatosDashboardEstudiante(String username) throws ResourceNotFoundException;
+
+    CursosEstudianteViewDTO obtenerMisCursos(String username) throws ResourceNotFoundException;
 
 }
 

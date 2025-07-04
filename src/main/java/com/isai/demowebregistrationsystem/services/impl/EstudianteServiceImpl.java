@@ -5,6 +5,8 @@ import com.isai.demowebregistrationsystem.exceptions.ValidationException;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteDetalleDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteListadoDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteRegistroDTO;
+import com.isai.demowebregistrationsystem.model.dtos.estudiantes.rolEstudiante.CursoEstudianteDTO;
+import com.isai.demowebregistrationsystem.model.dtos.estudiantes.rolEstudiante.CursosEstudianteViewDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.rolEstudiante.EstudianteDashboardDTO;
 import com.isai.demowebregistrationsystem.model.dtos.opciones.ApoderadoOptionDTO;
 import com.isai.demowebregistrationsystem.model.dtos.opciones.GradoOptionDTO;
@@ -22,10 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,6 +41,7 @@ public class EstudianteServiceImpl
     private final GradoRepository gradoRepository;
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final HorarioRepository horarioRepository;
 
 
     @Override
@@ -484,6 +485,99 @@ public class EstudianteServiceImpl
                 .seguroEscolar(estudiante.getSeguroEscolar())
                 .apoderadoPrincipal(apoderadoPrincipalNombre)
                 .telefonoApoderadoPrincipal(apoderadoPrincipalTelefono)
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CursosEstudianteViewDTO obtenerMisCursos(String username) throws ResourceNotFoundException {
+        Usuario usuario = usuarioRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + username));
+
+        Estudiante estudiante = estudianteRepository.findByPersonaIdPersona(usuario.getPersona().getIdPersona())
+                .orElseThrow(() -> new ResourceNotFoundException("Estudiante no encontrado para el usuario: " + username));
+
+        /*Obtenemos la matricula del estudiante*/
+        Matricula matriculaActual = matriculaRepository
+                .findByEstudiante_IdEstudianteAndPeriodoAcademico_ActivoTrueAndEstadoMatriculaOrderByFechaMatriculaDesc(
+                        estudiante.getIdEstudiante(), "ACTIVA")
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontró una matrícula activa para el estudiante " + username + " en el período actual."));
+
+        /*Preparamos la lista de cursos*/
+        List<CursoEstudianteDTO> cursosMatriculadosDTO = new ArrayList<>();
+
+        // Los cursos no están directamente en Matricula.
+        // Los cursos se asocian a un Grado y un Período Académico a través de Asignacion_Docente y Horario.
+        // Para el estudiante, sus cursos son los cursos del Grado y Sección en los que está matriculado
+        // y que tienen horarios asignados para su sección y período actual.
+
+        Integer idGradoMatriculado = matriculaActual.getGrado().getIdGrado();
+        Integer idSeccionMatriculada = matriculaActual.getSeccion().getIdSeccion();
+        Integer idPeriodoAcademicoMatriculado = matriculaActual.getPeriodoAcademico().getIdPeriodo();
+
+        /*Buscamos todos los horarios para el grado, seccion y periodo academico del estudiante*/
+        List<Horario> horariosDelEstudiante = horarioRepository.findByGrado_IdGradoAndSeccion_IdSeccionAndPeriodoAcademico_IdPeriodoAndActivoTrue(
+                idGradoMatriculado, idSeccionMatriculada, idPeriodoAcademicoMatriculado);
+
+        /*Agrupamos los horarios por el curso para evitar duplicados si un curso tiene multiples horarios y cremos un dto por cada curso unico*/
+        horariosDelEstudiante.stream()
+                .map(Horario::getCurso)
+                .distinct()
+                .forEach(curso -> {
+                    /*para cada curso encontrarmos un horario representativo*/
+                    Optional<Horario> horarioPrincipal = horariosDelEstudiante.stream()
+                            .filter(h -> h.getCurso().equals(curso))
+                            .findFirst(); // O alguna lógica para elegir el "principal"
+
+                    String nombreDocente = "N/A";
+                    String diaSemana = "N/A";
+                    LocalTime horaInicio = null;
+                    LocalTime horaFin = null;
+                    String nombreSalon = "N/A";
+
+                    if (horarioPrincipal.isPresent()) {
+                        Horario h = horarioPrincipal.get();
+                        if (h.getDocente() != null && h.getDocente().getPersona() != null) {
+                            nombreDocente = h.getDocente().getPersona().getNombres() + " " + h.getDocente().getPersona().getApellidos();
+                        }
+                        diaSemana = h.getDiaSemana();
+                        horaInicio = h.getHoraInicio();
+                        horaFin = h.getHoraFin();
+                        if (h.getSalon() != null) {
+                            nombreSalon = h.getSalon().getNombreSalon();
+                        }
+                    }
+
+                    cursosMatriculadosDTO.add(CursoEstudianteDTO.builder()
+                            .idCurso(curso.getIdCurso())
+                            .nombreCurso(curso.getNombreCurso())
+                            .codigoCurso(curso.getCodigoCurso())
+                            .areaConocimiento(curso.getAreaConocimiento())
+                            .descripcion(curso.getDescripcion())
+                            .creditos(curso.getCreditos())
+                            .horasSemanales(curso.getHorasSemanales())
+                            .nombreDocente(nombreDocente)
+                            .diaSemana(diaSemana)
+                            .horaInicio(horaInicio)
+                            .horaFin(horaFin)
+                            .nombreSalon(nombreSalon)
+                            .build());
+                });
+
+        String mensaje = "Aún no se han asignado cursos para tu matrícula actual.";
+        if (!cursosMatriculadosDTO.isEmpty()) {
+            mensaje = null;
+        }
+
+        return CursosEstudianteViewDTO.builder()
+                .nombreEstudiante(estudiante.getPersona().getNombres() + " " + estudiante.getPersona().getApellidos())
+                .gradoActual(matriculaActual.getGrado().getNombreGrado())
+                .seccionActual(matriculaActual.getSeccion().getNombreSeccion())
+                .periodoAcademicoActual(matriculaActual.getPeriodoAcademico().getNombrePeriodo() + " " + matriculaActual.getPeriodoAcademico().getAnoAcademico())
+                .cursosMatriculados(cursosMatriculadosDTO.stream()
+                        .sorted((c1, c2) -> c1.getNombreCurso().compareToIgnoreCase(c2.getNombreCurso()))
+                        .collect(Collectors.toList()))
+                .mensajeSinCursos(mensaje)
                 .build();
     }
 }
