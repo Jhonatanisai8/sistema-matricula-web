@@ -5,9 +5,7 @@ import com.isai.demowebregistrationsystem.exceptions.ValidationException;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteDetalleDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteListadoDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteRegistroDTO;
-import com.isai.demowebregistrationsystem.model.dtos.estudiantes.rolEstudiante.CursoEstudianteDTO;
-import com.isai.demowebregistrationsystem.model.dtos.estudiantes.rolEstudiante.CursosEstudianteViewDTO;
-import com.isai.demowebregistrationsystem.model.dtos.estudiantes.rolEstudiante.EstudianteDashboardDTO;
+import com.isai.demowebregistrationsystem.model.dtos.estudiantes.rolEstudiante.*;
 import com.isai.demowebregistrationsystem.model.dtos.opciones.ApoderadoOptionDTO;
 import com.isai.demowebregistrationsystem.model.dtos.opciones.GradoOptionDTO;
 import com.isai.demowebregistrationsystem.model.entities.*;
@@ -23,6 +21,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
@@ -42,6 +42,7 @@ public class EstudianteServiceImpl
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final HorarioRepository horarioRepository;
+    private final CalificacionRepository calificacionRepository;
 
 
     @Override
@@ -580,4 +581,124 @@ public class EstudianteServiceImpl
                 .mensajeSinCursos(mensaje)
                 .build();
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public NotasEstudianteViewDTO obtenerMisNotas(String username) throws ResourceNotFoundException {
+        Usuario usuario = usuarioRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + username));
+
+        Estudiante estudiante = estudianteRepository.findByPersonaIdPersona(usuario.getPersona().getIdPersona())
+                .orElseThrow(() -> new ResourceNotFoundException("Estudiante no encontrado para el usuario: " + username));
+
+        Matricula matriculaActual = matriculaRepository
+                .findByEstudiante_IdEstudianteAndPeriodoAcademico_ActivoTrueAndEstadoMatriculaOrderByFechaMatriculaDesc(
+                        estudiante.getIdEstudiante(), "ACTIVA")
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontró una matrícula activa para el estudiante " + username + " en el período actual para ver notas."));
+
+        Integer idEstudiante = estudiante.getIdEstudiante();
+        Integer idPeriodoAcademico = matriculaActual.getPeriodoAcademico().getIdPeriodo();
+
+        /*obtenemos todas las calificaciones del estudiante para el periodo actual*/
+        List<Calificacion> calificaciones = calificacionRepository
+                .findByEstudiante_IdEstudianteAndPeriodoAcademico_IdPeriodo(idEstudiante, idPeriodoAcademico);
+
+        /*agrupamos las notas por cursos*/
+        Map<Curso, List<Calificacion>> calificacionesPorCurso = calificaciones.stream()
+                .collect(Collectors.groupingBy(Calificacion::getCurso));
+
+        List<CursoNotasEstudianteDTO> cursosConNotasDTO = new ArrayList<>();
+
+        for (Map.Entry<Curso, List<Calificacion>> entry : calificacionesPorCurso.entrySet()) {
+            Curso curso = entry.getKey();
+            List<Calificacion> notasDelCurso = entry.getValue();
+            /*
+            buscamos el docente principal para el curso en periodo y seccion*/
+            String nombreDocente = "N/A";
+            List<Horario> horariosCurso = horarioRepository
+                    .findByCurso_IdCursoAndGrado_IdGradoAndSeccion_IdSeccionAndPeriodoAcademico_IdPeriodoAndActivoTrue(
+                            curso.getIdCurso(), matriculaActual.getGrado().getIdGrado(),
+                            matriculaActual.getSeccion().getIdSeccion(), idPeriodoAcademico);
+
+            if (!horariosCurso.isEmpty()) {
+                Horario horarioPrincipal = horariosCurso.get(0);
+                if (horarioPrincipal.getDocente() != null && horarioPrincipal.getDocente().getPersona() != null) {
+                    nombreDocente = horarioPrincipal.getDocente().getPersona().getNombres() + " " +
+                            horarioPrincipal.getDocente().getPersona().getApellidos();
+                }
+            }
+
+
+            List<CalificacionEstudianteDTO> calificacionesDTO = notasDelCurso.stream()
+                    .map(c -> CalificacionEstudianteDTO.builder()
+                            .idCalificacion(c.getIdCalificacion())
+                            .nombreCurso(c.getCurso().getNombreCurso())
+                            .tipoEvaluacion(c.getTipoEvaluacion())
+                            .nota(c.getNota())
+                            .pesoPorcentual(c.getPesoPorcentual())
+                            .fechaEvaluacion(c.getFechaEvaluacion())
+                            .observaciones(c.getObservaciones())
+                            .build())
+                    .sorted(Comparator.comparing(CalificacionEstudianteDTO::getFechaEvaluacion).reversed()) // Ordenar por fecha descendente
+                    .collect(Collectors.toList());
+
+            // calculamos el promedio
+            BigDecimal promedioCurso;
+            if (calificacionesDTO.stream().anyMatch(c -> c.getPesoPorcentual() != null)) {
+                BigDecimal sumaPesos = BigDecimal.ZERO;
+                BigDecimal sumaNotasPonderadas = BigDecimal.ZERO;
+
+                for (CalificacionEstudianteDTO c : calificacionesDTO) {
+                    if (c.getPesoPorcentual() != null) {
+                        BigDecimal peso = c.getPesoPorcentual().divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+                        sumaNotasPonderadas = sumaNotasPonderadas.add(c.getNota().multiply(peso));
+                        sumaPesos = sumaPesos.add(peso);
+                    }
+                }
+                if (sumaPesos.compareTo(BigDecimal.ZERO) > 0) {
+                    promedioCurso = sumaNotasPonderadas.divide(sumaPesos, 2, RoundingMode.HALF_UP);
+                } else {
+                    promedioCurso = BigDecimal.ZERO;
+                }
+            } else {
+                /*calculo promedio simple si no hay pesos o si los pesos son nulos*/
+                Optional<BigDecimal> sumaNotas = calificacionesDTO.stream()
+                        .map(CalificacionEstudianteDTO::getNota)
+                        .reduce(BigDecimal::add);
+
+                if (sumaNotas.isPresent() && !calificacionesDTO.isEmpty()) {
+                    promedioCurso = sumaNotas.get().divide(BigDecimal.valueOf(calificacionesDTO.size()), 2, RoundingMode.HALF_UP);
+                } else {
+                    promedioCurso = BigDecimal.ZERO;
+                }
+            }
+
+
+            cursosConNotasDTO.add(CursoNotasEstudianteDTO.builder()
+                    .idCurso(curso.getIdCurso())
+                    .nombreCurso(curso.getNombreCurso())
+                    .codigoCurso(curso.getCodigoCurso())
+                    .nombreDocente(nombreDocente)
+                    .calificaciones(calificacionesDTO)
+                    .promedioCurso(promedioCurso)
+                    .build());
+        }
+
+        String mensaje = "Aún no hay calificaciones registradas para tu matrícula actual.";
+        if (!cursosConNotasDTO.isEmpty()) {
+            mensaje = null;
+        }
+
+        return NotasEstudianteViewDTO.builder()
+                .nombreEstudiante(estudiante.getPersona().getNombres() + " " + estudiante.getPersona().getApellidos())
+                .gradoActual(matriculaActual.getGrado().getNombreGrado())
+                .seccionActual(matriculaActual.getSeccion().getNombreSeccion())
+                .periodoAcademicoActual(matriculaActual.getPeriodoAcademico().getNombrePeriodo() + " " + matriculaActual.getPeriodoAcademico().getAnoAcademico())
+                .cursosConNotas(cursosConNotasDTO.stream()
+                        .sorted(Comparator.comparing(CursoNotasEstudianteDTO::getNombreCurso))
+                        .collect(Collectors.toList()))
+                .mensajeSinNotas(mensaje)
+                .build();
+    }
 }
+

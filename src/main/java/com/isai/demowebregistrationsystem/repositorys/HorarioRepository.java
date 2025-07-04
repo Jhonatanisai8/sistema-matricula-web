@@ -1,5 +1,6 @@
 package com.isai.demowebregistrationsystem.repositorys;
 
+
 import com.isai.demowebregistrationsystem.model.entities.Horario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -40,8 +41,9 @@ public interface HorarioRepository
             Integer idCurso, Integer idGrado, Integer idSeccion, Integer idPeriodoAcademico);
 
     /*en caso un curso este en multiples horarios  */
-    List<Horario> findByCurso_IdCursoAndGrado_IdGradoAndSeccion_IdSeccionAndPeriodoAcademico_IdPeriodo(
-            Integer idCurso, Integer idGrado, Integer idSeccion, Integer idPeriodoAcademico);
+//    List<Horario> findByCurso_IdCursoAndGrado_IdGradoAndSeccion_IdSeccionAndPeriodoAcademico_IdPeriodo(
+//            Integer idCurso, Integer idGrado, Integer idSeccion, Integer idPeriodoAcademico);
 
     List<Horario> findByGrado_IdGradoAndSeccion_IdSeccionAndPeriodoAcademico_IdPeriodoAndActivoTrue(Integer idGradoMatriculado, Integer idSeccionMatriculada, Integer idPeriodoAcademicoMatriculado);
+
 }

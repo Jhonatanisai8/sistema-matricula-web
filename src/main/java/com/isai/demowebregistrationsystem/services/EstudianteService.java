@@ -6,6 +6,7 @@ import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteLista
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteRegistroDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.rolEstudiante.CursosEstudianteViewDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.rolEstudiante.EstudianteDashboardDTO;
+import com.isai.demowebregistrationsystem.model.dtos.estudiantes.rolEstudiante.NotasEstudianteViewDTO;
 import com.isai.demowebregistrationsystem.model.dtos.opciones.ApoderadoOptionDTO;
 import com.isai.demowebregistrationsystem.model.dtos.opciones.GradoOptionDTO;
 import org.springframework.data.domain.Page;
@@ -48,6 +49,8 @@ public interface EstudianteService {
     EstudianteDashboardDTO obtenerDatosDashboardEstudiante(String username) throws ResourceNotFoundException;
 
     CursosEstudianteViewDTO obtenerMisCursos(String username) throws ResourceNotFoundException;
+
+    NotasEstudianteViewDTO obtenerMisNotas(String username) throws ResourceNotFoundException;
 
 }
 
