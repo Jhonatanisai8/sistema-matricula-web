@@ -38,6 +38,7 @@
             <div class="card-body">
                 <form th:action="@{/admin/grados/guardar}" th:object="${gradoDTO}" method="post">
                     <input type="hidden" th:field="*{idGrado}"/>
+                    <input type="hidden" th:field="*{codigoGrado}"/>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -48,16 +49,17 @@
                                  th:errors="*{nombreGrado}"></div>
                             <div class="form-text text-muted small">Ej. Primero de Primaria, Inicial 3 años.</div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="codigoGrado" class="form-label">Código del Grado:</label>
-                            <input type="text" class="form-control" id="codigoGrado" th:field="*{codigoGrado}"
-                                   th:classappend="${#fields.hasErrors('codigoGrado') ? 'is-invalid' : ''}" required>
-                            <div class="invalid-feedback" th:if="${#fields.hasErrors('codigoGrado')}"
-                                 th:errors="*{codigoGrado}"></div>
-                            <div class="form-text text-muted small">Código único para identificar el grado (ej. PRIM1,
-                                INI3).
-                            </div>
-                        </div>
+
+                        <!--                        <div class="col-md-6 mb-3">-->
+                        <!--                            <label for="codigoGrado" class="form-label">Código del Grado:</label>-->
+                        <!--                            <input type="text" class="form-control" id="codigoGrado" th:field="*{codigoGrado}"-->
+                        <!--                                   th:classappend="${#fields.hasErrors('codigoGrado') ? 'is-invalid' : ''}" required>-->
+                        <!--                            <div class="invalid-feedback" th:if="${#fields.hasErrors('codigoGrado')}"-->
+                        <!--                                 th:errors="*{codigoGrado}"></div>-->
+                        <!--                            <div class="form-text text-muted small">Código único para identificar el grado (ej. PRIM1,-->
+                        <!--                                INI3).-->
+                        <!--                            </div>-->
+                        <!--                        </div>-->
                     </div>
 
                     <div class="row">
