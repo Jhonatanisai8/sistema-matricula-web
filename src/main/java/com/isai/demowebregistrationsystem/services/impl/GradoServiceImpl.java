@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -82,6 +83,16 @@ public class GradoServiceImpl
             grado.setActivo(gradoDTO.getActivo() != null ? gradoDTO.getActivo() : false);
         }
         BeanUtils.copyProperties(gradoDTO, grado, "idGrado", "activo");
+        String codigoGrado = "GRAD00";
+        Random random = new Random();
+        codigoGrado = codigoGrado.concat(String.valueOf(random.nextInt(100)));
+        System.out.println(gradoDTO.getCodigoGrado());
+        System.out.println(gradoDTO.getIdGrado());
+        if (gradoDTO.getIdGrado() == null) {
+            grado.setCodigoGrado(codigoGrado);
+        } else {
+            grado.setCodigoGrado(gradoDTO.getCodigoGrado());
+        }
         return convertToDto(gradoRepository.save(grado));
     }
 

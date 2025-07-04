@@ -56,7 +56,7 @@ public class AdminGradoController {
             return "redirect:/admin/grados";
         } catch (IllegalArgumentException e) {
             // Error de negocio (ej. código duplicado)
-            result.rejectValue("codigoGrado", "error.gradoDTO", e.getMessage()); // Puede ser otro campo si el mensaje es más específico
+            result.rejectValue("codigoGrado", "error.gradoDTO", e.getMessage());
             if (e.getMessage().contains("nombre")) {
                 result.rejectValue("nombreGrado", "error.gradoDTO", e.getMessage());
             }

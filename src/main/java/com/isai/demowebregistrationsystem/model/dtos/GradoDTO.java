@@ -19,8 +19,8 @@ public class GradoDTO {
     @Size(max = 100, message = "El nombre del grado no puede exceder los 100 caracteres.")
     private String nombreGrado;
 
-    @NotBlank(message = "El código del grado es obligatorio.")
-    @Size(max = 20, message = "El código del grado no puede exceder los 20 caracteres.")
+    //    @NotBlank(message = "El código del grado es obligatorio.")
+//    @Size(max = 20, message = "El código del grado no puede exceder los 20 caracteres.")
     private String codigoGrado;
 
     @Min(value = 0, message = "El nivel no puede ser negativo.")
