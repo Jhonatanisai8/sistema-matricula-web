@@ -15,13 +15,13 @@
 
     <style th:inline="css">
         :root {
-            --primary-color: #28a745; /* Verde Bootstrap (éxito) */
-            --dark-bg: #34495e; /* Gris oscuro azulado */
+            --primary-color: #28a745;
+            --dark-bg: #34495e;
             --darker-bg: #2c3e50;
             --text-light: #ecf0f1;
-            --highlight-color: #2ecc71; /* Verde más claro */
+            --highlight-color: #2ecc71;
             --font-family-base: 'Roboto', 'Segoe UI', Arial, sans-serif;
-            --main-bg-color: #f8f9fa; /* Fondo ligeramente gris */
+            --main-bg-color: #f8f9fa;
             --content-bg-color: #ffffff;
             --border-color-light: #e0e0e0;
             --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.08);
@@ -131,7 +131,7 @@
         }
 
         .navbar {
-            background-color: var(--primary-color) !important; /* Usar el color principal */
+            background-color: var(--primary-color) !important;
             box-shadow: var(--shadow-medium);
             padding: 0.75rem 1.5rem;
         }
@@ -155,7 +155,7 @@
 
         .btn-outline-light:hover {
             background-color: #ffffff;
-            color: var(--primary-color); /* Color principal del estudiante */
+            color: var(--primary-color);
             border-color: #ffffff;
         }
 
@@ -282,7 +282,7 @@
                 </a>
             </li>
             <li>
-                <a class="nav-link" th:href="@{/estudiante/mis-notas}">
+                <a class="nav-link" th:href="@{/estudiante/mis_notas}">
                     <i class="bi bi-journal-check"></i> Mis Notas
                 </a>
             </li>

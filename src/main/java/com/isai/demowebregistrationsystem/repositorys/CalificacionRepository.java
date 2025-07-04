@@ -16,4 +16,6 @@ public interface CalificacionRepository
 
     List<Calificacion> findByCurso_IdCursoAndPeriodoAcademico_IdPeriodo(
             Integer idCurso, Integer idPeriodoAcademico);
+
+    List<Calificacion> findByEstudiante_IdEstudianteAndPeriodoAcademico_IdPeriodo(Integer idEstudiante, Integer idPeriodoAcademico);
 }
