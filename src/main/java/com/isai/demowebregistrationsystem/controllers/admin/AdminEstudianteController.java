@@ -41,9 +41,13 @@ public class AdminEstudianteController {
             @RequestParam(name = "success", required = false) String successMessage,
             @RequestParam(name = "error", required = false) String errorMessage,
             @RequestParam(name = "keyword", required = false) String keyword,
-            @RequestParam(name = "activo", required = false) Boolean activo,
+            @RequestParam(name = "activo", required = false) String activoStr,
             @PageableDefault(size = 10, sort = "persona.apellidos", direction = Sort.Direction.ASC) Pageable pageable) {
 
+        Boolean activo = null;
+        if (activoStr != null && !activoStr.isEmpty()) {
+            activo = Boolean.parseBoolean(activoStr);
+        }
 
         String sortField = pageable.getSort().stream().findFirst().map(Sort.Order::getProperty).orElse(null);
         String sortDirection = pageable.getSort().stream().findFirst().map(order -> order.getDirection().name()).orElse(null);
@@ -61,7 +65,7 @@ public class AdminEstudianteController {
         model.addAttribute("sortField", sortField);
         model.addAttribute("sortDirection", sortDirection != null ? sortDirection.toLowerCase() : null);
         model.addAttribute("keyword", keyword);
-        model.addAttribute("activo", activo != null ? String.valueOf(activo) : "");
+        model.addAttribute("activo", activoStr != null ? activoStr : "");
 
         if (successMessage != null) {
             model.addAttribute("successMessage", successMessage);
