@@ -177,7 +177,7 @@ public class AuthController {
 
     @GetMapping("/estudiante/dashboard")
     public String estudianteDashboard() {
-        return "dashboards/estudiante_dashboard";
+        return "estudiante/dashboard";
     }
 
     @GetMapping("/apoderado/layaout")
