@@ -59,8 +59,6 @@ public class DocenteRegistroDTO {
     private String fotoUrlPersona;
 
 
-    @NotBlank(message = "El código de docente no puede estar vacío.")
-    @Size(min = 5, max = 50, message = "El código de docente debe tener entre 5 y 50 caracteres.")
     private String codigoDocente;
 
     @Email(message = "Debe ser un formato de correo electrónico institucional válido.")

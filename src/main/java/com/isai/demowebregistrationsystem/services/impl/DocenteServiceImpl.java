@@ -90,9 +90,16 @@ public class DocenteServiceImpl implements DocenteService {
         // actualizamos el  DTO con el ID generado
         dto.setIdPersona(persona.getIdPersona());
 
+        //Generamos el codigo del docente
+        String codigo = "DOC00";
+        Random random = new Random();
+        Integer numeroGenerado = random.nextInt(1000);
+        Integer numeroGenerado2 = random.nextInt(9000);
+        codigo += codigo.concat(numeroGenerado.toString().concat(numeroGenerado2.toString()).toUpperCase());
         // creamos y guardamos el Docente
+
         Docente docente = Docente.builder()
-                .codigoDocente(dto.getCodigoDocente())
+                .codigoDocente(codigo)
                 .emailInstitucional(dto.getEmailInstitucional())
                 .especialidadPrincipal(dto.getEspecialidadPrincipal())
                 .especialidadSecundaria(dto.getEspecialidadSecundaria())
@@ -170,7 +177,7 @@ public class DocenteServiceImpl implements DocenteService {
         personaRepository.save(personaExistente);
 
         // Actualizar Docente
-        docenteExistente.setCodigoDocente(dto.getCodigoDocente());
+        // docenteExistente.setCodigoDocente(dto.getCodigoDocente());
         docenteExistente.setEmailInstitucional(dto.getEmailInstitucional());
         docenteExistente.setEspecialidadPrincipal(dto.getEspecialidadPrincipal());
         docenteExistente.setEspecialidadSecundaria(dto.getEspecialidadSecundaria());
