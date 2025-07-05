@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 
@@ -319,10 +320,10 @@ public class ApoderadoServiceImpl implements ApoderadoService {
 
         PeriodoAcademico periodoActual = periodoAcademicoRepository.findByEstado("PENDIENTE")
                 .orElse(null);
-
         return estudiantes.stream()
                 .map(estudiante -> {
-                    Integer idMatriculaActual = null;
+                    AtomicReference<Integer> idMatriculaActualRef = new AtomicReference<>(null);
+
                     if (periodoActual != null) {
                         Optional<Matricula> matriculaOptional = matriculaRepository
                                 .findByEstudiante_IdEstudianteAndPeriodoAcademico_IdPeriodoAndEstadoMatricula(
@@ -330,12 +331,12 @@ public class ApoderadoServiceImpl implements ApoderadoService {
                                         periodoActual.getIdPeriodo(),
                                         "ACTIVA"
                                 );
-                        matriculaOptional.ifPresent(Matricula::getIdMatricula);
+                        matriculaOptional.ifPresent(matricula -> idMatriculaActualRef.set(matricula.getIdMatricula()));
                     }
 
                     return EstudianteListaApoderadoDTO.builder()
                             .idEstudiante(estudiante.getIdEstudiante())
-                            .idMatriculaActual(idMatriculaActual)
+                            .idMatriculaActual(idMatriculaActualRef.get())
                             .codigoEstudiante(estudiante.getCodigoEstudiante())
                             .nombresCompletos(estudiante.getPersona().getNombres() + " " + estudiante.getPersona().getApellidos())
                             .dni(estudiante.getPersona().getDni())
