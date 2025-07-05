@@ -250,10 +250,6 @@ public class EstudianteServiceImpl
     public Map<String, String> getEstadosCiviles() {
         Map<String, String> estados = new LinkedHashMap<>();
         estados.put("SOLTERO(A)", "Soltero(a)");
-        estados.put("CASADO(A)", "Casado(a)");
-        estados.put("DIVORCIADO(A)", "Divorciado(a)");
-        estados.put("VIUDO(A)", "Viudo(a)");
-        estados.put("CONVIVIENTE", "Conviviente");
         return estados;
     }
 

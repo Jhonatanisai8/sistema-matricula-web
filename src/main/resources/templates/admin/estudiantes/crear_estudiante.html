@@ -256,13 +256,23 @@
                             <div class="invalid-feedback" id="tipoSangreFeedback"
                                  th:if="${#fields.hasErrors('tipoSangre')}" th:errors="*{tipoSangre}"></div>
                         </div>
-                        <div class="col-md-8">
-                            <label for="seguroEscolar" class="form-label">Seguro Escolar</label>
-                            <input type="text" class="form-control" id="seguroEscolar" th:field="*{seguroEscolar}"
-                                   aria-describedby="seguroEscolarFeedback"/>
-                            <div class="invalid-feedback" id="seguroEscolarFeedback"
-                                 th:if="${#fields.hasErrors('seguroEscolar')}" th:errors="*{seguroEscolar}"></div>
+
+                        <!--                        <div class="col-md-8">-->
+                        <!--                            <label for="seguroEscolar" class="form-label">Seguro Escolar</label>-->
+                        <!--                            <input type="text" class="form-control" id="seguroEscolar" th:field="*{seguroEscolar}"-->
+                        <!--                                   aria-describedby="seguroEscolarFeedback"/>-->
+                        <!--                            <div class="invalid-feedback" id="seguroEscolarFeedback"-->
+                        <!--                                 th:if="${#fields.hasErrors('seguroEscolar')}" th:errors="*{seguroEscolar}"></div>-->
+                        <!--                        </div>-->
+
+                        <div class="col-md-4 mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="seguroEscolar"
+                                   th:field="*{seguroEscolar}">
+                            <label class="form-check-label" for="seguroEscolar">Seguro Escolar:</label>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('seguroEscolar')}"
+                                 th:errors="*{seguroEscolar}"></div>
                         </div>
+
                         <div class="col-md-12">
                             <label for="alergias" class="form-label">Alergias</label>
                             <textarea class="form-control" id="alergias" th:field="*{alergias}" rows="2"
