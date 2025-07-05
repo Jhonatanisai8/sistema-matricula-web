@@ -23,7 +23,6 @@ public class AuthController {
 
     private final UsuarioService usuarioService;
 
-    // --- Métodos de Login ---
     @GetMapping("/login")
     public String showLoginForm(@RequestParam(value = "error", required = false) String error,
                                 @RequestParam(value = "logout", required = false) String logout,
@@ -118,7 +117,6 @@ public class AuthController {
         return handleRegistration(registroDTO, result, redirectAttributes, model);
     }
 
-    // Método auxiliar para manejar la lógica común de registro y errores
     private String handleRegistration(RegistroUsuarioDTO registroDTO,
                                       BindingResult result,
                                       RedirectAttributes redirectAttributes,
@@ -176,9 +174,9 @@ public class AuthController {
         return "estudiante/dashboard";
     }
 
-    @GetMapping("/apoderado/layaout")
+    @GetMapping("/apoderado/dashboard")
     public String apoderadoDashboard() {
-        return "layouts/apoderado-layout";
+        return "apoderado/dashboard-apoderado";
     }
 
     @GetMapping("/access-denied")
