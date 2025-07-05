@@ -3,6 +3,7 @@ package com.isai.demowebregistrationsystem.services;
 import com.isai.demowebregistrationsystem.exceptions.ResourceNotFoundException;
 import com.isai.demowebregistrationsystem.model.dtos.ApoderadoDTO;
 import com.isai.demowebregistrationsystem.model.dtos.apoderado.DashboardApoderadpDTO;
+import com.isai.demowebregistrationsystem.model.dtos.apoderado.EstudianteListaApoderadoDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteRegistroDTO;
 import com.isai.demowebregistrationsystem.model.dtos.registroInicioSesion.RegistroApoderadoDTO;
 import com.isai.demowebregistrationsystem.model.entities.Apoderado;
@@ -10,6 +11,7 @@ import com.isai.demowebregistrationsystem.model.entities.Estudiante;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ApoderadoService {
@@ -47,5 +49,14 @@ public interface ApoderadoService {
      */
     Estudiante registrarNuevoEstudiante(EstudianteRegistroDTO estudianteRegistroDTO, String usernameApoderado)
             throws IllegalArgumentException, ResourceNotFoundException;
+
+    /**
+     * Obtiene una lista de estudiantes vinculados al apoderado autenticado.
+     *
+     * @param usernameApoderado El nombre de usuario del apoderado.
+     * @return Una lista de EstudianteListaDTO.
+     * @throws ResourceNotFoundException Si el apoderado no se encuentra.
+     */
+    List<EstudianteListaApoderadoDTO> obtenerHijosDelApoderado(String usernameApoderado) throws ResourceNotFoundException;
 
 }

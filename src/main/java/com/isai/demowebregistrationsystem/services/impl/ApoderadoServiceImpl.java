@@ -2,6 +2,7 @@ package com.isai.demowebregistrationsystem.services.impl;
 
 import com.isai.demowebregistrationsystem.exceptions.ResourceNotFoundException;
 import com.isai.demowebregistrationsystem.model.dtos.apoderado.DashboardApoderadpDTO;
+import com.isai.demowebregistrationsystem.model.dtos.apoderado.EstudianteListaApoderadoDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteRegistroDTO;
 import com.isai.demowebregistrationsystem.model.dtos.registroInicioSesion.RegistroApoderadoDTO;
 import com.isai.demowebregistrationsystem.model.entities.Estudiante;
@@ -25,8 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @RequiredArgsConstructor
@@ -305,5 +308,31 @@ public class ApoderadoServiceImpl implements ApoderadoService {
         nuevoEstudiante.setApoderadoPrincipal(apoderado);
 
         return estudianteRepository.save(nuevoEstudiante);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EstudianteListaApoderadoDTO> obtenerHijosDelApoderado(String usernameApoderado) throws ResourceNotFoundException {
+        Usuario usuario = usuarioRepository.findByUserName(usernameApoderado)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + usernameApoderado));
+
+        Apoderado apoderado = apoderadoRepository.findByPersonaIdPersona(usuario.getPersona().getIdPersona())
+                .orElseThrow(() -> new ResourceNotFoundException("Apoderado no encontrado para el usuario: " + usernameApoderado));
+
+        List<Estudiante> estudiantes = estudianteRepository.findByApoderadoPrincipal_IdApoderado(apoderado.getIdApoderado());
+
+        return estudiantes.stream()
+                .map(estudiante -> EstudianteListaApoderadoDTO.builder()
+                        .idEstudiante(estudiante.getIdEstudiante())
+                        .codigoEstudiante(estudiante.getCodigoEstudiante())
+                        .nombresCompletos(estudiante.getPersona().getNombres() + " " + estudiante.getPersona().getApellidos())
+                        .dni(estudiante.getPersona().getDni())
+                        .fechaNacimiento(estudiante.getPersona().getFechaNacimiento())
+                        .emailEducativo(estudiante.getEmailEducativo())
+                        .telefonoEmergencia(estudiante.getTelefonoEmergencia())
+                        .seguroEscolar(estudiante.getSeguroEscolar())
+                        .parentescoConApoderadoPrincipal(apoderado.getParentesco())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
