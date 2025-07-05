@@ -36,8 +36,14 @@
                     th:text="${isEdit ? 'Formulario de Edición' : 'Formulario de Registro'}"></h6>
             </div>
             <div class="card-body">
-                <form th:action="@{/admin/salones/guardar}" th:object="${salonDTO}" method="post">
-                    <input type="hidden" th:field="*{idSalon}"/>
+                <!--                <form th:action="${docenteRegistroDTO.idDocente != null ? '/admin/docentes/editar/' + docenteRegistroDTO.idDocente : '/admin/docentes/crear'}"-->
+                <!--                      th:object="${docenteRegistroDTO}" method="post" enctype="multipart/form-data">-->
+
+                <form th:action="${salonDTO.idSalon != null ? '/admin/salones/editar/' + salonDTO.idSalon : '/admin/salones/guardar'}"
+                      th:object="${salonDTO}" method="post">
+                    <!--                    <input type="hidden" th:field="*{idPersona}" th:if="${docenteRegistroDTO.idPersona != null}"/>-->
+
+                    <input type="hidden" th:field="*{idSalon}" th:value="${salonDTO.idSalon}"/>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
