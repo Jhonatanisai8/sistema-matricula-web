@@ -1,5 +1,7 @@
 package com.isai.demowebregistrationsystem.services.impl;
 
+import com.isai.demowebregistrationsystem.exceptions.ResourceNotFoundException;
+import com.isai.demowebregistrationsystem.model.dtos.apoderado.DashboardApoderadpDTO;
 import com.isai.demowebregistrationsystem.model.dtos.registroInicioSesion.RegistroApoderadoDTO;
 import com.isai.demowebregistrationsystem.model.enums.Rol;
 import com.isai.demowebregistrationsystem.model.dtos.ApoderadoDTO;
@@ -7,6 +9,7 @@ import com.isai.demowebregistrationsystem.model.entities.Apoderado;
 import com.isai.demowebregistrationsystem.model.entities.Persona;
 import com.isai.demowebregistrationsystem.model.entities.Usuario;
 import com.isai.demowebregistrationsystem.repositorys.ApoderadoRepository;
+import com.isai.demowebregistrationsystem.repositorys.EstudianteRepository;
 import com.isai.demowebregistrationsystem.repositorys.PersonaRepository;
 import com.isai.demowebregistrationsystem.repositorys.UsuarioRepository;
 import com.isai.demowebregistrationsystem.services.ApoderadoService;
@@ -22,6 +25,7 @@ import org.springframework.util.StringUtils;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+
 @RequiredArgsConstructor
 @Service
 public class ApoderadoServiceImpl implements ApoderadoService {
@@ -34,6 +38,7 @@ public class ApoderadoServiceImpl implements ApoderadoService {
 
     private final PersonaRepository personaRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EstudianteRepository estudianteRepository;
 
     @Transactional(readOnly = true)
     @Override
@@ -198,11 +203,33 @@ public class ApoderadoServiceImpl implements ApoderadoService {
                     dto.setUserName(usuario.getUserName());
                 });
         return dto;
+
     }
 
     @Override
     public Apoderado registrarNuevoApoderado(RegistroApoderadoDTO apoderadoDTO) {
         return null;
     }
-}
 
+    @Override
+    @Transactional(readOnly = true)
+    public DashboardApoderadpDTO obtenerDatosDashboardApoderado(String username) throws ResourceNotFoundException {
+        Usuario usuario = usuarioRepository.findByUserName(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + username));
+
+        Apoderado apoderado = apoderadoRepository.findByPersonaIdPersona(usuario.getPersona().getIdPersona())
+                .orElseThrow(() -> new ResourceNotFoundException("Apoderado no encontrado para el usuario: " + username));
+
+        long totalHijos = estudianteRepository.countByApoderadoPrincipal_IdApoderado(apoderado.getIdApoderado());
+
+        return DashboardApoderadpDTO.builder()
+                .nombresCompletos(apoderado.getPersona().getNombres() + " " + apoderado.getPersona().getApellidos())
+                .dni(apoderado.getPersona().getDni())
+                .emailPersonal(apoderado.getPersona().getEmailPersonal())
+                .telefono(apoderado.getPersona().getTelefono())
+                .ocupacion(apoderado.getOcupacion())
+                .nivelEducativo(apoderado.getNivelEducativo())
+                .totalHijosVinculados((int) totalHijos)
+                .build();
+    }
+}

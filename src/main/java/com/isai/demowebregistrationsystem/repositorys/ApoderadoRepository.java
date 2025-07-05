@@ -18,6 +18,6 @@ public interface ApoderadoRepository extends JpaRepository<Apoderado, Integer> {
 
     Page<Apoderado> findAll(Pageable pageable);
 
-    List<Apoderado> findByEsPrincipalTrue();
+    Optional<Apoderado> findByPersonaIdPersona(Integer idPersona);
 
 }
