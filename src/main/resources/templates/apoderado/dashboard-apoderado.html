@@ -9,7 +9,12 @@
     <title layout:fragment="title">Dashboard de Apoderado</title>
 
     <th:block layout:fragment="styles">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+              integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5KenTlPMBOX/I7PmO7NveS/JwSgD7gefdgRz0B+oNcGTyNP8Qy0g=="
+              crossorigin="anonymous" referrerpolicy="no-referrer"/>
         <style>
+
             .dashboard-card {
                 background-color: #ffffff;
                 border-radius: 12px;
@@ -55,7 +60,7 @@
                 opacity: 0.9;
             }
 
-            /* Colores específicos para cada tipo de card */
+
             .card-total {
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
@@ -67,40 +72,18 @@
                 color: white;
             }
 
-            .card-docente {
-                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-                color: white;
-            }
-
-            .card-docente .card-title,
-            .card-docente .card-text,
-            .card-docente .card-icon {
-                color: white;
-            }
-
-            .card-apoderado {
+            .card-info-apoderado {
                 background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
                 color: white;
             }
 
-            .card-apoderado .card-title,
-            .card-apoderado .card-text,
-            .card-apoderado .card-icon {
+            .card-info-apoderado .card-title,
+            .card-info-apoderado .card-text,
+            .card-info-apoderado .card-icon {
                 color: white;
             }
 
-            .card-estudiante {
-                background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-                color: white;
-            }
 
-            .card-estudiante .card-title,
-            .card-estudiante .card-text,
-            .card-estudiante .card-icon {
-                color: white;
-            }
-
-            /* Responsive adjustments */
             @media (max-width: 768px) {
                 .dashboard-card .card-body {
                     padding: 2rem 1.5rem;
@@ -114,54 +97,122 @@
                     font-size: 3rem;
                 }
             }
-
-            /* Sección de desarrollo */
-            .development-section {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                border-radius: 12px;
-                padding: 3rem;
-                text-align: center;
-                color: white;
-                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-            }
-
-            .development-section h4 {
-                font-weight: 300;
-                margin-bottom: 1.5rem;
-                opacity: 0.9;
-            }
-
-            .development-section .gear-icon {
-                font-size: 3rem;
-                margin-bottom: 1rem;
-                opacity: 0.7;
-                animation: rotate 10s linear infinite;
-            }
-
-            @keyframes rotate {
-                from {
-                    transform: rotate(0deg);
-                }
-                to {
-                    transform: rotate(360deg);
-                }
-            }
         </style>
     </th:block>
 </head>
 <body>
 
-<!-- Header específico para el dashboard -->
-<header layout:fragment="header" class="mb-4 pb-3 border-bottom custom-header-content">
-    <h1 class="h3 mb-0 text-dark-emphasis">
-        <i class="bi bi-speedometer2 me-2"></i>Dashboard de Apoderado
-    </h1>
-</header>
-
 <!-- Contenido principal del dashboard -->
-<section layout:fragment="content" class="flex-grow-1">
+<section layout:fragment="content" class="flex-grow-1 container-fluid">
+    <div class="container mt-4">
+        <header class="mb-4 text-center">
+            <h1 class="h3 text-primary"><i class="fas fa-user-shield me-2"></i> Dashboard del Apoderado</h1>
+            <p class="lead text-muted">Bienvenido, <span
+                    th:text="${dashboardData.nombresCompletos}">[Nombre Apoderado]</span></p>
+        </header>
+
+        <!-- Mensajes de alerta (errores) -->
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="row g-4">
+            <!-- Tarjeta de Información del Apoderado -->
+            <div class="col-lg-6 col-md-12">
+                <div class="card dashboard-card card-info-apoderado h-100">
+                    <div class="card-body">
+                        <i class="fas fa-id-card card-icon"></i>
+                        <h5 class="card-title">Mi Información</h5>
+                        <ul class="list-unstyled text-start w-100 px-3">
+                            <li class="mb-2"><strong>Nombre:</strong> <span
+                                    th:text="${dashboardData.nombresCompletos}"></span></li>
+                            <li class="mb-2"><strong>DNI:</strong> <span th:text="${dashboardData.dni}"></span></li>
+                            <li class="mb-2"><strong>Email:</strong> <span
+                                    th:text="${dashboardData.emailPersonal}"></span></li>
+                            <li class="mb-2"><strong>Teléfono:</strong> <span
+                                    th:text="${dashboardData.telefono}"></span></li>
+                            <li class="mb-2"><strong>Ocupación:</strong> <span
+                                    th:text="${dashboardData.ocupacion}"></span></li>
+                            <li class="mb-2"><strong>Nivel Educativo:</strong> <span
+                                    th:text="${dashboardData.nivelEducativo}"></span></li>
+                        </ul>
+                        <a th:href="@{/apoderado/perfil}" class="btn btn-light btn-sm mt-3">
+                            <i class="fas fa-edit me-1"></i> Editar Perfil
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta de Hijos Vinculados -->
+            <div class="col-lg-6 col-md-12">
+                <div class="card dashboard-card card-total h-100">
+                    <div class="card-body">
+                        <i class="fas fa-child card-icon"></i>
+                        <h5 class="card-title">Total de Hijos Vinculados</h5>
+                        <p class="card-text" th:text="${dashboardData.totalHijosVinculados}">0</p>
+                        <a th:href="@{/apoderado/mis_hijos}" class="btn btn-light btn-sm mt-3">
+                            <i class="fas fa-users me-1"></i> Ver Mis Hijos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Accesos Rápidos (similar a la del estudiante) -->
+        <div class="card shadow-sm mt-5">
+            <div class="card-header bg-primary-custom py-3">
+                <h5 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i> Accesos Rápidos</h5>
+            </div>
+            <div class="card-body">
+                <div class="row row-cols-1 row-cols-md-3 g-3">
+                    <div class="col">
+                        <a th:href="@{/apoderado/mis_hijos}" class="btn btn-outline-primary quick-access-btn">
+                            <i class="fas fa-users"></i>
+                            <span>Mis Hijos</span>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a th:href="@{/apoderado/pagos}" class="btn btn-outline-success quick-access-btn">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>Pagos</span>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a th:href="@{/apoderado/perfil}" class="btn btn-outline-info quick-access-btn">
+                            <i class="fas fa-cogs"></i>
+                            <span>Mi Perfil</span>
+                        </a>
+                    </div>
+                    <!-- Estos enlaces llevarán a páginas que requerirán un ID de hijo,
+                         así que por ahora solo son placeholders.
+                         Se implementarán cuando tengamos la lista de hijos. -->
+                    <div class="col">
+                        <a href="#" class="btn btn-outline-warning quick-access-btn disabled">
+                            <i class="fas fa-clipboard-list"></i>
+                            <span>Notas de Hijo</span>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="#" class="btn btn-outline-danger quick-access-btn disabled">
+                            <i class="fas fa-user-check"></i>
+                            <span>Asistencia de Hijo</span>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="#" class="btn btn-outline-secondary quick-access-btn disabled">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Registrar Nuevo Hijo</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
 
-
+<th:block layout:fragment="scripts">
+</th:block>
 </body>
 </html>

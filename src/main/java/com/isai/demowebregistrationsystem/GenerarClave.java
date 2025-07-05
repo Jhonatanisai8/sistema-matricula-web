@@ -15,5 +15,6 @@ public class GenerarClave {
         Random random = new Random();
         Integer numeroGenerado = random.nextInt(1000);
         System.out.println(numeroGenerado);
+
     }
 }
