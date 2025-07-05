@@ -15,17 +15,17 @@
 
     <style th:inline="css">
         :root {
-            --primary-color: #ffc107; /* Amarillo Bootstrap (warning) */
-            --dark-bg: #e6a700; /* Amarillo más oscuro */
-            --darker-bg: #d99c00;
-            --text-light: #495057; /* Texto oscuro para contrastar con amarillo */
-            --highlight-color: #f7a000; /* Amarillo brillante */
+            --primary-color: #0d6efd;
+            --dark-bg: #084298;
+            --darker-bg: #052c65;
+            --text-light: #e9ecef;
+            --highlight-color: #6ea8fe;
             --font-family-base: 'Roboto', 'Segoe UI', Arial, sans-serif;
-            --main-bg-color: #fffaf0; /* Fondo crema muy claro */
+            --main-bg-color: #f8f9fa;
             --content-bg-color: #ffffff;
-            --border-color-light: #e0e0e0;
-            --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.08);
-            --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+            --border-color-light: #dee2e6;
+            --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.05);
+            --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         html, body {
@@ -50,8 +50,8 @@
         }
 
         aside {
-            background-color: var(--primary-color); /* Sidebar con el color principal del docente */
-            color: var(--text-light); /* Texto oscuro para el sidebar */
+            background-color: var(--primary-color);
+            color: var(--text-light);
             min-width: 260px;
             max-width: 260px;
             padding: 1.5rem 1rem;
@@ -77,13 +77,13 @@
         }
 
         aside .nav-link:hover {
-            background-color: var(--darker-bg); /* Un tono más oscuro en hover */
-            color: #ffffff; /* Texto blanco en hover */
+            background-color: var(--darker-bg);
+            color: #ffffff;
             transform: translateX(5px);
         }
 
         aside .nav-link.active {
-            background-color: var(--dark-bg); /* Un tono oscuro para el activo */
+            background-color: var(--dark-bg);
             color: #ffffff;
             font-weight: 700;
             box-shadow: var(--shadow-light);
@@ -95,7 +95,7 @@
         }
 
         aside .sidebar-heading {
-            color: rgba(0, 0, 0, 0.6); /* Color oscuro para las cabeceras */
+            color: rgba(0, 0, 0, 0.6);
             font-size: 0.85rem;
             font-weight: bold;
             padding-left: 1rem;
@@ -131,7 +131,7 @@
         }
 
         .navbar {
-            background-color: var(--dark-bg) !important; /* Navbar con el color oscuro */
+            background-color: var(--dark-bg) !important;
             box-shadow: var(--shadow-medium);
             padding: 0.75rem 1.5rem;
         }
@@ -155,12 +155,12 @@
 
         .btn-outline-light:hover {
             background-color: #ffffff;
-            color: var(--dark-bg); /* Color oscuro del docente */
+            color: var(--dark-bg);
             border-color: #ffffff;
         }
 
         aside .mt-auto {
-            border-top: 1px solid rgba(0, 0, 0, 0.15); /* Borde oscuro para el footer del sidebar */
+            border-top: 1px solid rgba(0, 0, 0, 0.15);
             padding-top: 1.5rem;
             margin-top: 2rem !important;
             text-align: center;
