@@ -125,7 +125,7 @@ public class DocenteServiceImpl implements DocenteService {
                     .passwordHash(passwordEncoder.encode(dto.getPassword()))
                     .rol(Rol.DOCENTE)
                     .activo(true)
-                    .intentosFallidos(0)
+                    //.intentosFallidos(0)
                     .persona(persona)
                     .build();
             usuarioRepository.save(usuario);
@@ -213,13 +213,12 @@ public class DocenteServiceImpl implements DocenteService {
             }
             usuarioRepository.save(usuarioExistente);
         } else if (dto.getUsername() != null && !dto.getUsername().isEmpty() && dto.getPassword() != null && !dto.getPassword().isEmpty()) {
-            // Si no tiene usuario pero se le está creando uno
             Usuario nuevoUsuario = Usuario.builder()
                     .userName(dto.getUsername())
                     .passwordHash(passwordEncoder.encode(dto.getPassword()))
                     .rol(Rol.DOCENTE)
                     .activo(true)
-                    .intentosFallidos(0)
+                    //.intentosFallidos(0)
                     .persona(personaExistente)
                     .build();
             usuarioRepository.save(nuevoUsuario);

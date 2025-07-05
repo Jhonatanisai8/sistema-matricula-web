@@ -112,7 +112,7 @@ public class UsuarioServiceImpl implements UsuarioService {
             usuario = new Usuario();
             usuario.setFechaCreacion(LocalDateTime.now());
             usuario.setActivo(usuarioDTO.getActivo() != null ? usuarioDTO.getActivo() : true);
-            usuario.setIntentosFallidos(0);
+            // usuario.setIntentosFallidos(0);
         } else {
             usuario = usuarioRepository.findById(usuarioDTO.getIdUsuario())
                     .orElseThrow(() -> new IllegalArgumentException("Usuario con ID " + usuarioDTO.getIdUsuario() + " no encontrado."));
@@ -214,7 +214,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setRol(registroDTO.getRol());
         usuario.setActivo(true);
         usuario.setFechaCreacion(LocalDateTime.now());
-        usuario.setIntentosFallidos(0);
+        //usuario.setIntentosFallidos(0);
         usuario.setPersona(persona);
         usuario = usuarioRepository.save(usuario);
 
@@ -264,10 +264,10 @@ public class UsuarioServiceImpl implements UsuarioService {
                 usuario.getPasswordHash(),
                 usuario.getPasswordHash(),
                 usuario.getRol(),
-                usuario.getUltimoAcceso(),
+                //usuario.getUltimoAcceso(),
                 usuario.getActivo(),
                 usuario.getFechaCreacion(),
-                usuario.getIntentosFallidos(),
+                //usuario.getIntentosFallidos(),
                 usuario.getPersona().getIdPersona(),
                 usuario.getPersona().getNombres());
     }

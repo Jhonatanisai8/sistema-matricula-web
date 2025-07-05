@@ -25,7 +25,7 @@ public class Apoderado {
     @Column(name = "lugar_trabajo", length = 255)
     private String lugarTrabajo;
 
-    @Column(name = "telefono_trabajo", length = 20)
+    @Column(name = "telefono_trabajo", length = 9)
     private String telefonoTrabajo;
 
     @Column(name = "parentesco", length = 50)

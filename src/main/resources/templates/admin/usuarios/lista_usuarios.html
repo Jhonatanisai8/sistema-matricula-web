@@ -44,7 +44,7 @@
                             <th>Username</th>
                             <th>Persona Asociada</th>
                             <th>Rol</th>
-                            <th>Último Acceso</th>
+                            <!--                            <th>Último Acceso</th>-->
                             <th>Activo</th>
                             <th>Acciones</th>
                         </tr>
@@ -55,7 +55,7 @@
                             <td th:text="${usuario.userName}"></td>
                             <td th:text="${usuario.nombreCompletoPersona ?: 'N/A'}"></td>
                             <td th:text="${usuario.rol.descripcion}"></td>
-                            <td th:text="${usuario.ultimoAcceso != null ? #temporals.format(usuario.ultimoAcceso, 'dd/MM/yyyy HH:mm') : 'N/A'}"></td>
+                            <!--                            <td th:text="${usuario.ultimoAcceso != null ? #temporals.format(usuario.ultimoAcceso, 'dd/MM/yyyy HH:mm') : 'N/A'}"></td>-->
                             <td>
                                 <i th:class="${usuario.activo ? 'bi bi-check-circle-fill text-success' : 'bi bi-x-circle-fill text-danger'}"></i>
                                 <span th:text="${usuario.activo ? 'Sí' : 'No'}"></span>

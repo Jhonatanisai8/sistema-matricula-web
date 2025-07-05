@@ -32,8 +32,8 @@ public class Usuario {
     @Column(nullable = false)
     private Rol rol;
 
-    @Column(name = "ultimo_acceso")
-    private LocalDateTime ultimoAcceso;
+//    @Column(name = "ultimo_acceso")
+//    private LocalDateTime ultimoAcceso;
 
     @Column(name = "activo", nullable = false)
     private Boolean activo;
@@ -41,8 +41,8 @@ public class Usuario {
     @Column(name = "fecha_creacion", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime fechaCreacion;
 
-    @Column(name = "intentos_fallidos", nullable = false)
-    private Integer intentosFallidos;
+//    @Column(name = "intentos_fallidos", nullable = false)
+//    private Integer intentosFallidos;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_persona", unique = true, nullable = false)
@@ -51,7 +51,6 @@ public class Usuario {
     @PrePersist
     protected void onCreate() {
         if (this.activo == null) this.activo = true;
-        if (this.intentosFallidos == null) this.intentosFallidos = 0;
         if (this.fechaCreacion == null) this.fechaCreacion = LocalDateTime.now();
     }
 
