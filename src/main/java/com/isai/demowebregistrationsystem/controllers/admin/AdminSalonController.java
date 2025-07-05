@@ -103,4 +103,11 @@ public class AdminSalonController {
         return "redirect:/admin/salones";
     }
 
+    @GetMapping("/editar/{id}")
+    public String mostrarFormularioEditar(@PathVariable("id") Integer id, Model model, RedirectAttributes redirectAttributes) {
+        model.addAttribute("salonDTO", salonService.obtenerSalonPorId(id));
+        model.addAttribute("isEdit", id != null);
+
+        return "admin/salones/crear_salon";
+    }
 }
