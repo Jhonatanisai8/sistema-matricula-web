@@ -19,4 +19,6 @@ public interface PeriodoAcademicoRepository
 
     Optional<PeriodoAcademico> findByActivoTrueAndEstado(String estado);
 
+    Optional<PeriodoAcademico> findByEstado(String estado);
+
 }

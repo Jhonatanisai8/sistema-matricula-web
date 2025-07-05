@@ -95,12 +95,24 @@
                             <td class="action-buttons">
                                 <a th:href="@{/apoderado/notas_hijo/__${hijo.idEstudiante}__}"
                                    class="btn btn-sm btn-info" title="Ver Notas">
-                                    <b class="fas fa-clipboard-list">Ver Notas</b>
+                                    <i class="fas fa-clipboard-list"></i> Ver Notas
                                 </a>
                                 <a th:href="@{/apoderado/asistencia_hijo/__${hijo.idEstudiante}__}"
                                    class="btn btn-sm btn-warning" title="Ver Asistencia">
-                                    <b class="fas fa-user-check">Ver Asistencia</b>
+                                    <i class="fas fa-user-check"></i> Ver Asistencia
                                 </a>
+
+                                <th:block th:if="${hijo.idMatriculaActual == null}">
+                                    <a th:href="@{/apoderado/matricula/{id}(id=${hijo.idEstudiante})}"
+                                       class="btn btn-sm btn-success ms-2" title="Realizar Matrícula">
+                                        <i class="fas fa-file-invoice"></i> Matricular
+                                    </a>
+                                </th:block>
+                                <th:block th:if="${hijo.idMatriculaActual != null}">
+                                    <button class="btn btn-sm btn-secondary ms-2" disabled title="Ya Matriculado">
+                                        <i class="fas fa-check-circle"></i> Matriculado
+                                    </button>
+                                </th:block>
                             </td>
                         </tr>
                         </tbody>

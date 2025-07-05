@@ -14,6 +14,8 @@ public class EstudianteListaApoderadoDTO {
 
     private Integer idEstudiante;
 
+    private Integer idMatriculaActual;
+
     private String codigoEstudiante;
 
     private String nombresCompletos;

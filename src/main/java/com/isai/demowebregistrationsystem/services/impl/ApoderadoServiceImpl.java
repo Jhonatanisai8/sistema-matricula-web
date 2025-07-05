@@ -5,16 +5,10 @@ import com.isai.demowebregistrationsystem.model.dtos.apoderado.DashboardApoderad
 import com.isai.demowebregistrationsystem.model.dtos.apoderado.EstudianteListaApoderadoDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteRegistroDTO;
 import com.isai.demowebregistrationsystem.model.dtos.registroInicioSesion.RegistroApoderadoDTO;
-import com.isai.demowebregistrationsystem.model.entities.Estudiante;
+import com.isai.demowebregistrationsystem.model.entities.*;
 import com.isai.demowebregistrationsystem.model.enums.Rol;
 import com.isai.demowebregistrationsystem.model.dtos.ApoderadoDTO;
-import com.isai.demowebregistrationsystem.model.entities.Apoderado;
-import com.isai.demowebregistrationsystem.model.entities.Persona;
-import com.isai.demowebregistrationsystem.model.entities.Usuario;
-import com.isai.demowebregistrationsystem.repositorys.ApoderadoRepository;
-import com.isai.demowebregistrationsystem.repositorys.EstudianteRepository;
-import com.isai.demowebregistrationsystem.repositorys.PersonaRepository;
-import com.isai.demowebregistrationsystem.repositorys.UsuarioRepository;
+import com.isai.demowebregistrationsystem.repositorys.*;
 import com.isai.demowebregistrationsystem.services.ApoderadoService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +39,8 @@ public class ApoderadoServiceImpl implements ApoderadoService {
     private final PersonaRepository personaRepository;
     private final PasswordEncoder passwordEncoder;
     private final EstudianteRepository estudianteRepository;
+    private final PeriodoAcademicoRepository periodoAcademicoRepository;
+    private final MatriculaRepository matriculaRepository;
 
     @Transactional(readOnly = true)
     @Override
@@ -321,18 +317,35 @@ public class ApoderadoServiceImpl implements ApoderadoService {
 
         List<Estudiante> estudiantes = estudianteRepository.findByApoderadoPrincipal_IdApoderado(apoderado.getIdApoderado());
 
+        PeriodoAcademico periodoActual = periodoAcademicoRepository.findByEstado("PENDIENTE")
+                .orElse(null);
+
         return estudiantes.stream()
-                .map(estudiante -> EstudianteListaApoderadoDTO.builder()
-                        .idEstudiante(estudiante.getIdEstudiante())
-                        .codigoEstudiante(estudiante.getCodigoEstudiante())
-                        .nombresCompletos(estudiante.getPersona().getNombres() + " " + estudiante.getPersona().getApellidos())
-                        .dni(estudiante.getPersona().getDni())
-                        .fechaNacimiento(estudiante.getPersona().getFechaNacimiento())
-                        .emailEducativo(estudiante.getEmailEducativo())
-                        .telefonoEmergencia(estudiante.getTelefonoEmergencia())
-                        .seguroEscolar(estudiante.getSeguroEscolar())
-                        .parentescoConApoderadoPrincipal(apoderado.getParentesco())
-                        .build())
+                .map(estudiante -> {
+                    Integer idMatriculaActual = null;
+                    if (periodoActual != null) {
+                        Optional<Matricula> matriculaOptional = matriculaRepository
+                                .findByEstudiante_IdEstudianteAndPeriodoAcademico_IdPeriodoAndEstadoMatricula(
+                                        estudiante.getIdEstudiante(),
+                                        periodoActual.getIdPeriodo(),
+                                        "ACTIVA"
+                                );
+                        matriculaOptional.ifPresent(Matricula::getIdMatricula);
+                    }
+
+                    return EstudianteListaApoderadoDTO.builder()
+                            .idEstudiante(estudiante.getIdEstudiante())
+                            .idMatriculaActual(idMatriculaActual)
+                            .codigoEstudiante(estudiante.getCodigoEstudiante())
+                            .nombresCompletos(estudiante.getPersona().getNombres() + " " + estudiante.getPersona().getApellidos())
+                            .dni(estudiante.getPersona().getDni())
+                            .fechaNacimiento(estudiante.getPersona().getFechaNacimiento())
+                            .emailEducativo(estudiante.getEmailEducativo())
+                            .telefonoEmergencia(estudiante.getTelefonoEmergencia())
+                            .seguroEscolar(estudiante.getSeguroEscolar())
+                            .parentescoConApoderadoPrincipal(apoderado.getParentesco())
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 }
