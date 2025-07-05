@@ -63,6 +63,7 @@ public class SecurityConfig {
                         .requestMatchers("/estudiante/**").hasAnyRole("ADMIN", "ESTUDIANTE")
                         .requestMatchers("/apoderado/**").hasAnyRole("ADMIN", "APODERADO")
 
+
                         // Cualquier otra solicitud requiere autenticación
                         .anyRequest().authenticated()
                 )

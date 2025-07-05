@@ -31,4 +31,6 @@ public interface MatriculaRepository
 
     Optional<Matricula> findByEstudiante_IdEstudianteAndPeriodoAcademico_ActivoTrue(Integer idEstudiante);
 
+    List<Matricula> findByEstudiante_IdEstudiante(Integer idEstudiante);
+
 }
