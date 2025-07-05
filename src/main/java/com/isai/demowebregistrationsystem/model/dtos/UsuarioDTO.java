@@ -24,10 +24,10 @@ public class UsuarioDTO {
     @NotNull(message = "El rol es obligatorio.")
     private Rol rol;
 
-    private LocalDateTime ultimoAcceso;
+    //private LocalDateTime ultimoAcceso;
     private Boolean activo;
     private LocalDateTime fechaCreacion;
-    private Integer intentosFallidos;
+    //private Integer intentosFallidos;
 
     @NotNull(message = "Debe asociar el usuario a una persona.")
     private Integer personaId;

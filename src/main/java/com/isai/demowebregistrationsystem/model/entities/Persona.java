@@ -41,7 +41,7 @@ public class Persona {
     @Column(name = "direccion", length = 255)
     private String direccion;
 
-    @Column(name = "telefono", length = 20)
+    @Column(name = "telefono", length = 9)
     private String telefono;
 
     @Column(name = "email_personal", length = 100)
@@ -79,7 +79,6 @@ public class Persona {
     protected void onUpdate() {
         this.fechaActualizacion = LocalDateTime.now();
     }
-
 
     @Column(name = "foto_url", length = 255)
     private String fotoUrl;

@@ -2,7 +2,9 @@ package com.isai.demowebregistrationsystem.services.impl;
 
 import com.isai.demowebregistrationsystem.exceptions.ResourceNotFoundException;
 import com.isai.demowebregistrationsystem.model.dtos.apoderado.DashboardApoderadpDTO;
+import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteRegistroDTO;
 import com.isai.demowebregistrationsystem.model.dtos.registroInicioSesion.RegistroApoderadoDTO;
+import com.isai.demowebregistrationsystem.model.entities.Estudiante;
 import com.isai.demowebregistrationsystem.model.enums.Rol;
 import com.isai.demowebregistrationsystem.model.dtos.ApoderadoDTO;
 import com.isai.demowebregistrationsystem.model.entities.Apoderado;
@@ -24,6 +26,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 
 @RequiredArgsConstructor
@@ -139,7 +142,7 @@ public class ApoderadoServiceImpl implements ApoderadoService {
             usuario = new Usuario();
             usuario.setFechaCreacion(LocalDateTime.now());
             usuario.setActivo(true);
-            usuario.setIntentosFallidos(0);
+            //  usuario.setIntentosFallidos(0);
             usuario.setRol(Rol.APODERADO);
             usuario.setPersona(savedPersona);
         }
@@ -231,5 +234,76 @@ public class ApoderadoServiceImpl implements ApoderadoService {
                 .nivelEducativo(apoderado.getNivelEducativo())
                 .totalHijosVinculados((int) totalHijos)
                 .build();
+    }
+
+    @Override
+    public Estudiante registrarNuevoEstudiante(EstudianteRegistroDTO dto, String usernameApoderado) throws IllegalArgumentException, ResourceNotFoundException {
+        //obtenemos el apoderado que esta registrando
+        Usuario usuarioApoderado = usuarioRepository.findByUserName(usernameApoderado)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario Apoderado no encontrado: " + usernameApoderado));
+        Apoderado apoderado = apoderadoRepository.findByPersonaIdPersona(usuarioApoderado.getPersona().getIdPersona())
+                .orElseThrow(() -> new ResourceNotFoundException("Apoderado no encontrado para el usuario: " + usernameApoderado));
+
+        //verificamos que si la persona exite por dni
+        Optional<Persona> personaExistente = personaRepository.findByDni(dto.getDni());
+        Persona personaEstudiante;
+
+        if (personaExistente.isPresent()) {
+            personaEstudiante = personaExistente.get();
+            if (estudianteRepository.findByPersonaIdPersona(personaEstudiante.getIdPersona()).isPresent()) {
+                throw new IllegalArgumentException("Ya existe un estudiante registrado con el DNI: " + dto.getDni());
+            }
+            if (apoderado.getPersona().getIdPersona().equals(personaEstudiante.getIdPersona())) {
+                throw new IllegalArgumentException("El DNI ingresado pertenece al apoderado logueado. No puede registrarse a sí mismo como estudiante.");
+            }
+
+            personaEstudiante.setNombres(dto.getNombres());
+            personaEstudiante.setApellidos(dto.getApellidos());
+            personaEstudiante.setFechaNacimiento(dto.getFechaNacimiento());
+            personaEstudiante.setGenero(dto.getGenero());
+            personaEstudiante.setDireccion(dto.getDireccion());
+            personaEstudiante.setTelefono(dto.getTelefono());
+            personaEstudiante.setEmailPersonal(dto.getEmailPersonal());
+            personaEstudiante.setEstadoCivil(dto.getEstadoCivil());
+            personaEstudiante.setTipoDocumento(dto.getTipoDocumento());
+            personaEstudiante.setActivo(true);
+            personaRepository.save(personaEstudiante);
+
+        } else {
+            personaEstudiante = Persona.builder()
+                    .dni(dto.getDni())
+                    .nombres(dto.getNombres())
+                    .apellidos(dto.getApellidos())
+                    .fechaNacimiento(dto.getFechaNacimiento())
+                    .genero(dto.getGenero())
+                    .direccion(dto.getDireccion())
+                    .telefono(dto.getTelefono())
+                    .emailPersonal(dto.getEmailPersonal())
+                    .estadoCivil(dto.getEstadoCivil())
+                    .tipoDocumento(dto.getTipoDocumento())
+                    .activo(true)
+                    .fechaRegistro(LocalDateTime.now())
+                    .build();
+            personaRepository.save(personaEstudiante);
+        }
+        //creamos el estudiante y vincularlo a la persona y al apoderado
+        Estudiante nuevoEstudiante = new Estudiante();
+        nuevoEstudiante.setPersona(personaEstudiante); // Vincular con la Persona creada/existente
+
+        nuevoEstudiante.setCodigoEstudiante("EST-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+
+        nuevoEstudiante.setEmailEducativo(dto.getEmailEducativo());
+        nuevoEstudiante.setGradoAnterior(dto.getGradoAnterior());
+        nuevoEstudiante.setInstitucionProcedencia(dto.getInstitucionProcedencia());
+        nuevoEstudiante.setTipoSangre(dto.getTipoSangre());
+        nuevoEstudiante.setAlergias(dto.getAlergias());
+        nuevoEstudiante.setContactoEmergencia(dto.getContactoEmergencia());
+        nuevoEstudiante.setTelefonoEmergencia(dto.getTelefonoEmergencia());
+        nuevoEstudiante.setSeguroEscolar(dto.getSeguroEscolar());
+        nuevoEstudiante.setObservacionesMedicas(dto.getObservacionesMedicas());
+
+        nuevoEstudiante.setApoderadoPrincipal(apoderado);
+
+        return estudianteRepository.save(nuevoEstudiante);
     }
 }

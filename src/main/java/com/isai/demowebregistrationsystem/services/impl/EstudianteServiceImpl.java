@@ -198,7 +198,7 @@ public class EstudianteServiceImpl
             usuario = new Usuario();
             usuario.setFechaCreacion(LocalDateTime.now());
             usuario.setActivo(true);
-            usuario.setIntentosFallidos(0);
+            //usuario.setIntentosFallidos(0);
             usuario.setRol(Rol.ESTUDIANTE);
             usuario.setPersona(persona);
 

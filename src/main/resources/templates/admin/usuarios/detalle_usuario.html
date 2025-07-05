@@ -41,19 +41,19 @@
                     </div>
                 </div>
                 <div class="row mb-3">
-                    <div class="col-md-6">
-                        <strong>Último Acceso:</strong> <span
-                            th:text="${usuario.ultimoAcceso != null ? #temporals.format(usuario.ultimoAcceso, 'dd/MM/yyyy HH:mm:ss') : 'N/A'}"></span>
-                    </div>
+                    <!--                    <div class="col-md-6">-->
+                    <!--                        <strong>Último Acceso:</strong> <span-->
+                    <!--                            th:text="${usuario.ultimoAcceso != null ? #temporals.format(usuario.ultimoAcceso, 'dd/MM/yyyy HH:mm:ss') : 'N/A'}"></span>-->
+                    <!--                    </div>-->
                     <div class="col-md-6">
                         <strong>Fecha de Creación:</strong> <span
                             th:text="${usuario.fechaCreacion != null ? #temporals.format(usuario.fechaCreacion, 'dd/MM/yyyy HH:mm:ss') : 'N/A'}"></span>
                     </div>
                 </div>
                 <div class="row mb-3">
-                    <div class="col-md-6">
-                        <strong>Intentos Fallidos:</strong> <span th:text="${usuario.intentosFallidos}"></span>
-                    </div>
+                    <!--                    <div class="col-md-6">-->
+                    <!--                        <strong>Intentos Fallidos:</strong> <span th:text="${usuario.intentosFallidos}"></span>-->
+                    <!--                    </div>-->
                     <div class="col-md-6">
                         <strong>Persona Asociada:</strong> <span
                             th:text="${usuario.nombreCompletoPersona ?: 'N/A'}"></span>
