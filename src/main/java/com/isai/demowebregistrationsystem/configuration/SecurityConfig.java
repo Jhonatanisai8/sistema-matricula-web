@@ -42,8 +42,6 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // Deshabilita CSRF, considera habilitarlo con tokens para producción
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
-                        // Permitir acceso público a todas las rutas de autenticación y registro bajo /auth/
-                        // ¡VERIFICA DOBLEMENTE ESTAS RUTAS!
                         .requestMatchers(
                                 "/",
                                 "/auth/login",
@@ -57,14 +55,11 @@ public class SecurityConfig {
                                 "/favicon.ico"
                         ).permitAll()
 
-                        // Reglas de acceso basado en roles para los dashboards
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/docente/**").hasAnyRole("ADMIN", "DOCENTE")
-                        .requestMatchers("/estudiante/**").hasAnyRole("ADMIN", "ESTUDIANTE")
-                        .requestMatchers("/apoderado/**").hasAnyRole("ADMIN", "APODERADO")
-
-
-                        .requestMatchers("/index").permitAll()
+                        .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/docente/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_DOCENTE")
+                        .requestMatchers("/estudiante/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_ESTUDIANTE")
+                        .requestMatchers("/apoderado/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_APODERADO")
+                        .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/auth/login")

@@ -157,30 +157,4 @@ public class AuthController {
             return "redirect:/auth/registro";
         }
     }
-
-
-    @GetMapping("/admin/dashboard")
-    public String adminDashboard() {
-        return "admin/dashboard-admin";
-    }
-
-    @GetMapping("/docente/dashboard")
-    public String docenteDashboard() {
-        return "layout-docente";
-    }
-
-    @GetMapping("/estudiante/dashboard")
-    public String estudianteDashboard() {
-        return "estudiante/dashboard";
-    }
-
-    @GetMapping("/apoderado/dashboard")
-    public String apoderadoDashboard() {
-        return "apoderado/dashboard-apoderado";
-    }
-
-    @GetMapping("/access-denied")
-    public String accessDenied() {
-        return "error/access_denied";
-    }
 }
