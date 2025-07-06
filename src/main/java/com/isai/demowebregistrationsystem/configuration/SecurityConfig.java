@@ -52,7 +52,7 @@ public class SecurityConfig {
                                 "/auth/registro/guardar/**", // Los endpoints para guardar los registros
                                 "/css/**",
                                 "/js/**",
-                                "/img/**",
+                                "/imgs/**",
                                 "/webjars/**",
                                 "/favicon.ico"
                         ).permitAll() // ¡ESTO ES CLAVE! Asegura que estas rutas NO sean protegidas.
@@ -65,11 +65,11 @@ public class SecurityConfig {
 
 
                         // Cualquier otra solicitud requiere autenticación
-                        .anyRequest().authenticated()
+                        .requestMatchers("/index").permitAll()
                 )
                 .formLogin(form -> form
-                        .loginPage("/auth/login") // Página que muestra el formulario
-                        .loginProcessingUrl("/auth/do-login") // URL donde se procesa el login
+                        .loginPage("/auth/login")
+                        .loginProcessingUrl("/auth/do-login")
                         .successHandler(customAuthenticationSuccessHandler)
                         .failureUrl("/auth/login?error=true")
                         .permitAll()
