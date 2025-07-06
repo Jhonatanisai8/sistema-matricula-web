@@ -46,16 +46,16 @@ public class SecurityConfig {
                         // ¡VERIFICA DOBLEMENTE ESTAS RUTAS!
                         .requestMatchers(
                                 "/",
-                                "/auth/login", // Tu página de login real
-                                "/auth/registro", // La página de selección de rol
-                                "/auth/registro/form/**", // Los formularios de registro específicos (ej. /auth/registro/form/docente)
-                                "/auth/registro/guardar/**", // Los endpoints para guardar los registros
+                                "/auth/login",
+                                "/auth/registro",
+                                "/auth/registro/form/**",
+                                "/auth/registro/guardar/**",
                                 "/css/**",
                                 "/js/**",
                                 "/imgs/**",
                                 "/webjars/**",
                                 "/favicon.ico"
-                        ).permitAll() // ¡ESTO ES CLAVE! Asegura que estas rutas NO sean protegidas.
+                        ).permitAll()
 
                         // Reglas de acceso basado en roles para los dashboards
                         .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -64,7 +64,6 @@ public class SecurityConfig {
                         .requestMatchers("/apoderado/**").hasAnyRole("ADMIN", "APODERADO")
 
 
-                        // Cualquier otra solicitud requiere autenticación
                         .requestMatchers("/index").permitAll()
                 )
                 .formLogin(form -> form
@@ -75,14 +74,14 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/logout") // URL para cerrar sesión (normalmente un POST)
-                        .logoutSuccessUrl("/auth/login?logout=true") // A dónde ir después de cerrar sesión
-                        .invalidateHttpSession(true) // Invalida la sesión HTTP
-                        .deleteCookies("JSESSIONID") // Borra la cookie de sesión
-                        .permitAll() // Asegura que la URL de logout sea accesible
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/auth/login?logout=true")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll()
                 )
                 .exceptionHandling(ex -> ex
-                        .accessDeniedPage("/access-denied") // Página para acceso denegado
+                        .accessDeniedPage("/access-denied")
                 );
 
         return http.build();
