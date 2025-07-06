@@ -2,6 +2,7 @@ package com.isai.demowebregistrationsystem.services.impl;
 
 import com.isai.demowebregistrationsystem.exceptions.ResourceNotFoundException;
 import com.isai.demowebregistrationsystem.exceptions.ValidationException;
+import com.isai.demowebregistrationsystem.model.constantes.HorarioConstantes;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteDetalleDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteListadoDTO;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.EstudianteRegistroDTO;
@@ -25,6 +26,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,6 +45,7 @@ public class EstudianteServiceImpl
     private final PasswordEncoder passwordEncoder;
     private final HorarioRepository horarioRepository;
     private final CalificacionRepository calificacionRepository;
+    private final PeriodoAcademicoRepository periodoAcademicoRepository;
 
 
     @Override
@@ -700,69 +703,97 @@ public class EstudianteServiceImpl
     @Override
     @Transactional(readOnly = true)
     public HorarioEstudianteViewDTO obtenerMiHorario(String username) throws ResourceNotFoundException {
+
         Usuario usuario = usuarioRepository.findByUserName(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con username: " + username));
 
         Estudiante estudiante = estudianteRepository.findByPersonaIdPersona(usuario.getPersona().getIdPersona())
                 .orElseThrow(() -> new ResourceNotFoundException("Estudiante no encontrado para el usuario: " + username));
 
-        Matricula matriculaActual = matriculaRepository
-                .findByEstudiante_IdEstudianteAndPeriodoAcademico_ActivoTrueAndEstadoMatriculaOrderByFechaMatriculaDesc(
-                        estudiante.getIdEstudiante(), "ACTIVA")
-                .orElseThrow(() -> new ResourceNotFoundException("No se encontró una matrícula activa para el estudiante " + username + " en el período actual para ver el horario."));
+        PeriodoAcademico periodoActual = periodoAcademicoRepository.findByEstado("PENDIENTE")
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontró un período académico activo."));
 
-        Integer idGradoMatriculado = matriculaActual.getGrado().getIdGrado();
-        Integer idSeccionMatriculada = matriculaActual.getSeccion().getIdSeccion();
-        Integer idPeriodoAcademicoMatriculado = matriculaActual.getPeriodoAcademico().getIdPeriodo();
+        Matricula matriculaActiva = matriculaRepository
+                .findByEstudiante_IdEstudianteAndPeriodoAcademico_IdPeriodoAndEstadoMatricula(
+                        estudiante.getIdEstudiante(),
+                        periodoActual.getIdPeriodo(),
+                        "ACTIVA"
+                )
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontró una matrícula activa para el estudiante en el período actual."));
 
-        List<Horario> horarios = horarioRepository
+        List<Horario> horariosDB = horarioRepository
                 .findByGrado_IdGradoAndSeccion_IdSeccionAndPeriodoAcademico_IdPeriodoAndActivoTrue(
-                        idGradoMatriculado, idSeccionMatriculada, idPeriodoAcademicoMatriculado);
+                        matriculaActiva.getGrado().getIdGrado(),
+                        matriculaActiva.getSeccion().getIdSeccion(),
+                        matriculaActiva.getPeriodoAcademico().getIdPeriodo()
+                );
 
-        List<String> diasOrdenados = Arrays.asList(
-                "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"
-        );
+        HorarioEstudianteViewDTO horarioViewDTO = new HorarioEstudianteViewDTO();
+        horarioViewDTO.setNombreEstudiante(estudiante.getPersona().getNombres() + " " + estudiante.getPersona().getApellidos());
+        horarioViewDTO.setGradoActual(matriculaActiva.getGrado().getNombreGrado());
+        horarioViewDTO.setSeccionActual(matriculaActiva.getSeccion().getNombreSeccion());
+        horarioViewDTO.setPeriodoAcademicoActual(matriculaActiva.getPeriodoAcademico().getNombrePeriodo());
 
-        /*Mapa para cagruar los horarios por dia y semana*/
-        Map<String, List<HorarioClaseDTO>> horarioPorDia = new LinkedHashMap<>();
-        diasOrdenados.forEach(dia -> horarioPorDia.put(dia, new ArrayList<>()));
+        List<String> diasOrdenados = Arrays.asList("Lunes", "Martes");
+        List<String> horasDelDia = HorarioConstantes.HORAS_DEL_DIA;
+        horarioViewDTO.setDiasOrdenados(diasOrdenados);
 
-        for (Horario h : horarios) {
-            String nombreDocente = (h.getDocente() != null && h.getDocente().getPersona() != null) ?
-                    h.getDocente().getPersona().getNombres() + " " + h.getDocente().getPersona().getApellidos() : "N/A";
-
-            String nombreSalon = (h.getSalon() != null) ? h.getSalon().getNombreSalon() : "N/A";
-
-            HorarioClaseDTO claseDTO = HorarioClaseDTO.builder()
-                    .idHorario(h.getIdHorario())
-                    .diaSemana(h.getDiaSemana())
-                    .horaInicio(h.getHoraInicio())
-                    .horaFin(h.getHoraFin())
-                    .nombreCurso(h.getCurso().getNombreCurso())
-                    .codigoCurso(h.getCurso().getCodigoCurso())
-                    .nombreDocente(nombreDocente)
-                    .nombreSalon(nombreSalon)
-                    .build();
-
-            horarioPorDia.get(h.getDiaSemana()).add(claseDTO);
-        }
-        horarioPorDia.forEach((dia, clases) -> clases.sort(Comparator.comparing(HorarioClaseDTO::getHoraInicio)));
-
-        String mensaje = "Aún no se ha definido el horario para tu matrícula actual.";
-        if (!horarios.isEmpty()) {
-            mensaje = null;
+        Map<String, Map<String, HorarioClaseDTO>> horarioPorDiaYHora = new LinkedHashMap<>();
+        for (String dia : diasOrdenados) {
+            Map<String, HorarioClaseDTO> clasesPorHora = new LinkedHashMap<>();
+            for (String hora : horasDelDia) {
+                clasesPorHora.put(hora, null);
+            }
+            horarioPorDiaYHora.put(dia, clasesPorHora);
         }
 
-        return HorarioEstudianteViewDTO.builder()
-                .nombreEstudiante(estudiante.getPersona().getNombres() + " " + estudiante.getPersona().getApellidos())
-                .gradoActual(matriculaActual.getGrado().getNombreGrado())
-                .seccionActual(matriculaActual.getSeccion().getNombreSeccion())
-                .periodoAcademicoActual(matriculaActual.getPeriodoAcademico().getNombrePeriodo() + " " + matriculaActual.getPeriodoAcademico().getAnoAcademico())
-                .horarioPorDia(horarioPorDia)
-                .diasOrdenados(diasOrdenados)
-                .mensajeSinHorario(mensaje)
-                .build();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        for (Horario h : horariosDB) {
+            String diaSemana = h.getDiaSemana();
+            String horaSlotGenerado = h.getHoraInicio().format(formatter) + " - " + h.getHoraFin().format(formatter);
+
+            // Verificamos que el slot generado esté exactamente en la lista de constantes
+            Optional<String> horaSlotMatch = horasDelDia.stream()
+                    .filter(hora -> hora.equals(horaSlotGenerado))
+                    .findFirst();
+
+            if (horaSlotMatch.isPresent() && horarioPorDiaYHora.containsKey(diaSemana)) {
+                HorarioClaseDTO claseDTO = HorarioClaseDTO.builder()
+                        .idHorario(h.getIdHorario())
+                        .diaSemana(diaSemana)
+                        .horaInicio(h.getHoraInicio())
+                        .horaFin(h.getHoraFin())
+                        .nombreCurso(h.getCurso().getNombreCurso())
+                        .codigoCurso(h.getCurso().getCodigoCurso())
+                        .nombreDocente(h.getDocente() != null && h.getDocente().getPersona() != null
+                                ? h.getDocente().getPersona().getNombres() + " " + h.getDocente().getPersona().getApellidos()
+                                : "No asignado")
+                        .nombreSalon(h.getSalon().getNombreSalon())
+                        .build();
+
+                horarioPorDiaYHora.get(diaSemana).put(horaSlotMatch.get(), claseDTO);
+            }
+        }
+
+        System.out.println("------ MAPA COMPLETO HORARIO ------");
+        for (String dia : diasOrdenados) {
+            System.out.println("Día: " + dia);
+            Map<String, HorarioClaseDTO> mapaHoras = horarioPorDiaYHora.get(dia);
+            for (String hora : horasDelDia) {
+                HorarioClaseDTO clase = mapaHoras.get(hora);
+                System.out.println("  " + hora + " => " + (clase != null ? clase.getNombreCurso() : "-"));
+            }
+        }
+
+        horarioViewDTO.setHorarioPorDiaYHora(horarioPorDiaYHora);
+
+        boolean sinHorario = horarioPorDiaYHora.values().stream()
+                .flatMap(map -> map.values().stream())
+                .allMatch(Objects::isNull);
+
+        horarioViewDTO.setMensajeSinHorario(sinHorario ? "No hay horario de clases asignado para tu matrícula actual." : null);
+
+        return horarioViewDTO;
     }
-
 }
 

@@ -54,5 +54,7 @@ public interface EstudianteService {
     NotasEstudianteViewDTO obtenerMisNotas(String username) throws ResourceNotFoundException;
 
     HorarioEstudianteViewDTO obtenerMiHorario(String username) throws ResourceNotFoundException;
+
+
 }
 

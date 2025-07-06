@@ -33,4 +33,6 @@ public interface MatriculaRepository
 
     List<Matricula> findByEstudiante_IdEstudiante(Integer idEstudiante);
 
+    Optional<Matricula> findByEstudiante_IdEstudianteAndEstadoMatricula(Integer idEstudiante, String estadoMatricula);
+
 }

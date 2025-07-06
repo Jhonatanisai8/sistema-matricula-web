@@ -1,6 +1,7 @@
 package com.isai.demowebregistrationsystem.controllers.estudiante;
 
 import com.isai.demowebregistrationsystem.exceptions.ResourceNotFoundException;
+import com.isai.demowebregistrationsystem.model.constantes.HorarioConstantes;
 import com.isai.demowebregistrationsystem.model.dtos.estudiantes.rolEstudiante.HorarioEstudianteViewDTO;
 import com.isai.demowebregistrationsystem.services.EstudianteService;
 import org.springframework.stereotype.Controller;
@@ -28,6 +29,11 @@ public class EstudianteHorarioController {
             String username = principal.getName();
             HorarioEstudianteViewDTO horarioData = estudianteService.obtenerMiHorario(username);
             model.addAttribute("horarioData", horarioData);
+
+            // Agrega estas dos líneas
+            model.addAttribute("horasDelDia", HorarioConstantes.HORAS_DEL_DIA);
+            model.addAttribute("diasOrdenados", horarioData.getDiasOrdenados());
+
             return "estudiante/mi_horario";
         } catch (ResourceNotFoundException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -38,4 +44,5 @@ public class EstudianteHorarioController {
             return "redirect:/estudiante/dashboard";
         }
     }
+
 }

@@ -46,4 +46,5 @@ public interface HorarioRepository
 
     List<Horario> findByGrado_IdGradoAndSeccion_IdSeccionAndPeriodoAcademico_IdPeriodoAndActivoTrue(Integer idGradoMatriculado, Integer idSeccionMatriculada, Integer idPeriodoAcademicoMatriculado);
 
+
 }

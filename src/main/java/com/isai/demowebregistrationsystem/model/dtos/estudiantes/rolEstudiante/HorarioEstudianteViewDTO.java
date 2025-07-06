@@ -29,4 +29,13 @@ public class HorarioEstudianteViewDTO {
     private List<String> diasOrdenados;
 
     private String mensajeSinHorario;
+
+    private Map<String, Map<String, HorarioClaseDTO>> horarioPorDiaYHora;
+
+    public HorarioClaseDTO getClasePara(String dia, String hora) {
+        if (horarioPorDiaYHora == null || !horarioPorDiaYHora.containsKey(dia)) return null;
+        Map<String, HorarioClaseDTO> porHora = horarioPorDiaYHora.get(dia);
+        return porHora != null ? porHora.get(hora) : null;
+    }
+
 }
