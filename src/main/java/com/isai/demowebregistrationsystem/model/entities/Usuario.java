@@ -6,11 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "USUARIO")
+@Table(name = "USUARIOS")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -38,7 +39,11 @@ public class Usuario {
     @Column(name = "activo", nullable = false)
     private Boolean activo;
 
-    @Column(name = "fecha_creacion", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
+    //    @Column(name = "fecha_creacion", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
+//    @Column(name = "fecha_creacion", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
+
+    @Column(name = "fecha_creacion", nullable = false, updatable = false)
+    @CreationTimestamp
     private LocalDateTime fechaCreacion;
 
 //    @Column(name = "intentos_fallidos", nullable = false)
@@ -48,11 +53,11 @@ public class Usuario {
     @JoinColumn(name = "id_persona", unique = true, nullable = false)
     private Persona persona;
 
-    @PrePersist
-    protected void onCreate() {
-        if (this.activo == null) this.activo = true;
-        if (this.fechaCreacion == null) this.fechaCreacion = LocalDateTime.now();
-    }
+//    @PrePersist
+//    protected void onCreate() {
+//        if (this.activo == null) this.activo = true;
+//        if (this.fechaCreacion == null) this.fechaCreacion = LocalDateTime.now();
+//    }
 
 
 }
